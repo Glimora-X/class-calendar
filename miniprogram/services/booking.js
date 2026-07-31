@@ -6,11 +6,11 @@ const { callFunction } = require('../utils/request')
 const { CLOUD_FUNCTIONS } = require('../utils/constants')
 
 /**
- * @param {{ start: string, end: string }} range
+ * @param {{ start?: string, end?: string, _id?: string }} query
  * @returns {Promise<{ list: Array }>}
  */
-function listBookings(range) {
-  return callFunction(CLOUD_FUNCTIONS.bookingList, range)
+function listBookings(query) {
+  return callFunction(CLOUD_FUNCTIONS.bookingList, query)
 }
 
 /**

@@ -89,12 +89,8 @@ Page({
       setMonthBookings(monthKey, rows)
       this.applyMonthList(rows)
     } catch (err) {
-      if (!cached) {
-        // 骨架演示：无云时用本地示意数据，方便看 UI
-        const demo = buildDemoBookings(year, month)
-        this.applyMonthList(demo)
-        if (!demo.length) showApiError(err)
-      }
+      if (!cached) this.applyMonthList([])
+      showApiError(err)
     } finally {
       this.setData({ loading: false })
     }
@@ -102,12 +98,7 @@ Page({
 
   applyMonthList(list) {
     const rows = list || []
-    let selectedDate = this.data.selectedDate
-    const hasSelected = rows.some((b) => b.date === selectedDate)
-    if (!hasSelected && rows.length) {
-      selectedDate = rows.slice().sort((a, b) => a.date.localeCompare(b.date))[0].date
-    }
-    this.setData({ monthBookings: rows, selectedDate })
+    this.setData({ monthBookings: rows })
     this.recomputeViews(rows)
   },
 
@@ -200,53 +191,4 @@ function formatSelectedLabel(dateStr) {
   if (!dateStr) return '当日约课'
   const d = new Date(dateStr.replace(/-/g, '/'))
   return `${d.getMonth() + 1}月${d.getDate()}日 · ${WEEKDAY_CN[d.getDay()]}`
-}
-
-/** 仅 UI 联调：云未就绪时展示示意数据 */
-function buildDemoBookings(year, month) {
-  const d8 = `${year}-${pad(month)}-08`
-  const d11 = `${year}-${pad(month)}-11`
-  const d20 = `${year}-${pad(month)}-20`
-  return [
-    {
-      _id: 'demo-1',
-      studentName: '小明',
-      teacherName: '王老师',
-      subjectName: '英语',
-      date: d8,
-      startTime: '19:30',
-      endTime: '19:55',
-      cardTone: 'mint'
-    },
-    {
-      _id: 'demo-2',
-      studentName: '小红',
-      teacherName: '李老师',
-      subjectName: '数学',
-      date: d11,
-      startTime: '10:00',
-      endTime: '11:00',
-      cardTone: 'surface'
-    },
-    {
-      _id: 'demo-3',
-      studentName: '小明',
-      teacherName: '王老师',
-      subjectName: '英语',
-      date: d11,
-      startTime: '19:30',
-      endTime: '19:55',
-      cardTone: 'primary'
-    },
-    {
-      _id: 'demo-4',
-      studentName: '小杰',
-      teacherName: '张老师',
-      subjectName: '钢琴',
-      date: d20,
-      startTime: '16:00',
-      endTime: '16:45',
-      cardTone: 'surface'
-    }
-  ]
 }

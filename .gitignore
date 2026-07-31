@@ -4,5 +4,6 @@ miniprogram_npm/
 *.log
 project.private.config.json
 cloudfunctions/**/node_modules/
+miniprogram/config/env.js
 .idea/
 .vscode/

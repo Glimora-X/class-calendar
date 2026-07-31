@@ -1,7 +1,8 @@
 const { DEFAULT_TIME, DEFAULT_SUBJECT_NAME } = require('../../utils/constants')
 const { formatDate } = require('../../utils/format')
 const { listSubjects, upsertSubject } = require('../../services/subject')
-const { upsertBooking } = require('../../services/booking')
+const { upsertBooking, deleteBooking, listBookings } = require('../../services/booking')
+const { appendName } = require('../../services/name-list')
 const { getLastSubjectId, setLastSubjectId } = require('../../utils/cache')
 const { showApiError } = require('../../utils/errors')
 const { parseQuickInput } = require('../../utils/quick-parse')
@@ -28,7 +29,9 @@ Page({
       _id: query.id || '',
       date: query.date || today
     })
-    this.loadSubjects()
+    this.loadSubjects().then(() => {
+      if (query.id) this.loadBooking(query.id)
+    })
   },
 
   applySubjects(subjects) {
@@ -50,7 +53,6 @@ Page({
       const { list } = await listSubjects()
       this.applySubjects(list || [])
     } catch (err) {
-      // 云未就绪时本地兜底，保证科目选择器始终有可见默认值
       this.applySubjects([
         { _id: 'local-default-english', name: DEFAULT_SUBJECT_NAME }
       ])
@@ -58,9 +60,46 @@ Page({
     }
   },
 
+  async loadBooking(id) {
+    try {
+      const { list } = await listBookings({ _id: id })
+      const row = (list || [])[0]
+      if (!row) {
+        wx.showToast({ title: '记录不存在', icon: 'none' })
+        return
+      }
+      this.setData({
+        _id: row._id,
+        studentName: row.studentName || '',
+        teacherName: row.teacherName || '',
+        subjectId: row.subjectId || '',
+        subjectName: row.subjectName || DEFAULT_SUBJECT_NAME,
+        date: row.date,
+        startTime: row.startTime,
+        endTime: row.endTime,
+        note: row.note || ''
+      })
+      if (row.subjectId) setLastSubjectId(row.subjectId)
+    } catch (err) {
+      showApiError(err)
+    }
+  },
+
   onFieldInput(e) {
     const field = e.currentTarget.dataset.field
     this.setData({ [field]: e.detail.value })
+  },
+
+  onDateChange(e) {
+    this.setData({ date: e.detail.value })
+  },
+
+  onStartTimeChange(e) {
+    this.setData({ startTime: e.detail.value })
+  },
+
+  onEndTimeChange(e) {
+    this.setData({ endTime: e.detail.value })
   },
 
   onSubjectChange(e) {
@@ -133,6 +172,10 @@ Page({
       wx.showToast({ title: '请完善必填项', icon: 'none' })
       return
     }
+    if (String(subjectId).indexOf('local-') === 0) {
+      wx.showToast({ title: '请先开通云开发并部署科目云函数', icon: 'none' })
+      return
+    }
 
     const payload = {
       studentName: studentName.trim(),
@@ -148,15 +191,41 @@ Page({
 
     this.setData({ saving: true })
     try {
-      const res = await upsertBooking(payload)
+      await upsertBooking(payload)
       setLastSubjectId(subjectId)
+      // 联想列表：失败不影响主流程
+      try {
+        await appendName('student', payload.studentName)
+        await appendName('teacher', payload.teacherName)
+      } catch (e) {
+        /* ignore */
+      }
       wx.showToast({ title: '已保存', icon: 'success' })
       setTimeout(() => wx.navigateBack(), 400)
-      return res
     } catch (err) {
       showApiError(err)
     } finally {
       this.setData({ saving: false })
     }
+  },
+
+  onDelete() {
+    const { _id } = this.data
+    if (!_id) return
+    wx.showModal({
+      title: '删除约课',
+      content: '删除后不可恢复，确认删除？',
+      confirmColor: '#ef4444',
+      success: async (res) => {
+        if (!res.confirm) return
+        try {
+          await deleteBooking(_id)
+          wx.showToast({ title: '已删除', icon: 'success' })
+          setTimeout(() => wx.navigateBack(), 400)
+        } catch (err) {
+          showApiError(err)
+        }
+      }
+    })
   }
 })
