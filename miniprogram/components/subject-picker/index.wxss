@@ -1,0 +1,53 @@
+.subject-picker {
+  background: #fff;
+  border-radius: 28rpx;
+  padding: 28rpx;
+  box-shadow: 0 12rpx 40rpx rgba(27, 36, 48, 0.08);
+}
+
+.subject-picker__label {
+  font-size: 22rpx;
+  color: #8b95a5;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-bottom: 12rpx;
+}
+
+.subject-picker__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64rpx;
+}
+
+.subject-picker__value {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1b2430;
+}
+
+.subject-picker__action {
+  font-size: 24rpx;
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.subject-picker__add {
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #e6ebf2;
+}
+
+.subject-picker__input {
+  height: 80rpx;
+  padding: 0 20rpx;
+  background: #eef2f7;
+  border-radius: 20rpx;
+  margin-bottom: 16rpx;
+}
+
+.subject-picker__add-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16rpx;
+}

@@ -1,0 +1,17 @@
+<view class="cal">
+  <view class="cal__weekdays">
+    <text wx:for="{{weekdays}}" wx:key="*this" class="cal__wd">{{item}}</text>
+  </view>
+  <view class="cal__grid">
+    <view
+      wx:for="{{cells}}"
+      wx:key="key"
+      class="cal__cell {{item.empty ? 'is-empty' : ''}} {{item.selected ? 'is-selected' : ''}} {{item.tone ? 'has-mark tone-' + item.tone : ''}} {{item.isToday ? 'is-today' : ''}}"
+      data-date="{{item.date}}"
+      data-empty="{{item.empty}}"
+      bindtap="onSelect"
+    >
+      <text wx:if="{{!item.empty}}" class="cal__day">{{item.day}}</text>
+    </view>
+  </view>
+</view>

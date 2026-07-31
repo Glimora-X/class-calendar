@@ -1,0 +1,38 @@
+{
+  "pages": [
+    "pages/calendar/index",
+    "pages/booking-edit/index",
+    "pages/mine/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "约课",
+    "navigationBarBackgroundColor": "#EEF2F7",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#EEF2F7",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#8B95A5",
+    "selectedColor": "#3B82F6",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/calendar/index",
+        "text": "日历",
+        "iconPath": "assets/tab-calendar.png",
+        "selectedIconPath": "assets/tab-calendar-active.png"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的",
+        "iconPath": "assets/tab-mine.png",
+        "selectedIconPath": "assets/tab-mine-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

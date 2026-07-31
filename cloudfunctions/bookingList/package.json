@@ -1,0 +1,9 @@
+{
+  "name": "bookingList",
+  "version": "1.0.0",
+  "description": "约课云函数 bookingList（契约占位）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

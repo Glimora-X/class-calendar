@@ -1,0 +1,59 @@
+.section {
+  margin-bottom: 24rpx;
+}
+
+.quick {
+  padding: 28rpx;
+}
+
+.section__title {
+  font-size: 22rpx;
+  color: #8b95a5;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+  letter-spacing: 0.04em;
+}
+
+.form {
+  padding: 8rpx 28rpx;
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  min-height: 96rpx;
+  border-bottom: 1rpx solid #e6ebf2;
+}
+
+.field-row:last-child {
+  border-bottom: none;
+}
+
+.label {
+  width: 120rpx;
+  color: #8b95a5;
+  font-size: 26rpx;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.field {
+  flex: 1;
+  font-size: 28rpx;
+  color: #1b2430;
+}
+
+.field--area {
+  width: 100%;
+  min-height: 140rpx;
+  background: #eef2f7;
+  border-radius: 20rpx;
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+}
+
+.save {
+  margin-top: 16rpx;
+  height: 96rpx;
+  line-height: 96rpx;
+}

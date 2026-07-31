@@ -1,0 +1,12 @@
+<view class="month-nav">
+  <view class="month-nav__side" bindtap="onPrev">
+    <text class="chev">‹</text>
+  </view>
+  <view class="month-nav__center" bindtap="onToggleMode">
+    <text class="month-nav__title">{{year}}年{{month}}月</text>
+    <text class="month-nav__sub">{{mode === 'calendar' ? '月历' : '时间线'}} · 点此切换</text>
+  </view>
+  <view class="month-nav__side" bindtap="onNext">
+    <text class="chev">›</text>
+  </view>
+</view>

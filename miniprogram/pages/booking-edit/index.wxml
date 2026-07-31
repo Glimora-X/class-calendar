@@ -1,0 +1,87 @@
+<view class="page page--no-tab">
+  <view class="section surface-card quick">
+    <view class="section__title">快捷解析</view>
+    <textarea
+      class="field field--area"
+      placeholder="例：小明 王老师 4.15 19:30-19:55 英语"
+      value="{{quickText}}"
+      bindinput="onQuickInput"
+      maxlength="200"
+    />
+    <button size="mini" class="btn-ghost" bindtap="onParseQuick">解析填充</button>
+  </view>
+
+  <view class="section">
+    <subject-picker
+      subjects="{{subjects}}"
+      value="{{subjectId}}"
+      bind:change="onSubjectChange"
+      bind:add="onSubjectAdd"
+    />
+  </view>
+
+  <view class="section form surface-card">
+    <view class="field-row">
+      <text class="label">学员</text>
+      <input
+        class="field"
+        data-field="studentName"
+        value="{{studentName}}"
+        bindinput="onFieldInput"
+        placeholder="必填"
+      />
+    </view>
+    <view class="field-row">
+      <text class="label">老师</text>
+      <input
+        class="field"
+        data-field="teacherName"
+        value="{{teacherName}}"
+        bindinput="onFieldInput"
+        placeholder="必填"
+      />
+    </view>
+    <view class="field-row">
+      <text class="label">日期</text>
+      <input
+        class="field"
+        data-field="date"
+        value="{{date}}"
+        bindinput="onFieldInput"
+        placeholder="YYYY-MM-DD"
+      />
+    </view>
+    <view class="field-row">
+      <text class="label">开始</text>
+      <input
+        class="field"
+        data-field="startTime"
+        value="{{startTime}}"
+        bindinput="onFieldInput"
+        placeholder="HH:mm"
+      />
+    </view>
+    <view class="field-row">
+      <text class="label">结束</text>
+      <input
+        class="field"
+        data-field="endTime"
+        value="{{endTime}}"
+        bindinput="onFieldInput"
+        placeholder="HH:mm"
+      />
+    </view>
+    <view class="field-row">
+      <text class="label">备注</text>
+      <input
+        class="field"
+        data-field="note"
+        value="{{note}}"
+        bindinput="onFieldInput"
+        placeholder="可选"
+      />
+    </view>
+  </view>
+
+  <button class="btn-primary save" loading="{{saving}}" bindtap="onSave">保存约课</button>
+</view>

@@ -1,0 +1,17 @@
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+  padding: 0 4rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.section-sub {
+  font-size: 22rpx;
+  color: #8b95a5;
+}

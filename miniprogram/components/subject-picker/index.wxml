@@ -1,0 +1,20 @@
+<view class="subject-picker">
+  <view class="subject-picker__label">科目</view>
+  <view class="subject-picker__row" bindtap="onPick">
+    <text class="subject-picker__value">{{currentName}}</text>
+    <text class="subject-picker__action">切换 / 新增</text>
+  </view>
+  <view wx:if="{{adding}}" class="subject-picker__add">
+    <input
+      class="subject-picker__input"
+      placeholder="如：数学、钢琴"
+      value="{{newName}}"
+      bindinput="onNewNameInput"
+      focus
+    />
+    <view class="subject-picker__add-actions">
+      <button size="mini" class="btn-ghost" bindtap="onCancelAdd">取消</button>
+      <button size="mini" class="btn-primary" bindtap="onConfirmAdd">添加</button>
+    </view>
+  </view>
+</view>

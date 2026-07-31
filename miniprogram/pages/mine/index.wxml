@@ -1,0 +1,8 @@
+<view class="page">
+  <view class="page-title">我的</view>
+  <view class="menu surface-card">
+    <view class="menu__item" bindtap="onAbout">关于约课</view>
+    <view class="menu__item menu__item--danger" bindtap="onLogout">退出登录</view>
+  </view>
+  <view class="version">版本 {{version}}</view>
+</view>

@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "约课",
+  "usingComponents": {
+    "month-nav": "/components/month-nav/index",
+    "filter-chips": "/components/filter-chips/index",
+    "calendar-grid": "/components/calendar-grid/index",
+    "booking-item": "/components/booking-item/index",
+    "timeline-list": "/components/timeline-list/index",
+    "empty-state": "/components/empty-state/index"
+  }
+}

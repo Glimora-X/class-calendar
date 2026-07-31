@@ -1,0 +1,22 @@
+.empty {
+  padding: 64rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  background: #fff;
+  border-radius: 28rpx;
+  box-shadow: 0 12rpx 40rpx rgba(27, 36, 48, 0.06);
+}
+
+.empty__text {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1b2430;
+}
+
+.empty__hint {
+  font-size: 24rpx;
+  color: #8b95a5;
+  text-align: center;
+}

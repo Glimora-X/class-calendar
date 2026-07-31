@@ -1,0 +1,59 @@
+<view class="page">
+  <month-nav
+    year="{{year}}"
+    month="{{month}}"
+    mode="{{mode}}"
+    bind:change="onMonthChange"
+    bind:modechange="onModeChange"
+  />
+
+  <filter-chips items="{{chips}}" bind:change="onFilterChange" />
+
+  <block wx:if="{{mode === 'calendar'}}">
+    <calendar-grid
+      year="{{year}}"
+      month="{{month}}"
+      selectedDate="{{selectedDate}}"
+      marks="{{marks}}"
+      bind:select="onSelectDate"
+    />
+
+    <view class="section-head">
+      <text class="section-title">{{selectedLabel}}</text>
+      <text class="section-sub">{{summaryText}}</text>
+    </view>
+
+    <view wx:if="{{dayBookings.length}}">
+      <booking-item
+        wx:for="{{dayBookings}}"
+        wx:key="_id"
+        bookingId="{{item._id}}"
+        studentName="{{item.studentName}}"
+        teacherName="{{item.teacherName}}"
+        subjectName="{{item.subjectName}}"
+        startTime="{{item.startTime}}"
+        endTime="{{item.endTime}}"
+        tone="{{item.cardTone}}"
+        bind:tap="onTapBooking"
+      />
+    </view>
+    <empty-state
+      wx:else
+      text="这天还没有约课"
+      hint="点底部蓝色 + 号新增"
+    />
+  </block>
+
+  <block wx:else>
+    <timeline-list
+      wx:if="{{timelineGroups.length}}"
+      groups="{{timelineGroups}}"
+      bind:itemtap="onTapTimelineItem"
+    />
+    <empty-state
+      wx:else
+      text="本月还没有约课"
+      hint="点底部蓝色 + 号开始录入"
+    />
+  </block>
+</view>

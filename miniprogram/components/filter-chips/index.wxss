@@ -1,0 +1,32 @@
+.chips {
+  width: 100%;
+  white-space: nowrap;
+  margin-bottom: 28rpx;
+}
+
+.chips__inner {
+  display: inline-flex;
+  gap: 16rpx;
+  padding: 4rpx 2rpx 12rpx;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  height: 64rpx;
+  padding: 0 28rpx;
+  border-radius: 999rpx;
+  background: #fff;
+  color: #8b95a5;
+  font-size: 24rpx;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  box-shadow: 0 8rpx 20rpx rgba(27, 36, 48, 0.05);
+  text-transform: uppercase;
+}
+
+.chip.is-active {
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: 0 12rpx 28rpx rgba(59, 130, 246, 0.3);
+}

@@ -1,0 +1,27 @@
+<view class="tl">
+  <view wx:for="{{groups}}" wx:key="date" class="tl__row">
+    <view class="tl__date">
+      <text class="tl__day">{{item.day}}</text>
+      <text class="tl__wd">{{item.weekdayLabel}}</text>
+    </view>
+    <view class="tl__rail">
+      <view class="tl__dot tone-{{item.tone || 'primary'}}"></view>
+      <view class="tl__line"></view>
+    </view>
+    <view class="tl__cards">
+      <booking-item
+        wx:for="{{item.items}}"
+        wx:for-item="b"
+        wx:key="_id"
+        bookingId="{{b._id}}"
+        studentName="{{b.studentName}}"
+        teacherName="{{b.teacherName}}"
+        subjectName="{{b.subjectName}}"
+        startTime="{{b.startTime}}"
+        endTime="{{b.endTime}}"
+        tone="{{b.cardTone}}"
+        bind:tap="onTapItem"
+      />
+    </view>
+  </view>
+</view>

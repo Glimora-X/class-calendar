@@ -1,0 +1,162 @@
+const { DEFAULT_TIME, DEFAULT_SUBJECT_NAME } = require('../../utils/constants')
+const { formatDate } = require('../../utils/format')
+const { listSubjects, upsertSubject } = require('../../services/subject')
+const { upsertBooking } = require('../../services/booking')
+const { getLastSubjectId, setLastSubjectId } = require('../../utils/cache')
+const { showApiError } = require('../../utils/errors')
+const { parseQuickInput } = require('../../utils/quick-parse')
+
+Page({
+  data: {
+    _id: '',
+    studentName: '',
+    teacherName: '',
+    subjectId: '',
+    subjectName: DEFAULT_SUBJECT_NAME,
+    date: '',
+    startTime: DEFAULT_TIME.startTime,
+    endTime: DEFAULT_TIME.endTime,
+    note: '',
+    subjects: [],
+    quickText: '',
+    saving: false
+  },
+
+  onLoad(query) {
+    const today = formatDate(new Date())
+    this.setData({
+      _id: query.id || '',
+      date: query.date || today
+    })
+    this.loadSubjects()
+  },
+
+  applySubjects(subjects) {
+    const list = subjects || []
+    const lastId = getLastSubjectId()
+    const preferred =
+      list.find((s) => s._id === lastId) ||
+      list.find((s) => s.name === DEFAULT_SUBJECT_NAME) ||
+      list[0]
+    this.setData({
+      subjects: list,
+      subjectId: preferred ? preferred._id : '',
+      subjectName: preferred ? preferred.name : DEFAULT_SUBJECT_NAME
+    })
+  },
+
+  async loadSubjects() {
+    try {
+      const { list } = await listSubjects()
+      this.applySubjects(list || [])
+    } catch (err) {
+      // 云未就绪时本地兜底，保证科目选择器始终有可见默认值
+      this.applySubjects([
+        { _id: 'local-default-english', name: DEFAULT_SUBJECT_NAME }
+      ])
+      showApiError(err)
+    }
+  },
+
+  onFieldInput(e) {
+    const field = e.currentTarget.dataset.field
+    this.setData({ [field]: e.detail.value })
+  },
+
+  onSubjectChange(e) {
+    const { subjectId, subjectName } = e.detail
+    this.setData({ subjectId, subjectName })
+    setLastSubjectId(subjectId)
+  },
+
+  async onSubjectAdd(e) {
+    const name = (e.detail.name || '').trim()
+    if (!name) return
+    try {
+      const { _id } = await upsertSubject(name)
+      const subjects = this.data.subjects.slice()
+      if (!subjects.find((s) => s._id === _id)) {
+        subjects.push({ _id, name })
+      }
+      this.setData({ subjects, subjectId: _id, subjectName: name })
+      setLastSubjectId(_id)
+    } catch (err) {
+      showApiError(err)
+    }
+  },
+
+  onQuickInput(e) {
+    this.setData({ quickText: e.detail.value })
+  },
+
+  onParseQuick() {
+    const app = getApp()
+    const year = app.globalData.viewingYear || new Date().getFullYear()
+    const knownNames = {
+      students: [],
+      teachers: [],
+      subjects: (this.data.subjects || []).map((s) => s.name)
+    }
+    const result = parseQuickInput(this.data.quickText, year, knownNames)
+    if (!result.ok) {
+      wx.showToast({ title: result.error, icon: 'none' })
+      return
+    }
+    const d = result.data
+    const matched = (this.data.subjects || []).find((s) => s.name === d.subjectName)
+    this.setData({
+      studentName: d.studentName,
+      teacherName: d.teacherName,
+      date: d.date,
+      startTime: d.startTime,
+      endTime: d.endTime,
+      subjectName: d.subjectName,
+      subjectId: matched ? matched._id : this.data.subjectId
+    })
+  },
+
+  async onSave() {
+    const {
+      _id,
+      studentName,
+      teacherName,
+      subjectId,
+      subjectName,
+      date,
+      startTime,
+      endTime,
+      note,
+      saving
+    } = this.data
+    if (saving) return
+    if (!studentName || !teacherName || !subjectId || !date || !startTime || !endTime) {
+      wx.showToast({ title: '请完善必填项', icon: 'none' })
+      return
+    }
+
+    const payload = {
+      studentName: studentName.trim(),
+      teacherName: teacherName.trim(),
+      subjectId,
+      subjectName,
+      date,
+      startTime,
+      endTime,
+      note: note ? note.trim() : null
+    }
+    if (_id) payload._id = _id
+
+    this.setData({ saving: true })
+    try {
+      const res = await upsertBooking(payload)
+      setLastSubjectId(subjectId)
+      wx.showToast({ title: '已保存', icon: 'success' })
+      setTimeout(() => wx.navigateBack(), 400)
+      return res
+    } catch (err) {
+      showApiError(err)
+    } finally {
+      this.setData({ saving: false })
+    }
+  }
+})

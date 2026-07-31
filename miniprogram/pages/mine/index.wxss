@@ -1,0 +1,25 @@
+.menu {
+  overflow: hidden;
+}
+
+.menu__item {
+  padding: 36rpx 32rpx;
+  border-bottom: 1rpx solid #e6ebf2;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.menu__item:last-child {
+  border-bottom: none;
+}
+
+.menu__item--danger {
+  color: #ef4444;
+}
+
+.version {
+  margin-top: 48rpx;
+  text-align: center;
+  color: #8b95a5;
+  font-size: 22rpx;
+}

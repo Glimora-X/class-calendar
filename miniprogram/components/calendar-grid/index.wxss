@@ -1,0 +1,72 @@
+.cal {
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 28rpx 20rpx 20rpx;
+  box-shadow: 0 12rpx 40rpx rgba(27, 36, 48, 0.08);
+  margin-bottom: 32rpx;
+}
+
+.cal__weekdays,
+.cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.cal__wd {
+  text-align: center;
+  font-size: 22rpx;
+  color: #8b95a5;
+  padding-bottom: 16rpx;
+  font-weight: 600;
+}
+
+.cal__cell {
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.cal__day {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1b2430;
+  line-height: 64rpx;
+  text-align: center;
+}
+
+.cal__cell.is-empty {
+  pointer-events: none;
+}
+
+.cal__cell.has-mark .cal__day {
+  box-shadow: 0 8rpx 24rpx rgba(59, 130, 246, 0.25);
+}
+
+.cal__cell.tone-primary .cal__day {
+  background: rgba(59, 130, 246, 0.18);
+  color: #2563eb;
+}
+
+.cal__cell.tone-mint .cal__day {
+  background: rgba(52, 211, 153, 0.22);
+  color: #059669;
+  box-shadow: 0 8rpx 24rpx rgba(52, 211, 153, 0.28);
+}
+
+.cal__cell.is-selected .cal__day {
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: 0 12rpx 28rpx rgba(59, 130, 246, 0.4);
+}
+
+.cal__cell.is-today:not(.is-selected) .cal__day {
+  border: 2rpx solid #3b82f6;
+}
