@@ -8,7 +8,8 @@ Component({
     endTime: { type: String, value: '' },
     /** primary | mint | surface */
     tone: { type: String, value: 'surface' },
-    dateLabel: { type: String, value: '' }
+    dateLabel: { type: String, value: '' },
+    statusLabel: { type: String, value: '' }
   },
   methods: {
     onTap() {

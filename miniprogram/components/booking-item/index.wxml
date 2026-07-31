@@ -2,7 +2,7 @@
   <view class="card__main">
     <text class="card__title">{{studentName}} · {{subjectName}}</text>
     <text class="card__time">{{startTime}} — {{endTime}}</text>
-    <text class="card__meta">{{teacherName}}{{dateLabel ? ' · ' + dateLabel : ''}}</text>
+    <text class="card__meta">{{teacherName}}{{dateLabel ? ' · ' + dateLabel : ''}}{{statusLabel ? ' · ' + statusLabel : ''}}</text>
   </view>
   <text class="card__more">···</text>
 </view>

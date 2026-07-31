@@ -52,6 +52,7 @@ exports.main = async (event) => {
       } else {
         await col.add({
           data: {
+            _openid: OPENID,
             students: record.students || [],
             teachers: record.teachers || [],
             updatedAt: now

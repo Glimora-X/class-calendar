@@ -66,7 +66,10 @@ exports.main = async (event) => {
       const now = new Date().toISOString()
       await db.collection('bookings').add({
         data: {
+          _openid: OPENID,
           ...row,
+          status: 'pending',
+          statusManual: false,
           batchId,
           createdAt: now,
           updatedAt: now

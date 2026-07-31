@@ -2,10 +2,16 @@ const { DEFAULT_TIME, DEFAULT_SUBJECT_NAME } = require('../../utils/constants')
 const { formatDate } = require('../../utils/format')
 const { listSubjects, upsertSubject } = require('../../services/subject')
 const { upsertBooking, deleteBooking, listBookings } = require('../../services/booking')
-const { appendName } = require('../../services/name-list')
+const { appendName, fetchNameList } = require('../../services/name-list')
 const { getLastSubjectId, setLastSubjectId } = require('../../utils/cache')
 const { showApiError } = require('../../utils/errors')
 const { parseQuickInput } = require('../../utils/quick-parse')
+const {
+  BOOKING_STATUS,
+  STATUS_OPTIONS,
+  resolveBookingStatus,
+  statusWritePayload
+} = require('../../utils/booking-status')
 
 Page({
   data: {
@@ -18,6 +24,11 @@ Page({
     startTime: DEFAULT_TIME.startTime,
     endTime: DEFAULT_TIME.endTime,
     note: '',
+    status: BOOKING_STATUS.pending,
+    statusManual: false,
+    statusOptions: STATUS_OPTIONS,
+    statusIndex: 0,
+    statusDisplay: '待上（按时间自动）',
     subjects: [],
     quickText: '',
     saving: false
@@ -29,8 +40,29 @@ Page({
       _id: query.id || '',
       date: query.date || today
     })
+    this.syncStatusPicker(BOOKING_STATUS.pending, false)
     this.loadSubjects().then(() => {
       if (query.id) this.loadBooking(query.id)
+    })
+  },
+
+  syncStatusPicker(status, statusManual, date, startTime) {
+    const d = date != null ? date : this.data.date
+    const st = startTime != null ? startTime : this.data.startTime
+    const resolved = resolveBookingStatus(
+      { date: d, startTime: st, status, statusManual },
+      new Date()
+    )
+    const effective = statusManual ? status : resolved
+    const idx = Math.max(
+      0,
+      STATUS_OPTIONS.findIndex((o) => o.value === effective)
+    )
+    this.setData({
+      status: effective,
+      statusManual: !!statusManual,
+      statusIndex: idx,
+      statusDisplay: STATUS_OPTIONS[idx].label
     })
   },
 
@@ -79,6 +111,7 @@ Page({
         endTime: row.endTime,
         note: row.note || ''
       })
+      this.syncStatusPicker(row.status, !!row.statusManual, row.date, row.startTime)
       if (row.subjectId) setLastSubjectId(row.subjectId)
     } catch (err) {
       showApiError(err)
@@ -91,15 +124,35 @@ Page({
   },
 
   onDateChange(e) {
-    this.setData({ date: e.detail.value })
+    const date = e.detail.value
+    this.setData({ date })
+    if (!this.data.statusManual) {
+      this.syncStatusPicker(this.data.status, false, date, this.data.startTime)
+    }
   },
 
   onStartTimeChange(e) {
-    this.setData({ startTime: e.detail.value })
+    const startTime = e.detail.value
+    this.setData({ startTime })
+    if (!this.data.statusManual) {
+      this.syncStatusPicker(this.data.status, false, this.data.date, startTime)
+    }
   },
 
   onEndTimeChange(e) {
     this.setData({ endTime: e.detail.value })
+  },
+
+  onStatusChange(e) {
+    const idx = Number(e.detail.value)
+    const opt = STATUS_OPTIONS[idx] || STATUS_OPTIONS[0]
+    const write = statusWritePayload(opt.value)
+    this.setData({
+      status: write.status,
+      statusManual: write.statusManual,
+      statusIndex: idx,
+      statusDisplay: opt.label
+    })
   },
 
   onSubjectChange(e) {
@@ -128,12 +181,23 @@ Page({
     this.setData({ quickText: e.detail.value })
   },
 
-  onParseQuick() {
+  async onParseQuick() {
     const app = getApp()
     const year = app.globalData.viewingYear || new Date().getFullYear()
+    let students = []
+    let teachers = []
+    try {
+      const list = await fetchNameList()
+      students = list.students || []
+      teachers = (list.teachers || [])
+        .map((t) => (typeof t === 'string' ? t : t.name))
+        .filter(Boolean)
+    } catch (e) {
+      /* 无名单时仍走文本兜底 */
+    }
     const knownNames = {
-      students: [],
-      teachers: [],
+      students,
+      teachers,
       subjects: (this.data.subjects || []).map((s) => s.name)
     }
     const result = parseQuickInput(this.data.quickText, year, knownNames)
@@ -152,6 +216,9 @@ Page({
       subjectName: d.subjectName,
       subjectId: matched ? matched._id : this.data.subjectId
     })
+    if (!this.data.statusManual) {
+      this.syncStatusPicker(this.data.status, false, d.date, d.startTime)
+    }
   },
 
   async onSave() {
@@ -165,6 +232,8 @@ Page({
       startTime,
       endTime,
       note,
+      status,
+      statusManual,
       saving
     } = this.data
     if (saving) return
@@ -177,6 +246,13 @@ Page({
       return
     }
 
+    const finalStatus = statusManual
+      ? statusWritePayload(status)
+      : {
+          status: resolveBookingStatus({ date, startTime }, new Date()),
+          statusManual: false
+        }
+
     const payload = {
       studentName: studentName.trim(),
       teacherName: teacherName.trim(),
@@ -185,7 +261,9 @@ Page({
       date,
       startTime,
       endTime,
-      note: note ? note.trim() : null
+      note: note ? note.trim() : null,
+      status: finalStatus.status,
+      statusManual: finalStatus.statusManual
     }
     if (_id) payload._id = _id
 
@@ -193,7 +271,6 @@ Page({
     try {
       await upsertBooking(payload)
       setLastSubjectId(subjectId)
-      // 联想列表：失败不影响主流程
       try {
         await appendName('student', payload.studentName)
         await appendName('teacher', payload.teacherName)

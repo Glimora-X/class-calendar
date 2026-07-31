@@ -69,6 +69,20 @@
       </view>
     </picker>
 
+    <picker
+      mode="selector"
+      range="{{statusOptions}}"
+      range-key="label"
+      value="{{statusIndex}}"
+      bindchange="onStatusChange"
+    >
+      <view class="soft-field soft-field--tappable">
+        <text class="soft-field__label">状态</text>
+        <text class="soft-field__value">{{statusDisplay}}</text>
+        <text class="soft-field__chev">›</text>
+      </view>
+    </picker>
+
     <view class="soft-field soft-field--last">
       <text class="soft-field__label">备注</text>
       <input

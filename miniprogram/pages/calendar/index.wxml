@@ -34,6 +34,7 @@
         startTime="{{item.startTime}}"
         endTime="{{item.endTime}}"
         tone="{{item.cardTone}}"
+        statusLabel="{{item.statusLabel}}"
         bind:tap="onTapBooking"
       />
     </view>

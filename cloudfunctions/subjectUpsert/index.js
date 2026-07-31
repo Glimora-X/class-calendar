@@ -24,7 +24,7 @@ exports.main = async (event) => {
     }
 
     const res = await db.collection('subjects').add({
-      data: { name, createdAt: new Date().toISOString() }
+      data: { _openid: OPENID, name, createdAt: new Date().toISOString() }
     })
     return { _id: res._id }
   } catch (e) {

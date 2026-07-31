@@ -3,6 +3,8 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
 function pickFields(event) {
+  const status = String(event.status || '').trim()
+  const statusManual = !!event.statusManual
   return {
     studentName: String(event.studentName || '').trim(),
     teacherName: String(event.teacherName || '').trim(),
@@ -12,7 +14,9 @@ function pickFields(event) {
     startTime: String(event.startTime || '').trim(),
     endTime: String(event.endTime || '').trim(),
     note: event.note == null || event.note === '' ? null : String(event.note).trim(),
-    batchId: event.batchId == null || event.batchId === '' ? null : event.batchId
+    batchId: event.batchId == null || event.batchId === '' ? null : event.batchId,
+    status: status || 'pending',
+    statusManual
   }
 }
 
@@ -67,6 +71,8 @@ exports.main = async (event) => {
           endTime: fields.endTime,
           note: fields.note,
           batchId: fields.batchId,
+          status: fields.status,
+          statusManual: fields.statusManual,
           updatedAt: now
         }
       })
@@ -75,6 +81,7 @@ exports.main = async (event) => {
 
     const res = await db.collection('bookings').add({
       data: {
+        _openid: OPENID,
         studentName: fields.studentName,
         teacherName: fields.teacherName,
         subjectId: fields.subjectId,
@@ -84,6 +91,8 @@ exports.main = async (event) => {
         endTime: fields.endTime,
         note: fields.note,
         batchId: fields.batchId,
+        status: fields.status,
+        statusManual: fields.statusManual,
         createdAt: now,
         updatedAt: now
       }

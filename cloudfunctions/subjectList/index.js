@@ -26,7 +26,7 @@ exports.main = async () => {
 
     const now = new Date().toISOString()
     const add = await db.collection('subjects').add({
-      data: { name: DEFAULT_SUBJECT, createdAt: now }
+      data: { _openid: OPENID, name: DEFAULT_SUBJECT, createdAt: now }
     })
     return {
       list: [{ _id: add._id, name: DEFAULT_SUBJECT, createdAt: now }]

@@ -5,6 +5,7 @@ const { formatMonthKey, monthRange, formatDate, pad } = require('../../utils/for
 const { getMonthBookings, setMonthBookings } = require('../../utils/cache')
 const { listBookings } = require('../../services/booking')
 const { showApiError } = require('../../utils/errors')
+const { resolveBookingStatus, statusLabel, BOOKING_STATUS } = require('../../utils/booking-status')
 
 Page({
   data: {
@@ -109,13 +110,17 @@ Page({
       : list
 
     const teachers = uniqueTeachers(list)
+    const doneCountByTeacher = countDoneByTeacher(list)
     const chips = [
       { id: 'all', label: '全部', active: !filterTeacher },
-      ...teachers.map((name) => ({
-        id: name,
-        label: name,
-        active: filterTeacher === name
-      }))
+      ...teachers.map((name) => {
+        const done = doneCountByTeacher[name] || 0
+        return {
+          id: name,
+          label: `${name} ${done}`,
+          active: filterTeacher === name
+        }
+      })
     ]
 
     const byDate = {}
@@ -177,6 +182,19 @@ function uniqueTeachers(list) {
   return set
 }
 
+/** 本月每位老师「已上」课次数（含自动按时间算出的已上） */
+function countDoneByTeacher(list) {
+  const map = {}
+  const now = new Date()
+  ;(list || []).forEach((b) => {
+    const name = b.teacherName
+    if (!name) return
+    if (resolveBookingStatus(b, now) !== BOOKING_STATUS.done) return
+    map[name] = (map[name] || 0) + 1
+  })
+  return map
+}
+
 function byStartTime(a, b) {
   return String(a.startTime).localeCompare(String(b.startTime))
 }
@@ -184,7 +202,12 @@ function byStartTime(a, b) {
 function decorateBooking(b) {
   const tones = ['surface', 'primary', 'mint']
   const tone = tones[(b.studentName || '').length % tones.length]
-  return Object.assign({}, b, { cardTone: b.cardTone || tone })
+  const resolved = resolveBookingStatus(b)
+  return Object.assign({}, b, {
+    cardTone: b.cardTone || tone,
+    status: resolved,
+    statusLabel: statusLabel(resolved)
+  })
 }
 
 function formatSelectedLabel(dateStr) {
