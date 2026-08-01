@@ -1,0 +1,56 @@
+<view class="page page--no-tab">
+  <view class="head surface-card soft-block">
+    <text class="head__title">{{titleText}}</text>
+    <text class="head__sub">{{sourceLabel}}</text>
+  </view>
+
+  <view wx:if="{{loading}}" class="hint">加载上月约课…</view>
+
+  <block wx:elif="{{empty}}">
+    <empty-state text="上月没有约课可复制" hint="先在上月录入几节，再回来复制" />
+  </block>
+
+  <block wx:else>
+    <view class="section surface-card soft-block">
+      <view class="section__bar">
+        <text class="section__title">可生成 {{createRows.length}} 条</text>
+        <text class="link" bindtap="onToggleAll">全选/取消</text>
+      </view>
+      <view
+        wx:for="{{createRows}}"
+        wx:key="key"
+        class="row {{item.checked ? 'is-on' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="onToggleRow"
+      >
+        <view class="check">{{item.checked ? '✓' : ''}}</view>
+        <view class="row__main">
+          <text class="row__title">{{item.studentName}} · {{item.subjectName}}</text>
+          <text class="row__meta">{{item.sourceDate}} 复制为 {{item.date}} · {{item.startTime}}-{{item.endTime}}</text>
+          <text class="row__meta">{{item.teacherName}}</text>
+        </view>
+      </view>
+      <view wx:if="{{!createRows.length}}" class="hint">没有可映射到本月的记录</view>
+    </view>
+
+    <view wx:if="{{skippedRows.length}}" class="section surface-card soft-block">
+      <text class="section__title">无法生成 {{skippedRows.length}} 条</text>
+      <view wx:for="{{skippedRows}}" wx:key="key" class="row row--skip">
+        <view class="row__main">
+          <text class="row__title">{{item.studentName}} · {{item.teacherName}}</text>
+          <text class="row__meta">原日期 {{item.sourceDate}} · {{item.startTime}}-{{item.endTime}}</text>
+          <text class="row__warn">{{item.reason}}</text>
+        </view>
+      </view>
+    </view>
+
+    <button
+      class="soft-btn soft-btn--primary"
+      loading="{{saving}}"
+      disabled="{{!selectedCount}}"
+      bindtap="onConfirm"
+    >
+      确认复制 {{selectedCount}} 条
+    </button>
+  </block>
+</view>

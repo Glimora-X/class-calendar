@@ -60,8 +60,13 @@ function buildCopyMonthPreview(sourceBookings, targetYear, targetMonth) {
       targetYear,
       targetMonth
     )
-    if (date) previewCreate.push(Object.assign({}, b, { date }))
-    else previewSkipped.push(Object.assign({}, b, { skippedReason }))
+    if (date) {
+      previewCreate.push(
+        Object.assign({}, b, { date, _sourceDate: b.date })
+      )
+    } else {
+      previewSkipped.push(Object.assign({}, b, { skippedReason }))
+    }
   })
   return { previewCreate, previewSkipped }
 }

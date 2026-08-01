@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "复制上月课程",
+  "navigationBarBackgroundColor": "#EEF2F7",
+  "usingComponents": {
+    "empty-state": "/components/empty-state/index"
+  }
+}

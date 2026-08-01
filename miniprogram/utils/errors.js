@@ -35,14 +35,30 @@ function getErrorMessage(err) {
  * @param {{ code?: string, message?: string }} err
  */
 function showApiError(err) {
+  const title = getErrorMessage(err)
   wx.showToast({
-    title: getErrorMessage(err),
-    icon: 'none'
+    title: title.length > 20 ? title.slice(0, 20) : title,
+    icon: 'none',
+    duration: 2500
+  })
+}
+
+/**
+ * 写失败时提示：内容已保留可重试（避免用户以为丢了）
+ * @param {{ code?: string, message?: string }} err
+ */
+function showWriteError(err) {
+  const base = getErrorMessage(err)
+  wx.showToast({
+    title: `${base}，内容已保留`,
+    icon: 'none',
+    duration: 2800
   })
 }
 
 module.exports = {
   ApiCode,
   getErrorMessage,
-  showApiError
+  showApiError,
+  showWriteError
 }

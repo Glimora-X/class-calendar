@@ -7,10 +7,11 @@ const { CLOUD_FUNCTIONS } = require('../utils/constants')
 
 /**
  * @param {{ start?: string, end?: string, _id?: string }} query
+ * @param {{ silent?: boolean, title?: string }} [options]
  * @returns {Promise<{ list: Array }>}
  */
-function listBookings(query) {
-  return callFunction(CLOUD_FUNCTIONS.bookingList, query)
+function listBookings(query, options) {
+  return callFunction(CLOUD_FUNCTIONS.bookingList, query, options || {})
 }
 
 /**
@@ -18,7 +19,7 @@ function listBookings(query) {
  * @returns {Promise<{ code: string, _id: string }>}
  */
 function upsertBooking(input) {
-  return callFunction(CLOUD_FUNCTIONS.bookingUpsert, input)
+  return callFunction(CLOUD_FUNCTIONS.bookingUpsert, input, { title: '保存中' })
 }
 
 /**
@@ -26,7 +27,7 @@ function upsertBooking(input) {
  * @returns {Promise<{ code: string, _id: string }>}
  */
 function deleteBooking(_id) {
-  return callFunction(CLOUD_FUNCTIONS.bookingDelete, { _id })
+  return callFunction(CLOUD_FUNCTIONS.bookingDelete, { _id }, { title: '删除中' })
 }
 
 /**
@@ -34,12 +35,27 @@ function deleteBooking(_id) {
  * @returns {Promise<{ created: number, skipped: number, failed: number, failedItems?: Array }>}
  */
 function batchCreateBookings(payload) {
-  return callFunction(CLOUD_FUNCTIONS.bookingBatchCreate, payload)
+  return callFunction(CLOUD_FUNCTIONS.bookingBatchCreate, payload, {
+    title: '创建中'
+  })
+}
+
+/**
+ * 清空当前用户云端全部约课
+ * @returns {Promise<{ deleted: number }>}
+ */
+function clearAllBookings() {
+  return callFunction(
+    CLOUD_FUNCTIONS.bookingClearAll,
+    { confirm: true },
+    { title: '清空中' }
+  )
 }
 
 module.exports = {
   listBookings,
   upsertBooking,
   deleteBooking,
-  batchCreateBookings
+  batchCreateBookings,
+  clearAllBookings
 }

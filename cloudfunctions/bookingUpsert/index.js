@@ -2,6 +2,30 @@ const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
+const DEFAULT_REMIND_MINUTES = 10
+
+function normalizeRemindMinutes(raw) {
+  const n = Math.round(Number(raw))
+  if (!Number.isFinite(n)) return DEFAULT_REMIND_MINUTES
+  return Math.min(120, Math.max(1, n))
+}
+
+/** 约课 date+time 按北京时间解释（云函数主机多为 UTC，勿用无时区 Date 解析） */
+function chinaLocalMs(date, time) {
+  if (!date || !time) return NaN
+  const t = String(time).trim()
+  const withSec = t.length === 5 ? `${t}:00` : t
+  return new Date(`${String(date).trim()}T${withSec}+08:00`).getTime()
+}
+
+function computeRemindAt(date, startTime, minutesBefore) {
+  const before = normalizeRemindMinutes(minutesBefore)
+  const start = chinaLocalMs(date, startTime)
+  if (!Number.isFinite(start)) return null
+  if (start <= Date.now()) return null
+  return new Date(start - before * 60 * 1000).toISOString()
+}
+
 function pickFields(event) {
   const status = String(event.status || '').trim()
   const statusManual = !!event.statusManual
@@ -35,6 +59,13 @@ function validate(fields) {
   return true
 }
 
+function shouldRemind(fields) {
+  if (fields.statusManual && (fields.status === 'transferred' || fields.status === 'refunded')) {
+    return false
+  }
+  return true
+}
+
 /**
  * 入参: BookingUpsertInput
  * 出参: { code: 'OK', _id } | 错误 code
@@ -49,6 +80,10 @@ exports.main = async (event) => {
   }
 
   const now = new Date().toISOString()
+  const remindMinutes = normalizeRemindMinutes(payload.remindMinutesBefore)
+  const remindAt = shouldRemind(fields)
+    ? computeRemindAt(fields.date, fields.startTime, remindMinutes)
+    : null
 
   try {
     if (payload._id) {
@@ -60,22 +95,31 @@ exports.main = async (event) => {
         return { code: 'FORBIDDEN', message: '无权操作' }
       }
 
-      await db.collection('bookings').doc(payload._id).update({
-        data: {
-          studentName: fields.studentName,
-          teacherName: fields.teacherName,
-          subjectId: fields.subjectId,
-          subjectName: fields.subjectName,
-          date: fields.date,
-          startTime: fields.startTime,
-          endTime: fields.endTime,
-          note: fields.note,
-          batchId: fields.batchId,
-          status: fields.status,
-          statusManual: fields.statusManual,
-          updatedAt: now
-        }
-      })
+      const prev = doc.data
+      const timeChanged =
+        prev.date !== fields.date ||
+        prev.startTime !== fields.startTime ||
+        prev.remindAt !== remindAt
+      const patch = {
+        studentName: fields.studentName,
+        teacherName: fields.teacherName,
+        subjectId: fields.subjectId,
+        subjectName: fields.subjectName,
+        date: fields.date,
+        startTime: fields.startTime,
+        endTime: fields.endTime,
+        note: fields.note,
+        batchId: fields.batchId,
+        status: fields.status,
+        statusManual: fields.statusManual,
+        remindAt,
+        updatedAt: now
+      }
+      if (timeChanged || !remindAt) {
+        patch.remindSentAt = null
+      }
+
+      await db.collection('bookings').doc(payload._id).update({ data: patch })
       return { code: 'OK', _id: payload._id }
     }
 
@@ -93,6 +137,8 @@ exports.main = async (event) => {
         batchId: fields.batchId,
         status: fields.status,
         statusManual: fields.statusManual,
+        remindAt,
+        remindSentAt: null,
         createdAt: now,
         updatedAt: now
       }

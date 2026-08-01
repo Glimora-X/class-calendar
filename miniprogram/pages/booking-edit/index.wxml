@@ -1,5 +1,19 @@
 <view class="page page--no-tab">
-  <view class="section surface-card soft-block">
+  <view wx:if="{{showSubscribeGate}}" class="subscribe-gate surface-card soft-block">
+    <view class="subscribe-gate__title">已保存</view>
+    <view class="subscribe-gate__desc">请点击下方按钮，在微信弹窗里允许「日程提醒」（不要连点太快）。</view>
+    <view
+      class="soft-btn soft-btn--primary subscribe-gate__btn {{subscribeBusy ? 'is-disabled' : ''}}"
+      bindtap="onSubscribeTap"
+    >
+      {{subscribeBusy ? '请完成微信弹窗…' : '授权微信提醒'}}
+    </view>
+    <view class="soft-btn soft-btn--ghost subscribe-gate__skip" bindtap="onSkipSubscribe">
+      暂时不用
+    </view>
+  </view>
+
+  <view wx:if="{{!_id && !showSubscribeGate}}" class="section surface-card soft-block">
     <view class="section__title">快捷解析</view>
     <textarea
       class="soft-textarea"
@@ -22,28 +36,20 @@
   </view>
 
   <view class="section surface-card soft-block form">
-    <view class="soft-field">
-      <text class="soft-field__label">学员</text>
-      <input
-        class="soft-field__input"
-        data-field="studentName"
-        value="{{studentName}}"
-        bindinput="onFieldInput"
-        placeholder="必填"
-        placeholder-class="ph"
-      />
-    </view>
-    <view class="soft-field">
-      <text class="soft-field__label">老师</text>
-      <input
-        class="soft-field__input"
-        data-field="teacherName"
-        value="{{teacherName}}"
-        bindinput="onFieldInput"
-        placeholder="必填"
-        placeholder-class="ph"
-      />
-    </view>
+    <name-suggest
+      label="学员"
+      placeholder="必填"
+      value="{{studentName}}"
+      suggestions="{{studentSuggestions}}"
+      bind:input="onStudentSuggest"
+    />
+    <name-suggest
+      label="老师"
+      placeholder="必填"
+      value="{{teacherName}}"
+      suggestions="{{teacherSuggestions}}"
+      bind:input="onTeacherSuggest"
+    />
 
     <picker mode="date" value="{{date}}" bindchange="onDateChange">
       <view class="soft-field soft-field--tappable">
@@ -96,15 +102,20 @@
     </view>
   </view>
 
-  <button class="soft-btn soft-btn--primary save" loading="{{saving}}" bindtap="onSave">
-    保存约课
-  </button>
-
-  <button
-    wx:if="{{_id}}"
-    class="soft-btn soft-btn--danger"
-    bindtap="onDelete"
-  >
-    删除
-  </button>
+  <view wx:if="{{!showSubscribeGate}}" class="actions {{_id ? 'actions--split' : ''}}">
+    <button
+      wx:if="{{_id}}"
+      class="soft-btn soft-btn--danger actions__btn"
+      bindtap="onDelete"
+    >
+      删除
+    </button>
+    <button
+      class="soft-btn soft-btn--primary actions__btn actions__btn--save"
+      loading="{{saving}}"
+      bindtap="onSave"
+    >
+      保存约课
+    </button>
+  </view>
 </view>

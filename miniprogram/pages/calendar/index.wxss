@@ -11,6 +11,19 @@
   font-weight: 700;
 }
 
+.section-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6rpx;
+}
+
+.section-link {
+  font-size: 24rpx;
+  color: #3b82f6;
+  font-weight: 600;
+}
+
 .section-sub {
   font-size: 22rpx;
   color: #8b95a5;

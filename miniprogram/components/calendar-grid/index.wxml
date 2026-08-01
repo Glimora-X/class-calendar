@@ -6,12 +6,24 @@
     <view
       wx:for="{{cells}}"
       wx:key="key"
-      class="cal__cell {{item.empty ? 'is-empty' : ''}} {{item.selected ? 'is-selected' : ''}} {{item.tone ? 'has-mark tone-' + item.tone : ''}} {{item.isToday ? 'is-today' : ''}}"
+      class="cal__cell {{item.empty ? 'is-empty' : ''}} {{item.selected ? 'is-selected' : ''}} {{item.tone ? 'has-mark tone-' + item.tone : ''}} {{item.isToday ? 'is-today' : ''}} {{item.summary ? 'has-summary' : ''}}"
       data-date="{{item.date}}"
       data-empty="{{item.empty}}"
       bindtap="onSelect"
     >
-      <text wx:if="{{!item.empty}}" class="cal__day">{{item.day}}</text>
+      <view wx:if="{{!item.empty}}" class="cal__inner">
+        <text class="cal__day">{{item.day}}</text>
+        <text wx:if="{{item.summary}}" class="cal__summary">{{item.summary}}</text>
+        <text wx:elif="{{item.holiday}}" class="cal__holiday">{{item.holiday}}</text>
+        <view wx:elif="{{item.dots.length}}" class="cal__dots">
+          <view
+            wx:for="{{item.dots}}"
+            wx:for-item="dot"
+            wx:key="*this"
+            class="cal__dot"
+          />
+        </view>
+      </view>
     </view>
   </view>
 </view>

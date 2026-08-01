@@ -110,13 +110,64 @@
 }
 
 .soft-btn--danger {
-  margin-top: 20rpx;
   background: #fff;
   color: #ef4444;
   box-shadow: 0 8rpx 24rpx rgba(27, 36, 48, 0.06);
 }
 
-.save {
+.actions {
   margin-top: 12rpx;
+  display: flex;
+  gap: 20rpx;
+}
+
+.actions--split .actions__btn--save {
+  flex: 1.4;
+}
+
+.actions__btn {
+  flex: 1;
+  margin: 0;
+  min-width: 0;
+}
+
+.actions:not(.actions--split) .actions__btn--save {
   width: 100%;
+  flex: none;
+}
+
+.subscribe-gate {
+  margin-top: 12rpx;
+  padding: 32rpx 28rpx;
+}
+
+.subscribe-gate__title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1b2430;
+  margin-bottom: 12rpx;
+}
+
+.subscribe-gate__desc {
+  font-size: 26rpx;
+  color: #8b95a5;
+  line-height: 1.5;
+  margin-bottom: 28rpx;
+}
+
+.subscribe-gate__btn,
+.subscribe-gate__skip {
+  margin-top: 16rpx;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.subscribe-gate__btn {
+  margin-top: 0;
+}
+
+.subscribe-gate__btn.is-disabled {
+  opacity: 0.55;
+  pointer-events: none;
 }

@@ -2,6 +2,7 @@
   "navigationBarTitleText": "新增 / 编辑",
   "navigationBarBackgroundColor": "#EEF2F7",
   "usingComponents": {
-    "subject-picker": "/components/subject-picker/index"
+    "subject-picker": "/components/subject-picker/index",
+    "name-suggest": "/components/name-suggest/index"
   }
 }

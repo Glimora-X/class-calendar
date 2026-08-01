@@ -1,0 +1,130 @@
+.section {
+  margin-bottom: 24rpx;
+}
+
+.soft-block {
+  padding: 28rpx;
+}
+
+.section__title {
+  font-size: 26rpx;
+  color: #8b95a5;
+  font-weight: 600;
+}
+
+.ph {
+  color: #b0b8c4;
+}
+
+.form {
+  padding: 8rpx 8rpx 8rpx 28rpx;
+}
+
+.soft-field {
+  display: flex;
+  align-items: center;
+  min-height: 100rpx;
+  padding-right: 20rpx;
+  border-bottom: 1rpx solid #e6ebf2;
+}
+
+.soft-field--last {
+  border-bottom: none;
+}
+
+.soft-field--tappable:active {
+  background: rgba(59, 130, 246, 0.04);
+}
+
+.soft-field__label {
+  width: 120rpx;
+  flex-shrink: 0;
+  color: #8b95a5;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.soft-field__input {
+  flex: 1;
+  font-size: 30rpx;
+  color: #1b2430;
+  font-weight: 500;
+}
+
+.soft-field__value {
+  flex: 1;
+  font-size: 30rpx;
+  color: #1b2430;
+  font-weight: 600;
+}
+
+.soft-field__chev {
+  color: #c5ccd6;
+  font-size: 36rpx;
+  padding: 0 8rpx;
+}
+
+.month-actions {
+  display: flex;
+  gap: 12rpx;
+}
+
+.month-btn {
+  width: 56rpx;
+  height: 56rpx;
+  line-height: 52rpx;
+  text-align: center;
+  border-radius: 50%;
+  background: #eef2f7;
+  color: #1b2430;
+  font-size: 36rpx;
+  font-weight: 600;
+}
+
+.preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.preview-toggle {
+  color: #3b82f6;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.preview-list {
+  margin-top: 16rpx;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.preview-item {
+  background: #eef2f7;
+  border-radius: 12rpx;
+  padding: 10rpx 16rpx;
+  font-size: 24rpx;
+  color: #1b2430;
+}
+
+.soft-btn {
+  border-radius: 999rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-top: 8rpx;
+}
+
+.soft-btn::after {
+  border: none;
+}
+
+.soft-btn--primary {
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: 0 16rpx 36rpx rgba(59, 130, 246, 0.35);
+}
+
+.save {
+  margin-top: 16rpx;
+}

@@ -2,6 +2,8 @@
   "pages": [
     "pages/calendar/index",
     "pages/booking-edit/index",
+    "pages/booking-batch/index",
+    "pages/booking-copy-month/index",
     "pages/mine/index"
   ],
   "window": {

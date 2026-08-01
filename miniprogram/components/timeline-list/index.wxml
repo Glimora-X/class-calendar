@@ -20,6 +20,7 @@
         startTime="{{b.startTime}}"
         endTime="{{b.endTime}}"
         tone="{{b.cardTone}}"
+        teacherTone="{{b.cardTone}}"
         statusLabel="{{b.statusLabel}}"
         bind:tap="onTapItem"
       />

@@ -1,0 +1,9 @@
+{
+  "name": "bookingClearAll",
+  "version": "1.0.0",
+  "description": "清空当前用户全部约课",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

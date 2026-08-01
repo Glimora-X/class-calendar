@@ -1,11 +1,27 @@
 const WEEKDAY_CN = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
 
+const { DAY_CELL_SUMMARY_THRESHOLD } = require('../../utils/constants')
 const { addMonths } = require('../../utils/date-utils')
 const { formatMonthKey, monthRange, formatDate, pad } = require('../../utils/format')
 const { getMonthBookings, setMonthBookings } = require('../../utils/cache')
 const { listBookings } = require('../../services/booking')
+const { fetchNameList } = require('../../services/name-list')
 const { showApiError } = require('../../utils/errors')
-const { resolveBookingStatus, statusLabel, BOOKING_STATUS } = require('../../utils/booking-status')
+const { resolveBookingStatus, statusLabel } = require('../../utils/booking-status')
+const { holidaysInMonth } = require('../../utils/holidays')
+const {
+  findImminentBookings,
+  inAppToastKey,
+  hasShownInAppToast,
+  markInAppToastShown
+} = require('../../utils/reminder')
+
+const COLOR_TO_TONE = {
+  accent: 'primary',
+  pro: 'pro',
+  success: 'mint',
+  warning: 'warning'
+}
 
 Page({
   data: {
@@ -18,9 +34,11 @@ Page({
     filterTeacher: '',
     chips: [],
     marks: [],
+    holidays: {},
     dayBookings: [],
     timelineGroups: [],
     monthBookings: [],
+    teacherColorMap: {},
     loading: false
   },
 
@@ -28,25 +46,48 @@ Page({
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 0 })
     }
-    if (this.data.year) this.refreshMonth()
+    if (this.data.year) {
+      this.refreshMonth().then(() => this.checkImminentReminders())
+    } else {
+      this.checkImminentReminders()
+    }
+    this.loadTeacherColors()
   },
 
   onLoad() {
     const now = new Date()
     this.setViewing(now.getFullYear(), now.getMonth() + 1, formatDate(now))
+    this.loadTeacherColors()
+  },
+
+  async loadTeacherColors() {
+    try {
+      const list = await fetchNameList({ silent: true })
+      const map = {}
+      ;(list.teachers || []).forEach((t) => {
+        if (!t) return
+        if (typeof t === 'string') map[t] = 'primary'
+        else if (t.name) map[t.name] = COLOR_TO_TONE[t.color] || 'primary'
+      })
+      this.setData({ teacherColorMap: map })
+      if (this.data.monthBookings && this.data.monthBookings.length) {
+        this.recomputeViews(this.data.monthBookings)
+      }
+    } catch (e) {
+      /* ignore */
+    }
   },
 
   setViewing(year, month, selectedDate) {
     const app = getApp()
     app.globalData.viewingYear = year
     app.globalData.viewingMonth = month
-    const date =
-      selectedDate ||
-      `${year}-${pad(month)}-01`
+    const date = selectedDate || `${year}-${pad(month)}-01`
     this.setData({
       year,
       month,
       selectedDate: date,
+      holidays: holidaysInMonth(year, month),
       dayBookings: [],
       timelineGroups: [],
       summaryText: ''
@@ -74,6 +115,35 @@ Page({
     const date = e.detail.date
     this.setData({ selectedDate: date })
     this.recomputeViews(this.data.monthBookings)
+  },
+
+  onTapBatch() {
+    wx.navigateTo({ url: '/pages/booking-batch/index' })
+  },
+
+  onTapCopyMonth() {
+    wx.navigateTo({ url: '/pages/booking-copy-month/index' })
+  },
+
+  checkImminentReminders() {
+    const list = findImminentBookings(this.data.monthBookings || [])
+    if (!list.length) return
+    const b = list[0]
+    const key = inAppToastKey(b)
+    if (hasShownInAppToast(key)) return
+    markInAppToastShown(key)
+    const content = `${b.studentName || ''} · ${b.teacherName || ''}\n${b.date} ${b.startTime}-${b.endTime}`
+    wx.showModal({
+      title: '即将上课',
+      content,
+      confirmText: b._id ? '查看' : '知道了',
+      showCancel: !!b._id,
+      success: (res) => {
+        if (res.confirm && b._id) {
+          wx.navigateTo({ url: `/pages/booking-edit/index?id=${b._id}` })
+        }
+      }
+    })
   },
 
   async refreshMonth() {
@@ -104,21 +174,23 @@ Page({
   },
 
   recomputeViews(list) {
-    const { filterTeacher, selectedDate } = this.data
+    const { filterTeacher, selectedDate, teacherColorMap } = this.data
     const filtered = filterTeacher
       ? list.filter((b) => b.teacherName === filterTeacher)
       : list
 
     const teachers = uniqueTeachers(list)
-    const doneCountByTeacher = countDoneByTeacher(list)
+    const totalByTeacher = countByTeacher(list)
     const chips = [
-      { id: 'all', label: '全部', active: !filterTeacher },
+      { id: 'all', label: '全部', active: !filterTeacher, tone: '' },
       ...teachers.map((name) => {
-        const done = doneCountByTeacher[name] || 0
+        const total = totalByTeacher[name] || 0
+        const tone = teacherColorMap[name] || 'primary'
         return {
           id: name,
-          label: `${name} ${done}`,
-          active: filterTeacher === name
+          label: `${name} ${total}`,
+          active: filterTeacher === name,
+          tone
         }
       })
     ]
@@ -126,13 +198,21 @@ Page({
     const byDate = {}
     filtered.forEach((b) => {
       if (!byDate[b.date]) byDate[b.date] = []
-      byDate[b.date].push(decorateBooking(b))
+      byDate[b.date].push(decorateBooking(b, teacherColorMap))
     })
 
-    const marks = Object.keys(byDate).map((date, idx) => ({
-      date,
-      tone: idx % 2 === 0 ? 'primary' : 'mint'
-    }))
+    const marks = Object.keys(byDate).map((date) => {
+      const items = byDate[date] || []
+      const count = items.length
+      const firstTone = (items[0] && items[0].cardTone) || 'primary'
+      const tone = firstTone === 'surface' ? 'primary' : firstTone
+      return {
+        date,
+        tone,
+        count,
+        summary: count > DAY_CELL_SUMMARY_THRESHOLD ? `${count}节` : ''
+      }
+    })
 
     const dayBookings = (byDate[selectedDate] || []).slice().sort(byStartTime)
     const selectedLabel = formatSelectedLabel(selectedDate)
@@ -182,14 +262,12 @@ function uniqueTeachers(list) {
   return set
 }
 
-/** 本月每位老师「已上」课次数（含自动按时间算出的已上） */
-function countDoneByTeacher(list) {
+/** 本月每位老师约课总数（不区分状态） */
+function countByTeacher(list) {
   const map = {}
-  const now = new Date()
   ;(list || []).forEach((b) => {
     const name = b.teacherName
     if (!name) return
-    if (resolveBookingStatus(b, now) !== BOOKING_STATUS.done) return
     map[name] = (map[name] || 0) + 1
   })
   return map
@@ -199,12 +277,13 @@ function byStartTime(a, b) {
   return String(a.startTime).localeCompare(String(b.startTime))
 }
 
-function decorateBooking(b) {
-  const tones = ['surface', 'primary', 'mint']
-  const tone = tones[(b.studentName || '').length % tones.length]
+function decorateBooking(b, teacherColorMap) {
+  const map = teacherColorMap || {}
+  const fromTeacher = b.teacherName && map[b.teacherName]
+  const fallback = ['surface', 'primary', 'mint'][(b.studentName || '').length % 3]
   const resolved = resolveBookingStatus(b)
   return Object.assign({}, b, {
-    cardTone: b.cardTone || tone,
+    cardTone: fromTeacher || b.cardTone || fallback,
     status: resolved,
     statusLabel: statusLabel(resolved)
   })

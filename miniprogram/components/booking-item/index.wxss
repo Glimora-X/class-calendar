@@ -43,6 +43,18 @@
   box-shadow: 0 16rpx 40rpx rgba(52, 211, 153, 0.35);
 }
 
+.tone-pro {
+  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+  color: #fff;
+  box-shadow: 0 16rpx 40rpx rgba(139, 92, 246, 0.35);
+}
+
+.tone-warning {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #fff;
+  box-shadow: 0 16rpx 40rpx rgba(245, 158, 11, 0.35);
+}
+
 .card__main {
   flex: 1;
   min-width: 0;
@@ -61,15 +73,80 @@
   opacity: 0.85;
 }
 
-.card__meta {
+.card__meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
   font-size: 22rpx;
+}
+
+.card__meta {
   opacity: 0.7;
 }
 
+.card__teacher {
+  display: inline-flex;
+  align-items: center;
+  height: 36rpx;
+  padding: 0 12rpx;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+  font-weight: 700;
+  opacity: 1;
+}
+
+/* 彩色卡片上：白底 + 老师标签色字，与 chip 字色一致 */
+.card__teacher.tone-primary {
+  background: #fff;
+  color: #2563eb;
+}
+
+.card__teacher.tone-mint {
+  background: #fff;
+  color: #059669;
+}
+
+.card__teacher.tone-pro {
+  background: #fff;
+  color: #7c3aed;
+}
+
+.card__teacher.tone-warning {
+  background: #fff;
+  color: #d97706;
+}
+
+.card__teacher.tone-surface {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
+/* 白底卡片：老师名用标签实色，与 chip 对齐 */
 .tone-surface .card__time,
 .tone-surface .card__meta {
   color: #8b95a5;
   opacity: 1;
+}
+
+.tone-surface .card__teacher.tone-primary {
+  background: rgba(59, 130, 246, 0.14);
+  color: #2563eb;
+}
+
+.tone-surface .card__teacher.tone-mint {
+  background: rgba(52, 211, 153, 0.18);
+  color: #059669;
+}
+
+.tone-surface .card__teacher.tone-pro {
+  background: rgba(139, 92, 246, 0.16);
+  color: #7c3aed;
+}
+
+.tone-surface .card__teacher.tone-warning {
+  background: rgba(245, 158, 11, 0.18);
+  color: #d97706;
 }
 
 .card__more {

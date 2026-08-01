@@ -1,0 +1,23 @@
+<view class="ns">
+  <view class="soft-field">
+    <text class="soft-field__label">{{label}}</text>
+    <input
+      class="soft-field__input"
+      value="{{value}}"
+      placeholder="{{placeholder}}"
+      placeholder-class="ph"
+      bindinput="onInput"
+      bindfocus="onFocus"
+      bindblur="onBlur"
+    />
+  </view>
+  <view wx:if="{{open && filtered.length}}" class="ns__list">
+    <view
+      wx:for="{{filtered}}"
+      wx:key="*this"
+      class="ns__item"
+      data-name="{{item}}"
+      bindtap="onPick"
+    >{{item}}</view>
+  </view>
+</view>

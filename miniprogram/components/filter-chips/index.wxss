@@ -22,11 +22,52 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   box-shadow: 0 8rpx 20rpx rgba(27, 36, 48, 0.05);
-  text-transform: uppercase;
+  border: 2rpx solid transparent;
 }
 
 .chip.is-active {
   background: #3b82f6;
   color: #fff;
   box-shadow: 0 12rpx 28rpx rgba(59, 130, 246, 0.3);
+}
+
+/* 老师色：未选中描边/字色，选中铺满 */
+.chip.tone-primary:not(.is-active) {
+  color: #2563eb;
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+.chip.tone-primary.is-active {
+  background: #3b82f6;
+  box-shadow: 0 12rpx 28rpx rgba(59, 130, 246, 0.3);
+}
+
+.chip.tone-mint:not(.is-active) {
+  color: #059669;
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+.chip.tone-mint.is-active {
+  background: #34d399;
+  box-shadow: 0 12rpx 28rpx rgba(52, 211, 153, 0.35);
+}
+
+.chip.tone-pro:not(.is-active) {
+  color: #7c3aed;
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+.chip.tone-pro.is-active {
+  background: #8b5cf6;
+  box-shadow: 0 12rpx 28rpx rgba(139, 92, 246, 0.35);
+}
+
+.chip.tone-warning:not(.is-active) {
+  color: #d97706;
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+.chip.tone-warning.is-active {
+  background: #f59e0b;
+  box-shadow: 0 12rpx 28rpx rgba(245, 158, 11, 0.35);
 }

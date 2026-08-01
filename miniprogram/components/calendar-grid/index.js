@@ -8,16 +8,18 @@ Component({
     selectedDate: { type: String, value: '' },
     /**
      * 有课日期标记
-     * [{ date: 'YYYY-MM-DD', tone: 'primary'|'mint' }]
+     * [{ date, tone, count?, summary? }]
      */
-    marks: { type: Array, value: [] }
+    marks: { type: Array, value: [] },
+    /** { 'YYYY-MM-DD': '国庆' } */
+    holidays: { type: Object, value: {} }
   },
   data: {
     weekdays: WEEKDAYS,
     cells: []
   },
   observers: {
-    'year, month, selectedDate, marks': function () {
+    'year, month, selectedDate, marks, holidays': function () {
       this.buildCells()
     }
   },
@@ -33,8 +35,10 @@ Component({
       const selectedDate = this.data.selectedDate
       const markMap = {}
       ;(this.data.marks || []).forEach((m) => {
-        markMap[m.date] = m.tone || 'primary'
+        if (!m || !m.date) return
+        markMap[m.date] = m
       })
+      const holidayMap = this.data.holidays || {}
 
       const first = new Date(year, month - 1, 1)
       const startWeekday = first.getDay()
@@ -50,13 +54,25 @@ Component({
       }
       for (let d = 1; d <= daysInMonth; d++) {
         const date = `${year}-${pad(month)}-${pad(d)}`
-        const tone = markMap[date]
+        const mark = markMap[date]
+        const holiday = holidayMap[date] || ''
+        const count = mark ? Number(mark.count) || 0 : 0
+        const summary = (mark && mark.summary) || ''
+        const dots = !summary && count > 0
+          ? count === 1
+            ? [1]
+            : [1, 2]
+          : []
         cells.push({
           key: date,
           empty: false,
           day: d,
           date,
-          tone: tone || '',
+          tone: (mark && mark.tone) || '',
+          count,
+          summary,
+          dots,
+          holiday,
           selected: date === selectedDate,
           isToday: date === todayStr
         })

@@ -15,12 +15,17 @@
       month="{{month}}"
       selectedDate="{{selectedDate}}"
       marks="{{marks}}"
+      holidays="{{holidays}}"
       bind:select="onSelectDate"
     />
 
     <view class="section-head">
       <text class="section-title">{{selectedLabel}}</text>
-      <text class="section-sub">{{summaryText}}</text>
+      <view class="section-actions">
+        <text class="section-link" bindtap="onTapCopyMonth">复制上月</text>
+        <text class="section-link" bindtap="onTapBatch">批量约课</text>
+        <text class="section-sub">{{summaryText}}</text>
+      </view>
     </view>
 
     <view wx:if="{{dayBookings.length}}">
@@ -34,6 +39,7 @@
         startTime="{{item.startTime}}"
         endTime="{{item.endTime}}"
         tone="{{item.cardTone}}"
+        teacherTone="{{item.cardTone}}"
         statusLabel="{{item.statusLabel}}"
         bind:tap="onTapBooking"
       />

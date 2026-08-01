@@ -12,8 +12,13 @@
 ## 当前进度
 
 - Soft UI：月历 / 时间线 / FAB / 表单软卡片（日期时间用系统 picker，外皮自定义）
-- P0 云函数已按契约实现真写库：`bookingList|Upsert|Delete`、`subjectList|Upsert`、`nameList`、`bookingBatchCreate`
+- P0 云函数已按契约实现真写库：`bookingList|Upsert|Delete`、`subjectList|Upsert`、`nameList`、`bookingBatchCreate`（写库显式 `_openid`）
 - 日历接云端列表；失败时空态 + toast（已去掉示意 demo）
+- 约课状态：待上/已上/已转/已退；老师 chip 显示本月约课总数（不区分状态）
+- 快捷解析：相对日期、中英文冒号、空格/`约` 拆学员老师
+- P1：批量约课页、学员/老师联想、月历节假日标注
+- P0.5：复制上月课程（预览勾选 + 无对应周次跳过提示）
+- 课前提醒：开课前 10 分钟（订阅消息 + 打开日历弹窗）；见 `docs/CLOUD_SETUP.md` §6
 
 ## 本地联调
 

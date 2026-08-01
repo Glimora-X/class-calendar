@@ -2,6 +2,30 @@ const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
+const DEFAULT_REMIND_MINUTES = 10
+
+function normalizeRemindMinutes(raw) {
+  const n = Math.round(Number(raw))
+  if (!Number.isFinite(n)) return DEFAULT_REMIND_MINUTES
+  return Math.min(120, Math.max(1, n))
+}
+
+/** 约课 date+time 按北京时间解释（云函数主机多为 UTC） */
+function chinaLocalMs(date, time) {
+  if (!date || !time) return NaN
+  const t = String(time).trim()
+  const withSec = t.length === 5 ? `${t}:00` : t
+  return new Date(`${String(date).trim()}T${withSec}+08:00`).getTime()
+}
+
+function computeRemindAt(date, startTime, minutesBefore) {
+  const before = normalizeRemindMinutes(minutesBefore)
+  const start = chinaLocalMs(date, startTime)
+  if (!Number.isFinite(start)) return null
+  if (start <= Date.now()) return null
+  return new Date(start - before * 60 * 1000).toISOString()
+}
+
 /**
  * 入参: { batchId, items: BookingCreateInput[] }
  * 出参: { created, skipped, failed, failedItems }
@@ -11,6 +35,7 @@ exports.main = async (event) => {
   const payload = event || {}
   const batchId = payload.batchId
   const items = payload.items
+  const remindMinutes = normalizeRemindMinutes(payload.remindMinutesBefore)
 
   if (!batchId || !Array.isArray(items)) {
     return { code: 'INVALID_PARAM', message: '缺少 batchId/items' }
@@ -38,6 +63,7 @@ exports.main = async (event) => {
       !row.studentName ||
       !row.teacherName ||
       !row.subjectId ||
+      !row.subjectName ||
       !row.date ||
       !row.startTime ||
       !row.endTime
@@ -64,12 +90,15 @@ exports.main = async (event) => {
       }
 
       const now = new Date().toISOString()
+      const remindAt = computeRemindAt(row.date, row.startTime, remindMinutes)
       await db.collection('bookings').add({
         data: {
           _openid: OPENID,
           ...row,
           status: 'pending',
           statusManual: false,
+          remindAt,
+          remindSentAt: null,
           batchId,
           createdAt: now,
           updatedAt: now

@@ -1,8 +1,40 @@
 <view class="page">
   <view class="page-title">我的</view>
+
+  <view class="section-label">设置</view>
   <view class="menu surface-card">
+    <picker
+      mode="selector"
+      range="{{durationLabels}}"
+      value="{{durationIndex}}"
+      bindchange="onDurationChange"
+    >
+      <view class="menu__item menu__item--row">
+        <text>默认课程时长</text>
+        <text class="menu__value">{{durationLabel}} ›</text>
+      </view>
+    </picker>
+    <picker
+      mode="selector"
+      range="{{remindLabels}}"
+      value="{{remindIndex}}"
+      bindchange="onRemindChange"
+    >
+      <view class="menu__item menu__item--row menu__item--last">
+        <text>课前提醒</text>
+        <text class="menu__value">提前 {{remindLabel}} ›</text>
+      </view>
+    </picker>
+  </view>
+  <view class="hint">时长用于新建/改开始时间时的结束时间；提醒用于微信通知与小程序内弹窗。</view>
+
+  <view class="section-label">功能</view>
+  <view class="menu surface-card">
+    <view class="menu__item" bindtap="onCopyMonth">复制上月课程</view>
+    <view class="menu__item" bindtap="onBatch">批量约课</view>
     <view class="menu__item" bindtap="onAbout">关于约课</view>
-    <view class="menu__item menu__item--danger" bindtap="onLogout">退出登录</view>
+    <view class="menu__item menu__item--danger" bindtap="onClearBookings">清空全部约课</view>
+    <view class="menu__item menu__item--danger menu__item--last" bindtap="onLogout">退出登录</view>
   </view>
   <view class="version">版本 {{version}}</view>
 </view>

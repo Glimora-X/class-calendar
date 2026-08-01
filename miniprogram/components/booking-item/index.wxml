@@ -2,7 +2,11 @@
   <view class="card__main">
     <text class="card__title">{{studentName}} · {{subjectName}}</text>
     <text class="card__time">{{startTime}} — {{endTime}}</text>
-    <text class="card__meta">{{teacherName}}{{dateLabel ? ' · ' + dateLabel : ''}}{{statusLabel ? ' · ' + statusLabel : ''}}</text>
+    <view class="card__meta-row">
+      <text class="card__teacher tone-{{teacherTone || tone}}">{{teacherName}}</text>
+      <text wx:if="{{dateLabel}}" class="card__meta"> · {{dateLabel}}</text>
+      <text wx:if="{{statusLabel}}" class="card__meta"> · {{statusLabel}}</text>
+    </view>
   </view>
   <text class="card__more">···</text>
 </view>

@@ -52,7 +52,7 @@ function getLastSubjectId() {
 }
 
 /**
- * 退出登录：清本地约课与偏好，不清云端
+ * 退出登录：清本地约课、偏好与提醒去重标记，不清云端
  */
 function clearAll() {
   try {
@@ -61,6 +61,7 @@ function clearAll() {
     keys.forEach((key) => {
       if (
         key.indexOf('bookings:') === 0 ||
+        key.indexOf('remind:toast:') === 0 ||
         key === CACHE_KEYS.lastSubjectId ||
         key === CACHE_KEYS.nameLists
       ) {

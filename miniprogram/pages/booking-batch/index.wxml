@@ -1,0 +1,92 @@
+<view class="page page--no-tab">
+  <view class="section surface-card soft-block form">
+    <view class="soft-field soft-field--tappable">
+      <text class="soft-field__label">月份</text>
+      <text class="soft-field__value">{{monthLabel}}</text>
+      <view class="month-actions">
+        <text class="month-btn" bindtap="onMonthPrev">‹</text>
+        <text class="month-btn" bindtap="onMonthNext">›</text>
+      </view>
+    </view>
+
+    <picker
+      mode="selector"
+      range="{{weekdayOptions}}"
+      range-key="label"
+      value="{{weekdayPickerIndex}}"
+      bindchange="onWeekdayChange"
+    >
+      <view class="soft-field soft-field--tappable">
+        <text class="soft-field__label">周几</text>
+        <text class="soft-field__value">{{weekdayLabel}}</text>
+        <text class="soft-field__chev">›</text>
+      </view>
+    </picker>
+  </view>
+
+  <view class="section">
+    <subject-picker
+      subjects="{{subjects}}"
+      value="{{subjectId}}"
+      bind:change="onSubjectChange"
+    />
+  </view>
+
+  <view class="section surface-card soft-block form">
+    <name-suggest
+      label="学员"
+      placeholder="必填"
+      value="{{studentName}}"
+      suggestions="{{studentSuggestions}}"
+      bind:input="onStudentInput"
+    />
+    <name-suggest
+      label="老师"
+      placeholder="必填"
+      value="{{teacherName}}"
+      suggestions="{{teacherSuggestions}}"
+      bind:input="onTeacherInput"
+    />
+
+    <picker mode="time" value="{{startTime}}" bindchange="onStartTimeChange">
+      <view class="soft-field soft-field--tappable">
+        <text class="soft-field__label">开始</text>
+        <text class="soft-field__value">{{startTime}}</text>
+        <text class="soft-field__chev">›</text>
+      </view>
+    </picker>
+
+    <picker mode="time" value="{{endTime}}" bindchange="onEndTimeChange">
+      <view class="soft-field soft-field--tappable">
+        <text class="soft-field__label">结束</text>
+        <text class="soft-field__value">{{endTime}}</text>
+        <text class="soft-field__chev">›</text>
+      </view>
+    </picker>
+
+    <view class="soft-field soft-field--last">
+      <text class="soft-field__label">备注</text>
+      <input
+        class="soft-field__input"
+        value="{{note}}"
+        bindinput="onNoteInput"
+        placeholder="可选"
+        placeholder-class="ph"
+      />
+    </view>
+  </view>
+
+  <view class="section surface-card soft-block">
+    <view class="preview-head" bindtap="onTogglePreview">
+      <text class="section__title">将生成 {{previewDates.length}} 天</text>
+      <text class="preview-toggle">{{previewOpen ? '收起' : '预览'}}</text>
+    </view>
+    <view wx:if="{{previewOpen}}" class="preview-list">
+      <text wx:for="{{previewDates}}" wx:key="*this" class="preview-item">{{item}}</text>
+    </view>
+  </view>
+
+  <button class="soft-btn soft-btn--primary save" loading="{{saving}}" bindtap="onSubmit">
+    预览确认并创建
+  </button>
+</view>

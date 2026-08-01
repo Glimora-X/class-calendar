@@ -53,6 +53,14 @@
   border-color: #34d399;
 }
 
+.tl__dot.tone-pro {
+  border-color: #8b5cf6;
+}
+
+.tl__dot.tone-warning {
+  border-color: #f59e0b;
+}
+
 .tl__line {
   flex: 1;
   width: 4rpx;

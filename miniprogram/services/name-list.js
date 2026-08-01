@@ -6,10 +6,11 @@ const { callFunction } = require('../utils/request')
 const { CLOUD_FUNCTIONS } = require('../utils/constants')
 
 /**
+ * @param {{ silent?: boolean, title?: string }} [options]
  * @returns {Promise<{ teachers: Array, students: string[] }>}
  */
-function fetchNameList() {
-  return callFunction(CLOUD_FUNCTIONS.nameList, {})
+function fetchNameList(options) {
+  return callFunction(CLOUD_FUNCTIONS.nameList, {}, options || {})
 }
 
 /**
@@ -18,7 +19,11 @@ function fetchNameList() {
  * @returns {Promise<{ teachers: Array, students: string[] }>}
  */
 function appendName(type, name) {
-  return callFunction(CLOUD_FUNCTIONS.nameList, { type, name })
+  return callFunction(
+    CLOUD_FUNCTIONS.nameList,
+    { type, name },
+    { silent: true }
+  )
 }
 
 module.exports = {

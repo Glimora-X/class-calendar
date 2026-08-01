@@ -1,0 +1,9 @@
+{
+  "name": "reminderTick",
+  "version": "1.0.0",
+  "description": "课前订阅消息定时扫描",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

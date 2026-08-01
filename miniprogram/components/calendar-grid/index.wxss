@@ -21,25 +21,69 @@
 }
 
 .cal__cell {
-  height: 80rpx;
+  height: 108rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
 }
 
+.cal__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rpx;
+}
+
 .cal__day {
-  width: 64rpx;
-  height: 64rpx;
+  width: 56rpx;
+  height: 56rpx;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28rpx;
+  font-size: 26rpx;
   font-weight: 600;
   color: #1b2430;
-  line-height: 64rpx;
+  line-height: 56rpx;
   text-align: center;
+}
+
+.cal__holiday {
+  font-size: 16rpx;
+  color: #ef4444;
+  line-height: 1.1;
+  max-width: 72rpx;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.cal__summary {
+  font-size: 16rpx;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #2563eb;
+  max-width: 72rpx;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.cal__dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+  height: 10rpx;
+}
+
+.cal__dot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: #3b82f6;
 }
 
 .cal__cell.is-empty {
@@ -61,10 +105,55 @@
   box-shadow: 0 8rpx 24rpx rgba(52, 211, 153, 0.28);
 }
 
+.cal__cell.tone-mint .cal__dot {
+  background: #34d399;
+}
+
+.cal__cell.tone-mint .cal__summary {
+  color: #059669;
+}
+
+.cal__cell.tone-pro .cal__day {
+  background: rgba(139, 92, 246, 0.2);
+  color: #7c3aed;
+  box-shadow: 0 8rpx 24rpx rgba(139, 92, 246, 0.28);
+}
+
+.cal__cell.tone-pro .cal__dot {
+  background: #8b5cf6;
+}
+
+.cal__cell.tone-pro .cal__summary {
+  color: #7c3aed;
+}
+
+.cal__cell.tone-warning .cal__day {
+  background: rgba(245, 158, 11, 0.22);
+  color: #d97706;
+  box-shadow: 0 8rpx 24rpx rgba(245, 158, 11, 0.28);
+}
+
+.cal__cell.tone-warning .cal__dot {
+  background: #f59e0b;
+}
+
+.cal__cell.tone-warning .cal__summary {
+  color: #d97706;
+}
+
 .cal__cell.is-selected .cal__day {
   background: #3b82f6;
   color: #fff;
   box-shadow: 0 12rpx 28rpx rgba(59, 130, 246, 0.4);
+}
+
+.cal__cell.is-selected .cal__holiday,
+.cal__cell.is-selected .cal__summary {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.cal__cell.is-selected .cal__dot {
+  background: #fff;
 }
 
 .cal__cell.is-today:not(.is-selected) .cal__day {
