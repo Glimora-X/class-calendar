@@ -10,13 +10,18 @@ const {
   getRemindMinutesBefore
 } = require('../../utils/prefs')
 const { listSubjects, upsertSubject } = require('../../services/subject')
-const { upsertBooking, deleteBooking, listBookings } = require('../../services/booking')
+const {
+  upsertBooking,
+  deleteBooking,
+  listBookings,
+  batchCreateBookings
+} = require('../../services/booking')
 const { appendName, fetchNameList } = require('../../services/name-list')
 const { getLastSubjectId, setLastSubjectId } = require('../../utils/cache')
 const { showApiError, showWriteError } = require('../../utils/errors')
 const { callFunction } = require('../../utils/request')
 const { CLOUD_FUNCTIONS } = require('../../utils/constants')
-const { parseQuickInput } = require('../../utils/quick-parse')
+const { parseQuickInputMulti } = require('../../utils/quick-parse')
 const {
   BOOKING_STATUS,
   STATUS_OPTIONS,
@@ -51,6 +56,7 @@ Page({
     studentSuggestions: [],
     teacherSuggestions: [],
     quickText: '',
+    drafts: [],
     saving: false,
     // 保存成功后展示：用独立按钮拉起订阅（避免保存链路吃掉手势）
     showSubscribeGate: false,
@@ -65,11 +71,19 @@ Page({
       _id: query.id || '',
       date: query.date || today
     }
-    // 新建：开始时间默认当前时刻，结束时间按设置的课程时长
+    // 新建：开始时间默认当前时刻，结束时间按设置的课程时长；初始化 1 条草稿
     if (!query.id) {
       const startTime = formatTime(now)
+      const endTime = addMinutesToTime(startTime, getClassDurationMinutes())
       patch.startTime = startTime
-      patch.endTime = addMinutesToTime(startTime, getClassDurationMinutes())
+      patch.endTime = endTime
+      patch.drafts = [
+        this.makeEmptyDraft({
+          date: query.date || today,
+          startTime,
+          endTime
+        })
+      ]
     }
     this.setData(patch)
     this.syncStatusPicker(BOOKING_STATUS.pending, false)
@@ -77,6 +91,33 @@ Page({
     this.loadSubjects().then(() => {
       if (query.id) this.loadBooking(query.id)
     })
+  },
+
+  makeEmptyDraft(overrides) {
+    this._draftSeq = (this._draftSeq || 0) + 1
+    const now = new Date()
+    const startTime = formatTime(now)
+    return Object.assign(
+      {
+        key: `d_${Date.now()}_${this._draftSeq}`,
+        subjectId: this.data.subjectId || '',
+        subjectName: this.data.subjectName || DEFAULT_SUBJECT_NAME,
+        studentName: '',
+        teacherName: '',
+        date: formatDate(now),
+        startTime,
+        endTime: addMinutesToTime(startTime, getClassDurationMinutes()),
+        note: ''
+      },
+      overrides || {}
+    )
+  },
+
+  updateDraft(index, patch) {
+    const drafts = (this.data.drafts || []).slice()
+    if (index < 0 || index >= drafts.length) return
+    drafts[index] = Object.assign({}, drafts[index], patch)
+    this.setData({ drafts })
   },
 
   async loadNames() {
@@ -121,11 +162,21 @@ Page({
       list.find((s) => s._id === lastId) ||
       list.find((s) => s.name === DEFAULT_SUBJECT_NAME) ||
       list[0]
-    this.setData({
+    const subjectId = preferred ? preferred._id : ''
+    const subjectName = preferred ? preferred.name : DEFAULT_SUBJECT_NAME
+    const patch = {
       subjects: list,
-      subjectId: preferred ? preferred._id : '',
-      subjectName: preferred ? preferred.name : DEFAULT_SUBJECT_NAME
-    })
+      subjectId,
+      subjectName
+    }
+    // 新增态：给尚未选科目的草稿补上默认科目
+    if (!this.data._id && (this.data.drafts || []).length) {
+      patch.drafts = this.data.drafts.map((d) => {
+        if (d.subjectId) return d
+        return Object.assign({}, d, { subjectId, subjectName })
+      })
+    }
+    this.setData(patch)
   },
 
   async loadSubjects() {
@@ -241,6 +292,87 @@ Page({
     }
   },
 
+  onAddDraft() {
+    const drafts = (this.data.drafts || []).slice()
+    drafts.push(this.makeEmptyDraft())
+    this.setData({ drafts })
+  },
+
+  onRemoveDraft(e) {
+    const index = Number(e.currentTarget.dataset.index)
+    const drafts = (this.data.drafts || []).slice()
+    if (drafts.length <= 1) return
+    if (index < 0 || index >= drafts.length) return
+    drafts.splice(index, 1)
+    this.setData({ drafts })
+  },
+
+  onDraftStudentSuggest(e) {
+    const index = Number(e.currentTarget.dataset.index)
+    this.updateDraft(index, { studentName: e.detail.value })
+  },
+
+  onDraftTeacherSuggest(e) {
+    const index = Number(e.currentTarget.dataset.index)
+    this.updateDraft(index, { teacherName: e.detail.value })
+  },
+
+  onDraftDateChange(e) {
+    const index = Number(e.currentTarget.dataset.index)
+    this.updateDraft(index, { date: e.detail.value })
+  },
+
+  onDraftStartTimeChange(e) {
+    const index = Number(e.currentTarget.dataset.index)
+    const drafts = this.data.drafts || []
+    const draft = drafts[index]
+    if (!draft) return
+    const startTime = e.detail.value
+    const duration = minutesBetweenTimes(draft.startTime, draft.endTime)
+    const minutes = Number.isFinite(duration)
+      ? duration
+      : getClassDurationMinutes()
+    this.updateDraft(index, {
+      startTime,
+      endTime: addMinutesToTime(startTime, minutes)
+    })
+  },
+
+  onDraftEndTimeChange(e) {
+    const index = Number(e.currentTarget.dataset.index)
+    this.updateDraft(index, { endTime: e.detail.value })
+  },
+
+  onDraftNoteInput(e) {
+    const index = Number(e.currentTarget.dataset.index)
+    this.updateDraft(index, { note: e.detail.value })
+  },
+
+  onDraftSubjectChange(e) {
+    const index = Number(e.currentTarget.dataset.index)
+    const { subjectId, subjectName } = e.detail
+    this.updateDraft(index, { subjectId, subjectName })
+    setLastSubjectId(subjectId)
+  },
+
+  async onDraftSubjectAdd(e) {
+    const index = Number(e.currentTarget.dataset.index)
+    const name = (e.detail.name || '').trim()
+    if (!name) return
+    try {
+      const { _id } = await upsertSubject(name)
+      const subjects = this.data.subjects.slice()
+      if (!subjects.find((s) => s._id === _id)) {
+        subjects.push({ _id, name })
+      }
+      this.setData({ subjects })
+      this.updateDraft(index, { subjectId: _id, subjectName: name })
+      setLastSubjectId(_id)
+    } catch (err) {
+      showApiError(err)
+    }
+  },
+
   onQuickInput(e) {
     this.setData({ quickText: e.detail.value })
   },
@@ -264,28 +396,178 @@ Page({
       teachers,
       subjects: (this.data.subjects || []).map((s) => s.name)
     }
-    const result = parseQuickInput(this.data.quickText, year, knownNames)
-    if (!result.ok) {
-      wx.showToast({ title: result.error, icon: 'none' })
+    const { okItems, failItems } = parseQuickInputMulti(
+      this.data.quickText,
+      year,
+      knownNames
+    )
+    if (!okItems.length) {
+      const tip =
+        (failItems[0] && failItems[0].error) || '没识别出可用约课，请检查格式'
+      wx.showToast({ title: tip, icon: 'none' })
       return
     }
-    const d = result.data
-    const matched = (this.data.subjects || []).find((s) => s.name === d.subjectName)
-    this.setData({
-      studentName: d.studentName,
-      teacherName: d.teacherName,
+
+    const preferredId = this.data.subjectId
+    const preferredName = this.data.subjectName || DEFAULT_SUBJECT_NAME
+    const drafts = okItems.map(({ data }) => {
+      const matched = (this.data.subjects || []).find(
+        (s) => s.name === data.subjectName
+      )
+      return this.makeEmptyDraft({
+        studentName: data.studentName,
+        teacherName: data.teacherName,
+        date: data.date,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        subjectName: data.subjectName,
+        subjectId: matched ? matched._id : preferredId,
+        note: ''
+      })
+    })
+    // 若解析科目未匹配且 preferred 也空，用科目名兜底显示
+    drafts.forEach((d) => {
+      if (!d.subjectId && !d.subjectName) d.subjectName = preferredName
+    })
+    this.setData({ drafts })
+
+    let title = `已填充 ${okItems.length} 条`
+    if (failItems.length) {
+      const firstFail = failItems[0]
+      title = `${title}，${failItems.length} 条失败`
+      if (firstFail) {
+        title = `${title}（第${firstFail.line}行）`
+      }
+    }
+    wx.showToast({ title, icon: 'none', duration: 2500 })
+  },
+
+  draftMissingLabel(draft) {
+    if (!draft) return '内容'
+    if (!(draft.studentName || '').trim()) return '学员'
+    if (!(draft.teacherName || '').trim()) return '老师'
+    if (!(draft.subjectId || '').trim()) return '科目'
+    if (!(draft.subjectName || '').trim()) return '科目'
+    if (!(draft.date || '').trim()) return '日期'
+    if (!(draft.startTime || '').trim()) return '开始时间'
+    if (!(draft.endTime || '').trim()) return '结束时间'
+    return ''
+  },
+
+  async onSaveMulti() {
+    const { drafts, saving } = this.data
+    if (saving) return
+    if (!drafts || drafts.length < 1) {
+      wx.showToast({ title: '请至少填写一条约课', icon: 'none' })
+      return
+    }
+
+    const incompletes = []
+    for (let i = 0; i < drafts.length; i++) {
+      const missing = this.draftMissingLabel(drafts[i])
+      if (missing) incompletes.push({ index: i, missing })
+    }
+    if (incompletes.length === drafts.length) {
+      wx.showToast({ title: '请至少填写一条约课', icon: 'none' })
+      return
+    }
+    if (incompletes.length) {
+      const first = incompletes[0]
+      wx.showToast({
+        title: `第 ${first.index + 1} 条缺少${first.missing}`,
+        icon: 'none'
+      })
+      return
+    }
+
+    const firstLocal = drafts.find(
+      (d) => String(d.subjectId || '').indexOf('local-') === 0
+    )
+    if (firstLocal) {
+      wx.showToast({ title: '请先开通云开发并部署科目云函数', icon: 'none' })
+      return
+    }
+
+    const items = drafts.map((d) => ({
+      studentName: d.studentName.trim(),
+      teacherName: d.teacherName.trim(),
+      subjectId: d.subjectId,
+      subjectName: d.subjectName,
       date: d.date,
       startTime: d.startTime,
       endTime: d.endTime,
-      subjectName: d.subjectName,
-      subjectId: matched ? matched._id : this.data.subjectId
-    })
-    if (!this.data.statusManual) {
-      this.syncStatusPicker(this.data.status, false, d.date, d.startTime)
+      note: d.note ? String(d.note).trim() : null
+    }))
+
+    const tmplId = getSubscribeTmplId()
+    const needSubscribe = !!tmplId
+
+    this.setData({ saving: true })
+    try {
+      const result = await batchCreateBookings({
+        batchId: `multi_${Date.now()}`,
+        items,
+        remindMinutesBefore: getRemindMinutesBefore()
+      })
+
+      const subjectId = items[0] && items[0].subjectId
+      if (subjectId) setLastSubjectId(subjectId)
+
+      const studentSet = {}
+      const teacherSet = {}
+      items.forEach((it) => {
+        studentSet[it.studentName] = true
+        teacherSet[it.teacherName] = true
+      })
+      try {
+        const studentNames = Object.keys(studentSet)
+        const teacherNames = Object.keys(teacherSet)
+        for (let i = 0; i < studentNames.length; i++) {
+          await appendName('student', studentNames[i])
+        }
+        for (let i = 0; i < teacherNames.length; i++) {
+          await appendName('teacher', teacherNames[i])
+        }
+      } catch (e) {
+        /* ignore */
+      }
+
+      const created = result.created || 0
+      const skipped = result.skipped || 0
+      const failed = result.failed || 0
+
+      if (needSubscribe && created > 0) {
+        try {
+          wx.hideToast()
+        } catch (e) {
+          /* ignore */
+        }
+        this.setData({
+          showSubscribeGate: true,
+          subscribeTmplId: tmplId
+        })
+      } else {
+        wx.showToast({
+          title: `已创建 ${created} 节，跳过重复 ${skipped} 节${
+            failed ? `，失败 ${failed}` : ''
+          }`,
+          icon: 'none',
+          duration: 2500
+        })
+        setTimeout(() => wx.navigateBack(), 600)
+      }
+    } catch (err) {
+      showWriteError(err)
+    } finally {
+      this.setData({ saving: false })
     }
   },
 
   async onSave() {
+    if (!this.data._id) {
+      return this.onSaveMulti()
+    }
+
     const {
       _id,
       studentName,

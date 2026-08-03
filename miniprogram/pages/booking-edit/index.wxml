@@ -13,94 +13,202 @@
     </view>
   </view>
 
-  <view wx:if="{{!_id && !showSubscribeGate}}" class="section surface-card soft-block">
-    <view class="section__title">快捷解析</view>
-    <textarea
-      class="soft-textarea"
-      placeholder="例：小明 王老师 4.15 19:30-19:55 英语"
-      placeholder-class="ph"
-      value="{{quickText}}"
-      bindinput="onQuickInput"
-      maxlength="200"
-    />
-    <button class="soft-btn soft-btn--ghost" bindtap="onParseQuick">解析填充</button>
-  </view>
-
-  <view class="section">
-    <subject-picker
-      subjects="{{subjects}}"
-      value="{{subjectId}}"
-      bind:change="onSubjectChange"
-      bind:add="onSubjectAdd"
-    />
-  </view>
-
-  <view class="section surface-card soft-block form">
-    <name-suggest
-      label="学员"
-      placeholder="必填"
-      value="{{studentName}}"
-      suggestions="{{studentSuggestions}}"
-      bind:input="onStudentSuggest"
-    />
-    <name-suggest
-      label="老师"
-      placeholder="必填"
-      value="{{teacherName}}"
-      suggestions="{{teacherSuggestions}}"
-      bind:input="onTeacherSuggest"
-    />
-
-    <picker mode="date" value="{{date}}" bindchange="onDateChange">
-      <view class="soft-field soft-field--tappable">
-        <text class="soft-field__label">日期</text>
-        <text class="soft-field__value">{{date}}</text>
-        <text class="soft-field__chev">›</text>
-      </view>
-    </picker>
-
-    <picker mode="time" value="{{startTime}}" bindchange="onStartTimeChange">
-      <view class="soft-field soft-field--tappable">
-        <text class="soft-field__label">开始</text>
-        <text class="soft-field__value">{{startTime}}</text>
-        <text class="soft-field__chev">›</text>
-      </view>
-    </picker>
-
-    <picker mode="time" value="{{endTime}}" bindchange="onEndTimeChange">
-      <view class="soft-field soft-field--tappable">
-        <text class="soft-field__label">结束</text>
-        <text class="soft-field__value">{{endTime}}</text>
-        <text class="soft-field__chev">›</text>
-      </view>
-    </picker>
-
-    <picker
-      mode="selector"
-      range="{{statusOptions}}"
-      range-key="label"
-      value="{{statusIndex}}"
-      bindchange="onStatusChange"
-    >
-      <view class="soft-field soft-field--tappable">
-        <text class="soft-field__label">状态</text>
-        <text class="soft-field__value">{{statusDisplay}}</text>
-        <text class="soft-field__chev">›</text>
-      </view>
-    </picker>
-
-    <view class="soft-field soft-field--last">
-      <text class="soft-field__label">备注</text>
-      <input
-        class="soft-field__input"
-        data-field="note"
-        value="{{note}}"
-        bindinput="onFieldInput"
-        placeholder="可选"
+  <!-- 新增态：快捷解析 + 多草稿 -->
+  <block wx:if="{{!_id && !showSubscribeGate}}">
+    <view class="section surface-card soft-block">
+      <view class="section__title">快捷解析</view>
+      <textarea
+        class="soft-textarea soft-textarea--multi"
+        placeholder="可粘贴多行，每行一节约课&#10;例：Sisi2BJ约乔姐 8月7号 21:30-21:55"
         placeholder-class="ph"
+        value="{{quickText}}"
+        bindinput="onQuickInput"
+        maxlength="2000"
+      />
+      <button class="soft-btn soft-btn--ghost" bindtap="onParseQuick">解析填充</button>
+    </view>
+
+    <view
+      wx:for="{{drafts}}"
+      wx:key="key"
+      class="section surface-card soft-block draft-card"
+    >
+      <view class="draft-card__head">
+        <text class="draft-card__title">约课 {{index + 1}}</text>
+        <view
+          wx:if="{{drafts.length > 1}}"
+          class="draft-card__remove"
+          data-index="{{index}}"
+          bindtap="onRemoveDraft"
+        >
+          删除
+        </view>
+      </view>
+
+      <view class="draft-card__subject">
+        <subject-picker
+          subjects="{{subjects}}"
+          value="{{item.subjectId}}"
+          data-index="{{index}}"
+          bind:change="onDraftSubjectChange"
+          bind:add="onDraftSubjectAdd"
+        />
+      </view>
+
+      <view class="form">
+        <name-suggest
+          label="学员"
+          placeholder="必填"
+          value="{{item.studentName}}"
+          suggestions="{{studentSuggestions}}"
+          data-index="{{index}}"
+          bind:input="onDraftStudentSuggest"
+        />
+        <name-suggest
+          label="老师"
+          placeholder="必填"
+          value="{{item.teacherName}}"
+          suggestions="{{teacherSuggestions}}"
+          data-index="{{index}}"
+          bind:input="onDraftTeacherSuggest"
+        />
+
+        <picker
+          mode="date"
+          value="{{item.date}}"
+          data-index="{{index}}"
+          bindchange="onDraftDateChange"
+        >
+          <view class="soft-field soft-field--tappable">
+            <text class="soft-field__label">日期</text>
+            <text class="soft-field__value">{{item.date}}</text>
+            <text class="soft-field__chev">›</text>
+          </view>
+        </picker>
+
+        <picker
+          mode="time"
+          value="{{item.startTime}}"
+          data-index="{{index}}"
+          bindchange="onDraftStartTimeChange"
+        >
+          <view class="soft-field soft-field--tappable">
+            <text class="soft-field__label">开始</text>
+            <text class="soft-field__value">{{item.startTime}}</text>
+            <text class="soft-field__chev">›</text>
+          </view>
+        </picker>
+
+        <picker
+          mode="time"
+          value="{{item.endTime}}"
+          data-index="{{index}}"
+          bindchange="onDraftEndTimeChange"
+        >
+          <view class="soft-field soft-field--tappable">
+            <text class="soft-field__label">结束</text>
+            <text class="soft-field__value">{{item.endTime}}</text>
+            <text class="soft-field__chev">›</text>
+          </view>
+        </picker>
+
+        <view class="soft-field soft-field--last">
+          <text class="soft-field__label">备注</text>
+          <input
+            class="soft-field__input"
+            data-index="{{index}}"
+            value="{{item.note}}"
+            bindinput="onDraftNoteInput"
+            placeholder="可选"
+            placeholder-class="ph"
+          />
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <button class="soft-btn soft-btn--ghost draft-add" bindtap="onAddDraft">＋ 添加一条</button>
+    </view>
+  </block>
+
+  <!-- 编辑态：单表单 -->
+  <block wx:if="{{_id && !showSubscribeGate}}">
+    <view class="section">
+      <subject-picker
+        subjects="{{subjects}}"
+        value="{{subjectId}}"
+        bind:change="onSubjectChange"
+        bind:add="onSubjectAdd"
       />
     </view>
-  </view>
+
+    <view class="section surface-card soft-block form">
+      <name-suggest
+        label="学员"
+        placeholder="必填"
+        value="{{studentName}}"
+        suggestions="{{studentSuggestions}}"
+        bind:input="onStudentSuggest"
+      />
+      <name-suggest
+        label="老师"
+        placeholder="必填"
+        value="{{teacherName}}"
+        suggestions="{{teacherSuggestions}}"
+        bind:input="onTeacherSuggest"
+      />
+
+      <picker mode="date" value="{{date}}" bindchange="onDateChange">
+        <view class="soft-field soft-field--tappable">
+          <text class="soft-field__label">日期</text>
+          <text class="soft-field__value">{{date}}</text>
+          <text class="soft-field__chev">›</text>
+        </view>
+      </picker>
+
+      <picker mode="time" value="{{startTime}}" bindchange="onStartTimeChange">
+        <view class="soft-field soft-field--tappable">
+          <text class="soft-field__label">开始</text>
+          <text class="soft-field__value">{{startTime}}</text>
+          <text class="soft-field__chev">›</text>
+        </view>
+      </picker>
+
+      <picker mode="time" value="{{endTime}}" bindchange="onEndTimeChange">
+        <view class="soft-field soft-field--tappable">
+          <text class="soft-field__label">结束</text>
+          <text class="soft-field__value">{{endTime}}</text>
+          <text class="soft-field__chev">›</text>
+        </view>
+      </picker>
+
+      <picker
+        mode="selector"
+        range="{{statusOptions}}"
+        range-key="label"
+        value="{{statusIndex}}"
+        bindchange="onStatusChange"
+      >
+        <view class="soft-field soft-field--tappable">
+          <text class="soft-field__label">状态</text>
+          <text class="soft-field__value">{{statusDisplay}}</text>
+          <text class="soft-field__chev">›</text>
+        </view>
+      </picker>
+
+      <view class="soft-field soft-field--last">
+        <text class="soft-field__label">备注</text>
+        <input
+          class="soft-field__input"
+          data-field="note"
+          value="{{note}}"
+          bindinput="onFieldInput"
+          placeholder="可选"
+          placeholder-class="ph"
+        />
+      </view>
+    </view>
+  </block>
 
   <view wx:if="{{!showSubscribeGate}}" class="actions {{_id ? 'actions--split' : ''}}">
     <button

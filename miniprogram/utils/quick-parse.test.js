@@ -4,7 +4,7 @@
  */
 
 const assert = require('assert')
-const { parseQuickInput } = require('./quick-parse')
+const { parseQuickInput, parseQuickInputMulti } = require('./quick-parse')
 
 const empty = { students: [], teachers: [], subjects: [] }
 
@@ -87,6 +87,43 @@ assertData('Sisi2BJ 然泽 7.27 21: 30-21: 55', empty, {
   assert.strictEqual(result.data.teacherName, '真真')
   assert.strictEqual(result.data.startTime, '11:30')
   assert.strictEqual(result.data.endTime, '11:55')
+}
+
+// 多行解析：成功行 + 跳过空行
+{
+  const multi = parseQuickInputMulti(
+    [
+      'Sisi2BJ约乔姐 8月7号 21:30-21:55',
+      '',
+      'Sisi2BJ约乔姐 8月8号 13：00-13：25',
+      'Sisi2BJ约乔姐 8月3号 21:00-21:25'
+    ].join('\n'),
+    2026,
+    empty
+  )
+  assert.strictEqual(multi.okItems.length, 3)
+  assert.strictEqual(multi.failItems.length, 0)
+  assert.strictEqual(multi.okItems[0].data.date, '2026-08-07')
+  assert.strictEqual(multi.okItems[0].data.startTime, '21:30')
+  assert.strictEqual(multi.okItems[1].data.date, '2026-08-08')
+  assert.strictEqual(multi.okItems[1].data.startTime, '13:00')
+  assert.strictEqual(multi.okItems[2].data.date, '2026-08-03')
+  assert.strictEqual(multi.okItems[0].data.studentName, 'Sisi2BJ')
+  assert.strictEqual(multi.okItems[0].data.teacherName, '乔姐')
+}
+
+// 多行：部分失败
+{
+  const multi = parseQuickInputMulti(
+    ['Sisi2BJ约乔姐 8月7号 21:30-21:55', '这行没法解析', 'Sisi2BJ约乔姐 8月8号 13:00-13:25'].join(
+      '\n'
+    ),
+    2026,
+    empty
+  )
+  assert.strictEqual(multi.okItems.length, 2)
+  assert.strictEqual(multi.failItems.length, 1)
+  assert.strictEqual(multi.failItems[0].line, 2)
 }
 
 console.log('all tests passed')

@@ -28,6 +28,41 @@
   font-size: 28rpx;
   color: #1b2430;
   line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.soft-textarea--multi {
+  min-height: 220rpx;
+}
+
+.draft-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.draft-card__title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #1b2430;
+}
+
+.draft-card__remove {
+  font-size: 26rpx;
+  color: #ef4444;
+  font-weight: 600;
+  padding: 8rpx 12rpx;
+}
+
+.draft-card__subject {
+  margin-bottom: 8rpx;
+}
+
+.draft-add {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .form {

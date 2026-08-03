@@ -161,6 +161,36 @@ function parseQuickInput(text, viewingYear, knownNames, now) {
   }
 }
 
+/**
+ * 多行快捷解析：按换行拆分，空行跳过；部分失败不影响成功行
+ * @param {string} text
+ * @param {number} viewingYear
+ * @param {KnownNames} knownNames
+ * @param {Date} [now]
+ * @returns {{ okItems: Array<{ line: number, data: object }>, failItems: Array<{ line: number, error: string }> }}
+ */
+function parseQuickInputMulti(text, viewingYear, knownNames, now) {
+  const raw = String(text || '')
+  const lines = raw.split(/\n/)
+  const okItems = []
+  const failItems = []
+
+  for (let i = 0; i < lines.length; i++) {
+    const lineText = lines[i].trim()
+    if (!lineText) continue
+    const line = i + 1
+    const result = parseQuickInput(lineText, viewingYear, knownNames, now)
+    if (result.ok) {
+      okItems.push({ line, data: result.data })
+    } else {
+      failItems.push({ line, error: result.error || '解析失败' })
+    }
+  }
+
+  return { okItems, failItems }
+}
+
 module.exports = {
-  parseQuickInput
+  parseQuickInput,
+  parseQuickInputMulti
 }
