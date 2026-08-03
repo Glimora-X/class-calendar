@@ -15,6 +15,8 @@ App({
   },
   globalData: {
     viewingYear: null,
-    viewingMonth: null
+    viewingMonth: null,
+    /** 约课有写入后置 true，日历 onShow 强制拉云 */
+    bookingsDirty: false
   }
 })

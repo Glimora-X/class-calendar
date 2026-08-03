@@ -3,10 +3,15 @@ const WEEKDAY_CN = ['星期日', '星期一', '星期二', '星期三', '星期�
 const { DAY_CELL_SUMMARY_THRESHOLD } = require('../../utils/constants')
 const { addMonths } = require('../../utils/date-utils')
 const { formatMonthKey, monthRange, formatDate, pad } = require('../../utils/format')
-const { getMonthBookings, setMonthBookings } = require('../../utils/cache')
+const {
+  getMonthBookings,
+  setMonthBookings,
+  isMonthBookingsFresh
+} = require('../../utils/cache')
 const { listBookings } = require('../../services/booking')
 const { fetchNameList } = require('../../services/name-list')
 const { showApiError } = require('../../utils/errors')
+const { consumeBookingsDirty } = require('../../utils/sync-flags')
 const { resolveBookingStatus, statusLabel } = require('../../utils/booking-status')
 const { holidaysInMonth } = require('../../utils/holidays')
 const {
@@ -46,8 +51,9 @@ Page({
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 0 })
     }
+    const force = consumeBookingsDirty()
     if (this.data.year) {
-      this.refreshMonth().then(() => this.checkImminentReminders())
+      this.refreshMonth({ force }).then(() => this.checkImminentReminders())
     } else {
       this.checkImminentReminders()
     }
@@ -56,7 +62,9 @@ Page({
 
   onLoad() {
     const now = new Date()
-    this.setViewing(now.getFullYear(), now.getMonth() + 1, formatDate(now))
+    this.setViewing(now.getFullYear(), now.getMonth() + 1, formatDate(now), {
+      force: true
+    })
     this.loadTeacherColors()
   },
 
@@ -78,7 +86,7 @@ Page({
     }
   },
 
-  setViewing(year, month, selectedDate) {
+  setViewing(year, month, selectedDate, options) {
     const app = getApp()
     app.globalData.viewingYear = year
     app.globalData.viewingMonth = month
@@ -92,12 +100,13 @@ Page({
       timelineGroups: [],
       summaryText: ''
     })
-    this.refreshMonth()
+    const force = !(options && options.force === false)
+    this.refreshMonth({ force })
   },
 
   onMonthChange(e) {
     const next = addMonths(this.data.year, this.data.month, e.detail.delta)
-    this.setViewing(next.year, next.month)
+    this.setViewing(next.year, next.month, null, { force: true })
   },
 
   onModeChange(e) {
@@ -146,16 +155,24 @@ Page({
     })
   },
 
-  async refreshMonth() {
+  /**
+   * @param {{ force?: boolean }} [options] force=true 跳过 TTL，必拉云
+   */
+  async refreshMonth(options) {
+    const force = !!(options && options.force)
     const { year, month } = this.data
     const monthKey = formatMonthKey(year, month)
     const cached = getMonthBookings(monthKey)
     if (cached) this.applyMonthList(cached)
 
+    if (!force && cached && isMonthBookingsFresh(monthKey)) {
+      return
+    }
+
     this.setData({ loading: true })
     try {
       const { start, end } = monthRange(year, month)
-      const { list } = await listBookings({ start, end })
+      const { list } = await listBookings({ start, end }, { silent: !force && !!cached })
       const rows = list || []
       setMonthBookings(monthKey, rows)
       this.applyMonthList(rows)

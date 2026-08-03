@@ -1,0 +1,143 @@
+<h2>左侧约课时间轴，可借鉴右侧的哪些交互？</h2>
+<p class="subtitle">点选你想优先改的部分（可多选）。下面用对照说明「现在」vs「可怎么学」。</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">现在 · 约课时间轴</div>
+    <div class="mockup-body" style="background:#f5f6f8;padding:16px;">
+      <div style="display:flex;gap:8px;margin-bottom:12px;font:12px/1.2 system-ui;">
+        <div style="width:40px;text-align:left;">
+          <div style="font-weight:700;font-size:18px;">01</div>
+          <div style="color:#8b95a5;font-size:10px;">星期六</div>
+        </div>
+        <div style="width:12px;display:flex;flex-direction:column;align-items:center;">
+          <div style="width:10px;height:10px;border:2px solid #3b82f6;border-radius:50%;background:#fff;margin-top:6px;"></div>
+          <div style="flex:1;width:2px;background:#93c5fd;opacity:.6;"></div>
+        </div>
+        <div style="flex:1;">
+          <div style="background:linear-gradient(135deg,#60a5fa,#3b82f6);color:#fff;border-radius:14px;padding:12px;box-shadow:0 8px 20px rgba(59,130,246,.35);">
+            <div style="display:flex;justify-content:space-between;">
+              <strong style="font-size:13px;">Sisi2BJ · 英语</strong>
+              <span style="opacity:.6;">···</span>
+            </div>
+            <div style="font-size:11px;opacity:.9;margin:6px 0;">13:00 — 13:25</div>
+            <div style="font-size:10px;display:flex;gap:6px;align-items:center;">
+              <span style="background:#fff;color:#2563eb;border-radius:999px;padding:2px 8px;font-weight:700;">乔姐</span>
+              <span style="opacity:.8;">已上</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#64748b;line-height:1.5;">
+        卡片整块同色渐变 · ··· 无独立点击 · 状态仅文字 · 圆点按老师色
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">参考 · 右侧交互特征</div>
+    <div class="mockup-body" style="background:#f5f6f8;padding:16px;">
+      <div style="display:flex;gap:8px;margin-bottom:10px;font:12px/1.2 system-ui;">
+        <div style="width:48px;">
+          <div style="font-weight:700;font-size:16px;">02</div>
+          <div style="color:#94a3b8;font-size:9px;">Saturday</div>
+        </div>
+        <div style="width:12px;display:flex;flex-direction:column;align-items:center;">
+          <div style="width:10px;height:10px;border:2px solid #3b82f6;border-radius:50%;background:#fff;margin-top:4px;"></div>
+          <div style="flex:1;width:2px;background:#bfdbfe;"></div>
+        </div>
+        <div style="flex:1;background:#3b82f6;color:#fff;border-radius:12px;padding:10px;position:relative;overflow:visible;">
+          <div style="font-size:12px;font-weight:600;">特殊高亮卡</div>
+          <div style="position:absolute;right:-4px;top:-10px;font-size:22px;">🎁</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;font:12px/1.2 system-ui;">
+        <div style="width:48px;">
+          <div style="font-weight:700;font-size:16px;">04</div>
+          <div style="color:#94a3b8;font-size:9px;">Monday</div>
+        </div>
+        <div style="width:12px;display:flex;flex-direction:column;align-items:center;">
+          <div style="width:10px;height:10px;border:2px solid #3b82f6;border-radius:50%;background:#fff;margin-top:4px;"></div>
+          <div style="flex:1;width:2px;background:#bfdbfe;"></div>
+        </div>
+        <div style="flex:1;background:#fff;border-radius:12px;padding:10px;box-shadow:0 4px 14px rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="color:#94a3b8;font-size:10px;">标题弱 · 时间强</div>
+            <div style="font-weight:700;font-size:13px;color:#1e293b;">11:30 — 15:00</div>
+          </div>
+          <span style="color:#94a3b8;writing-mode:vertical-rl;letter-spacing:2px;">···</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;font:12px/1.2 system-ui;">
+        <div style="width:48px;">
+          <div style="font-weight:700;font-size:16px;">08</div>
+          <div style="color:#94a3b8;font-size:9px;">Friday</div>
+        </div>
+        <div style="width:12px;display:flex;flex-direction:column;align-items:center;">
+          <div style="width:10px;height:10px;border:2px solid #22c55e;border-radius:50%;background:#22c55e;margin-top:4px;"></div>
+          <div style="flex:1;width:2px;background:#bfdbfe;"></div>
+        </div>
+        <div style="flex:1;background:#22c55e;color:#fff;border-radius:12px;padding:10px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:10px;opacity:.85;">今日 / 焦点态</div>
+            <div style="font-weight:700;font-size:13px;">09:00 — 10:00</div>
+          </div>
+          <div style="display:flex;gap:2px;">
+            <div style="width:18px;height:18px;border-radius:50%;background:#bbf7d0;border:1px solid #fff;"></div>
+            <div style="width:18px;height:18px;border-radius:50%;background:#86efac;border:1px solid #fff;margin-left:-6px;font-size:8px;display:flex;align-items:center;justify-content:center;color:#166534;">+1</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <p class="label">请多选：你想优先落地的调整</p>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="hierarchy" onclick="toggleSelect(this)">
+      <div class="letter">1</div>
+      <div class="content">
+        <h3>信息层级：时间更大、标题更弱</h3>
+        <p>参考右侧「标题灰小字 + 时间加粗」。约课场景可改为：时间主导，学生·科目次之，减少全卡白字同权。</p>
+      </div>
+    </div>
+    <div class="option" data-choice="default-surface" onclick="toggleSelect(this)">
+      <div class="letter">2</div>
+      <div class="content">
+        <h3>默认白底卡，彩色只做焦点</h3>
+        <p>右侧多数白卡，仅今日/进行中用实色。现在几乎每张都是老师色渐变，扫读压力大。可改为：默认 surface，仅「待上/今日」上色。</p>
+      </div>
+    </div>
+    <div class="option" data-choice="more-menu" onclick="toggleSelect(this)">
+      <div class="letter">3</div>
+      <div class="content">
+        <h3>··· 独立成菜单（改/删/改状态）</h3>
+        <p>右侧 ··· 是明确次要操作入口。现在整卡点击进详情，··· 只是装饰。可拆：点卡=详情，点···=ActionSheet。</p>
+      </div>
+    </div>
+    <div class="option" data-choice="today-focus" onclick="toggleSelect(this)">
+      <div class="letter">4</div>
+      <div class="content">
+        <h3>今日圆点实心 + 卡片联动高亮</h3>
+        <p>右侧绿点与绿卡同步表示焦点日。现在圆点跟老师色，和「今天」无关。可加 isToday：实心点 + 当日卡片强调。</p>
+      </div>
+    </div>
+    <div class="option" data-choice="status-visual" onclick="toggleSelect(this)">
+      <div class="letter">5</div>
+      <div class="content">
+        <h3>状态用视觉表达，不只文字</h3>
+        <p>「已上 / 待上」可映射为：已上=白底弱化，待上=彩色；或左侧短色条/圆点状态色，减少纯文字负担。</p>
+      </div>
+    </div>
+    <div class="option" data-choice="skip-special" onclick="toggleSelect(this)">
+      <div class="letter">×</div>
+      <div class="content">
+        <h3>不做：生日式 3D 装饰 / 头像堆叠</h3>
+        <p>约课业务没有「特殊活动卡」和多人参与头像语义；强行搬会显得花。建议明确排除。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle">看完后在对话里告诉我你的选择，或直接点选上方选项。</p>

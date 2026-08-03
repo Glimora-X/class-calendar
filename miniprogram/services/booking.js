@@ -4,6 +4,7 @@
 
 const { callFunction } = require('../utils/request')
 const { CLOUD_FUNCTIONS } = require('../utils/constants')
+const { markBookingsDirty } = require('../utils/sync-flags')
 
 /**
  * @param {{ start?: string, end?: string, _id?: string }} query
@@ -19,7 +20,12 @@ function listBookings(query, options) {
  * @returns {Promise<{ code: string, _id: string }>}
  */
 function upsertBooking(input) {
-  return callFunction(CLOUD_FUNCTIONS.bookingUpsert, input, { title: '保存中' })
+  return callFunction(CLOUD_FUNCTIONS.bookingUpsert, input, {
+    title: '保存中'
+  }).then((res) => {
+    markBookingsDirty()
+    return res
+  })
 }
 
 /**
@@ -27,7 +33,12 @@ function upsertBooking(input) {
  * @returns {Promise<{ code: string, _id: string }>}
  */
 function deleteBooking(_id) {
-  return callFunction(CLOUD_FUNCTIONS.bookingDelete, { _id }, { title: '删除中' })
+  return callFunction(CLOUD_FUNCTIONS.bookingDelete, { _id }, {
+    title: '删除中'
+  }).then((res) => {
+    markBookingsDirty()
+    return res
+  })
 }
 
 /**
@@ -37,6 +48,9 @@ function deleteBooking(_id) {
 function batchCreateBookings(payload) {
   return callFunction(CLOUD_FUNCTIONS.bookingBatchCreate, payload, {
     title: '创建中'
+  }).then((res) => {
+    markBookingsDirty()
+    return res
   })
 }
 
@@ -49,7 +63,10 @@ function clearAllBookings() {
     CLOUD_FUNCTIONS.bookingClearAll,
     { confirm: true },
     { title: '清空中' }
-  )
+  ).then((res) => {
+    markBookingsDirty()
+    return res
+  })
 }
 
 module.exports = {

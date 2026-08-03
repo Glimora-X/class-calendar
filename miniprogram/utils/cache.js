@@ -4,13 +4,19 @@
 
 const { CACHE_KEYS } = require('./constants')
 
+/** 月历云端数据认为「新鲜」的时长：期内 onShow 不重复拉取 */
+const MONTH_CACHE_TTL_MS = 45 * 1000
+
 /**
  * @param {string} monthKey YYYY-MM
  * @param {Array} list BookingResponse[]
  */
 function setMonthBookings(monthKey, list) {
   try {
-    wx.setStorageSync(CACHE_KEYS.monthBookings(monthKey), list || [])
+    wx.setStorageSync(CACHE_KEYS.monthBookings(monthKey), {
+      list: list || [],
+      fetchedAt: Date.now()
+    })
   } catch (e) {
     console.warn('[cache] setMonthBookings failed', e)
   }
@@ -23,9 +29,65 @@ function setMonthBookings(monthKey, list) {
 function getMonthBookings(monthKey) {
   try {
     const data = wx.getStorageSync(CACHE_KEYS.monthBookings(monthKey))
-    return Array.isArray(data) ? data : null
+    if (Array.isArray(data)) return data
+    if (data && Array.isArray(data.list)) return data.list
+    return null
   } catch (e) {
     return null
+  }
+}
+
+/**
+ * @param {string} monthKey
+ * @param {number} [ttlMs]
+ * @returns {boolean}
+ */
+function isMonthBookingsFresh(monthKey, ttlMs) {
+  const ttl = ttlMs == null ? MONTH_CACHE_TTL_MS : ttlMs
+  try {
+    const data = wx.getStorageSync(CACHE_KEYS.monthBookings(monthKey))
+    if (!data || Array.isArray(data) || !data.fetchedAt) return false
+    return Date.now() - Number(data.fetchedAt) < ttl
+  } catch (e) {
+    return false
+  }
+}
+
+/**
+ * @param {object} payload nameList 云函数返回
+ */
+function setNameListsCache(payload) {
+  try {
+    wx.setStorageSync(CACHE_KEYS.nameLists, {
+      data: payload || {},
+      fetchedAt: Date.now()
+    })
+  } catch (e) {
+    console.warn('[cache] setNameListsCache failed', e)
+  }
+}
+
+/**
+ * @param {number} [ttlMs]
+ * @returns {object|null}
+ */
+function getNameListsCache(ttlMs) {
+  const ttl = ttlMs == null ? 5 * 60 * 1000 : ttlMs
+  try {
+    const raw = wx.getStorageSync(CACHE_KEYS.nameLists)
+    if (!raw || !raw.data || !raw.fetchedAt) return null
+    if (Date.now() - Number(raw.fetchedAt) >= ttl) return null
+    return raw.data
+  } catch (e) {
+    return null
+  }
+}
+
+function clearNameListsCache() {
+  try {
+    wx.removeStorageSync(CACHE_KEYS.nameLists)
+  } catch (e) {
+    /* ignore */
   }
 }
 
@@ -74,8 +136,13 @@ function clearAll() {
 }
 
 module.exports = {
+  MONTH_CACHE_TTL_MS,
   setMonthBookings,
   getMonthBookings,
+  isMonthBookingsFresh,
+  setNameListsCache,
+  getNameListsCache,
+  clearNameListsCache,
   setLastSubjectId,
   getLastSubjectId,
   clearAll
