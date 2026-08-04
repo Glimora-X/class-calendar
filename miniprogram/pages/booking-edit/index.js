@@ -102,7 +102,7 @@ Page({
     statusManual: false,
     statusOptions: STATUS_OPTIONS,
     statusIndex: 0,
-    statusDisplay: '待上（按时间自动）',
+    statusDisplay: '待上',
     subjects: [],
     studentSuggestions: [],
     teacherSuggestions: [],

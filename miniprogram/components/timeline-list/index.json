@@ -1,6 +1,6 @@
 {
   "component": true,
   "usingComponents": {
-    "booking-item": "/components/booking-item/index"
+    "timeline-booking-card": "/components/timeline-booking-card/index"
   }
 }

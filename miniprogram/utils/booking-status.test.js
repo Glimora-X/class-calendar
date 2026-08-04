@@ -8,7 +8,9 @@ const {
   BOOKING_STATUS,
   resolveBookingStatus,
   statusLabel,
-  isManualStatus
+  isManualStatus,
+  statusVisual,
+  teacherInitial
 } = require('./booking-status')
 
 const base = {
@@ -64,5 +66,28 @@ assert.strictEqual(statusLabel(BOOKING_STATUS.refunded), '已退')
 
 assert.strictEqual(isManualStatus(BOOKING_STATUS.transferred), true)
 assert.strictEqual(isManualStatus(BOOKING_STATUS.pending), false)
+
+const pendingV = statusVisual(BOOKING_STATUS.pending)
+assert.strictEqual(pendingV.statusClass, 'st-pending')
+assert.strictEqual(pendingV.cardBg, '#F0F6FF')
+assert.strictEqual(pendingV.badgeBg, '#3B82F6')
+assert.strictEqual(pendingV.timeColor, '#2563EB')
+assert.strictEqual(pendingV.dotColor, '#3B82F6')
+assert.strictEqual(pendingV.label, '待上')
+
+assert.strictEqual(statusVisual(BOOKING_STATUS.done).statusClass, 'st-done')
+assert.strictEqual(statusVisual(BOOKING_STATUS.done).badgeBg, '#52A878')
+assert.strictEqual(statusVisual(BOOKING_STATUS.transferred).statusClass, 'st-transferred')
+assert.strictEqual(statusVisual(BOOKING_STATUS.transferred).badgeBg, '#8B5CF6')
+assert.strictEqual(statusVisual(BOOKING_STATUS.refunded).statusClass, 'st-refunded')
+assert.strictEqual(statusVisual(BOOKING_STATUS.refunded).badgeBg, '#9AA1AA')
+assert.strictEqual(statusVisual(BOOKING_STATUS.refunded).cardBg, '#F6F7F8')
+// 未知状态回落待上
+assert.strictEqual(statusVisual('nope').statusClass, 'st-pending')
+
+assert.strictEqual(teacherInitial('然泽'), '然')
+assert.strictEqual(teacherInitial('  Jo  '), 'J')
+assert.strictEqual(teacherInitial(''), '?')
+assert.strictEqual(teacherInitial(null), '?')
 
 console.log('all tests passed')

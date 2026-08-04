@@ -12,7 +12,11 @@ const { listBookings } = require('../../services/booking')
 const { fetchNameList } = require('../../services/name-list')
 const { showApiError } = require('../../utils/errors')
 const { consumeBookingsDirty } = require('../../utils/sync-flags')
-const { resolveBookingStatus, statusLabel } = require('../../utils/booking-status')
+const {
+  resolveBookingStatus,
+  statusLabel,
+  teacherInitial
+} = require('../../utils/booking-status')
 const { holidaysInMonth } = require('../../utils/holidays')
 const {
   findImminentBookings,
@@ -238,13 +242,16 @@ Page({
       .sort()
       .map((date) => {
         const d = new Date(date.replace(/-/g, '/'))
-        const tone = marks.find((m) => m.date === date)
+        const items = byDate[date].slice().sort(byStartTime)
+        const first = items[0]
+        const statusDotClass =
+          (first && first.status) || 'pending'
         return {
           date,
           day: pad(d.getDate()),
           weekdayLabel: WEEKDAY_CN[d.getDay()],
-          tone: (tone && tone.tone) || 'primary',
-          items: byDate[date].slice().sort(byStartTime)
+          statusDotClass,
+          items
         }
       })
 
@@ -299,10 +306,14 @@ function decorateBooking(b, teacherColorMap) {
   const fromTeacher = b.teacherName && map[b.teacherName]
   const fallback = ['surface', 'primary', 'mint'][(b.studentName || '').length % 3]
   const resolved = resolveBookingStatus(b)
+  const student = String(b.studentName || '').trim() || '学员'
+  const subject = String(b.subjectName || '').trim() || '科目'
   return Object.assign({}, b, {
     cardTone: fromTeacher || b.cardTone || fallback,
     status: resolved,
-    statusLabel: statusLabel(resolved)
+    statusLabel: statusLabel(resolved),
+    teacherInitial: teacherInitial(b.teacherName),
+    metaLine: `${student} | ${subject}`
   })
 }
 

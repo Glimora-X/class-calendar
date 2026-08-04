@@ -5,23 +5,24 @@
       <text class="tl__wd">{{item.weekdayLabel}}</text>
     </view>
     <view class="tl__rail">
-      <view class="tl__dot tone-{{item.tone || 'primary'}}"></view>
+      <view class="tl__dot tl__dot--{{item.statusDotClass || 'pending'}}"></view>
       <view class="tl__line"></view>
     </view>
     <view class="tl__cards">
-      <booking-item
+      <timeline-booking-card
         wx:for="{{item.items}}"
         wx:for-item="b"
         wx:key="_id"
-        bookingId="{{b._id}}"
-        studentName="{{b.studentName}}"
-        teacherName="{{b.teacherName}}"
-        subjectName="{{b.subjectName}}"
-        startTime="{{b.startTime}}"
-        endTime="{{b.endTime}}"
-        tone="{{b.cardTone}}"
-        teacherTone="{{b.cardTone}}"
-        statusLabel="{{b.statusLabel}}"
+        booking-id="{{b._id}}"
+        start-time="{{b.startTime}}"
+        end-time="{{b.endTime}}"
+        status="{{b.status}}"
+        status-label="{{b.statusLabel}}"
+        teacher-name="{{b.teacherName}}"
+        teacher-initial="{{b.teacherInitial}}"
+        student-name="{{b.studentName}}"
+        subject-name="{{b.subjectName}}"
+        meta-line="{{b.metaLine}}"
         bind:tap="onTapItem"
       />
     </view>

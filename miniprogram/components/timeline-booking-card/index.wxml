@@ -1,0 +1,13 @@
+<view class="tbc tbc--{{status || 'pending'}}" bindtap="onTap">
+  <view class="tbc__ribbon">{{statusLabel}}</view>
+  <view class="tbc__row tbc__row--top">
+    <text class="tbc__time">{{startTime}} — {{endTime}}</text>
+  </view>
+  <view class="tbc__row tbc__row--bottom">
+    <text class="tbc__meta">{{metaText}}</text>
+    <view class="tbc__teacher">
+      <view class="tbc__avatar">{{teacherInitial}}</view>
+      <text class="tbc__teacher-name">{{teacherName}}</text>
+    </view>
+  </view>
+</view>

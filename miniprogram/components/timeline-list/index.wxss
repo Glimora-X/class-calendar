@@ -7,6 +7,7 @@
   align-items: stretch;
   gap: 12rpx;
   min-height: 120rpx;
+  margin-bottom: 8rpx;
 }
 
 .tl__date {
@@ -49,28 +50,21 @@
   box-sizing: border-box;
 }
 
-.tl__dot.tone-mint {
-  border-color: #34d399;
-}
-
-.tl__dot.tone-pro {
-  border-color: #8b5cf6;
-}
-
-.tl__dot.tone-warning {
-  border-color: #f59e0b;
-}
+.tl__dot--pending { border-color: #3b82f6; }
+.tl__dot--done { border-color: #52a878; }
+.tl__dot--transferred { border-color: #8b5cf6; }
+.tl__dot--refunded { border-color: #9aa1aa; }
 
 .tl__line {
   flex: 1;
   width: 4rpx;
-  background: #3b82f6;
-  opacity: 0.35;
+  background: #d0d5dd;
+  opacity: 0.9;
   margin-top: -2rpx;
 }
 
 .tl__cards {
   flex: 1;
   min-width: 0;
-  padding-bottom: 8rpx;
+  padding-bottom: 36rpx;
 }
