@@ -20,6 +20,7 @@
 
 .soft-field__input {
   flex: 1;
+  min-width: 0;
   font-size: 30rpx;
   color: #1b2430;
   font-weight: 500;
@@ -29,12 +30,112 @@
   color: #b0b8c4;
 }
 
+.ns--compact .soft-field {
+  padding-right: 8rpx;
+}
+
+.ns--compact .soft-field__label {
+  width: 64rpx;
+  font-size: 24rpx;
+}
+
+.ns--compact .soft-field__input {
+  font-size: 28rpx;
+}
+
+/* —— stack：点选字段 —— */
+.ns-stack {
+  display: flex;
+  align-items: center;
+  min-height: 104rpx;
+  padding: 18rpx 4rpx 18rpx 0;
+  gap: 16rpx;
+  box-sizing: border-box;
+}
+
+.ns-stack__ico {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 12rpx;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+
+.ns-stack__ico--blue {
+  background: #5b9cff;
+}
+
+.ns-stack__ico--purple {
+  background: #8b7cf5;
+}
+
+.ns-stack__ico--green {
+  background: #3ecf8e;
+}
+
+.ns-stack__ico--orange {
+  background: #ffb020;
+}
+
+.ns-stack__ico--yellow {
+  background: #f5c542;
+}
+
+.ns-stack__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6rpx;
+}
+
+.ns-stack__label {
+  font-size: 20rpx;
+  color: #9aa3b2;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.ns-stack__value {
+  font-size: 28rpx;
+  color: #1a2332;
+  font-weight: 600;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ns-stack__value--ph {
+  color: #b0b8c4;
+  font-weight: 400;
+}
+
+.ns-stack__chev {
+  width: 28rpx;
+  height: 48rpx;
+  color: #c5ccd6;
+  font-size: 28rpx;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
 .ns__list {
   position: absolute;
   left: 120rpx;
   right: 8rpx;
   top: 96rpx;
-  z-index: 20;
+  z-index: 40;
   background: #fff;
   border-radius: 16rpx;
   box-shadow: 0 12rpx 32rpx rgba(27, 36, 48, 0.12);
@@ -42,8 +143,12 @@
   max-height: 360rpx;
 }
 
+.ns--compact .ns__list {
+  left: 64rpx;
+}
+
 .ns__item {
-  padding: 20rpx 24rpx;
+  padding: 22rpx 24rpx;
   font-size: 28rpx;
   color: #1b2430;
   border-bottom: 1rpx solid #eef2f7;
@@ -55,4 +160,91 @@
 
 .ns__item:active {
   background: rgba(59, 130, 246, 0.06);
+}
+
+/* —— 手动输入弹层 —— */
+.ns-modal {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48rpx;
+  box-sizing: border-box;
+}
+
+.ns-modal__mask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.ns-modal__panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 620rpx;
+  background: #fff;
+  border-radius: 28rpx;
+  padding: 36rpx 32rpx 28rpx;
+  box-shadow: 0 24rpx 60rpx rgba(15, 23, 42, 0.2);
+  box-sizing: border-box;
+}
+
+.ns-modal__title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1b2430;
+  margin-bottom: 24rpx;
+  text-align: center;
+}
+
+.ns-modal__input {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 24rpx;
+  background: #eef2f7;
+  border-radius: 20rpx;
+  font-size: 30rpx;
+  color: #1b2430;
+  font-weight: 600;
+  box-sizing: border-box;
+}
+
+.ns-modal__actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 28rpx;
+}
+
+.ns-modal__btn {
+  flex: 1;
+  margin: 0;
+  height: 84rpx;
+  line-height: 84rpx;
+  border-radius: 999rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  padding: 0;
+}
+
+.ns-modal__btn::after {
+  border: none;
+}
+
+.ns-modal__btn--ghost {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.ns-modal__btn--primary {
+  background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
+  color: #fff;
 }

@@ -1,8 +1,8 @@
-<view class="subject-picker">
+<view class="subject-picker {{embedded ? 'subject-picker--embedded' : ''}}">
   <view class="subject-picker__label">科目</view>
   <view class="subject-picker__row" bindtap="onPick">
     <text class="subject-picker__value">{{currentName}}</text>
-    <text class="subject-picker__action">切换 / 新增</text>
+    <text class="subject-picker__action">切换 / 新增 ›</text>
   </view>
   <view wx:if="{{adding}}" class="subject-picker__add">
     <input

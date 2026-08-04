@@ -1,4 +1,4 @@
-<view class="page page--no-tab">
+<view class="page page--no-tab page--booking-edit">
   <view wx:if="{{showSubscribeGate}}" class="subscribe-gate surface-card soft-block">
     <view class="subscribe-gate__title">已保存</view>
     <view class="subscribe-gate__desc">请点击下方按钮，在微信弹窗里允许「日程提醒」（不要连点太快）。</view>
@@ -13,65 +13,151 @@
     </view>
   </view>
 
-  <!-- 新增态：快捷解析 + 多草稿 -->
-  <block wx:if="{{!_id && !showSubscribeGate}}">
-    <view class="section surface-card soft-block">
-      <view class="section__title">快捷解析</view>
-      <textarea
-        class="soft-textarea soft-textarea--multi"
-        placeholder="可粘贴多行，每行一节约课&#10;例：Sisi2BJ约乔姐 8月7号 21:30-21:55"
-        placeholder-class="ph"
-        value="{{quickText}}"
-        bindinput="onQuickInput"
-        maxlength="2000"
-      />
-      <button class="soft-btn soft-btn--ghost" bindtap="onParseQuick">解析填充</button>
+  <!-- 新增态 -->
+  <block wx:if="{{!isEdit && formReady && !showSubscribeGate}}">
+    <view class="parse-card {{parseExpanded ? '' : 'parse-card--collapsed'}}">
+      <view class="parse-card__head" bindtap="onToggleParse">
+        <view class="parse-card__titles">
+          <text class="parse-card__title">快捷解析</text>
+          <text class="parse-card__desc">粘贴约课信息，自动生成多条草稿</text>
+        </view>
+        <text class="parse-card__chev">{{parseExpanded ? '︿' : '﹀'}}</text>
+      </view>
+      <block wx:if="{{parseExpanded}}">
+        <view class="parse-box">
+          <view class="parse-box__paste" catchtap="onPasteQuick">粘贴</view>
+          <textarea
+            class="soft-textarea soft-textarea--multi"
+            placeholder="例：&#10;Sisi2BJ约乔姐 8月7号 21:30-21:55&#10;Sisi2BJ约乔姐 8月8号 13:00-13:25"
+            placeholder-class="ph"
+            value="{{quickText}}"
+            bindinput="onQuickInput"
+            maxlength="2000"
+          />
+        </view>
+        <view class="parse-btn" bindtap="onParseQuick">解析生成</view>
+      </block>
+    </view>
+
+    <view class="list-head">
+      <text class="list-head__title">约课列表（共 {{draftCount}} 条）</text>
     </view>
 
     <view
       wx:for="{{drafts}}"
       wx:key="key"
-      class="section surface-card soft-block draft-card"
+      class="bk-card {{expandedIndex === index ? 'bk-card--expanded' : 'bk-card--collapsed'}}"
     >
-      <view class="draft-card__head">
-        <text class="draft-card__title">约课 {{index + 1}}</text>
-        <view
-          wx:if="{{drafts.length > 1}}"
-          class="draft-card__remove"
-          data-index="{{index}}"
-          bindtap="onRemoveDraft"
-        >
-          删除
+      <!-- 折叠摘要 -->
+      <view
+        wx:if="{{expandedIndex !== index}}"
+        class="bk-summary"
+        data-index="{{index}}"
+        bindtap="onToggleDraft"
+      >
+        <view class="bk-summary__top">
+          <view class="bk-card__badge">{{index + 1}}</view>
+          <text class="bk-summary__subject">{{item.subjectName || '未选科目'}}</text>
+          <view class="bk-card__tools">
+            <view
+              class="bk-ico-btn"
+              data-index="{{index}}"
+              catchtap="onDraftReorder"
+              hover-class="bk-ico-btn--active"
+            >
+              <view class="bk-tool__dots">
+                <view class="bk-tool__dot"></view>
+                <view class="bk-tool__dot"></view>
+                <view class="bk-tool__dot"></view>
+                <view class="bk-tool__dot"></view>
+                <view class="bk-tool__dot"></view>
+                <view class="bk-tool__dot"></view>
+              </view>
+            </view>
+            <view
+              class="bk-ico-btn bk-ico-btn--copy"
+              data-index="{{index}}"
+              catchtap="onCopyDraft"
+              hover-class="bk-ico-btn--active"
+            >⧉</view>
+            <view
+              class="bk-ico-btn bk-ico-btn--danger"
+              data-index="{{index}}"
+              catchtap="onRemoveDraft"
+              hover-class="bk-ico-btn--active"
+            >×</view>
+          </view>
+          <text class="bk-summary__arrow">﹀</text>
         </view>
+        <view class="bk-summary__meta">
+          <view class="bk-summary__item">
+            <text class="bk-summary__ico">日</text>
+            <text class="bk-summary__chip">{{item.summaryDate || '日期'}}</text>
+          </view>
+          <view class="bk-summary__item">
+            <text class="bk-summary__ico">时</text>
+            <text class="bk-summary__chip">{{item.summaryTime || '时间'}}</text>
+          </view>
+          <view class="bk-summary__item">
+            <text class="bk-summary__ico">学</text>
+            <text class="bk-summary__chip">{{item.studentName || '学员'}}</text>
+          </view>
+          <view class="bk-summary__item">
+            <text class="bk-summary__ico">师</text>
+            <text class="bk-summary__chip">{{item.teacherName || '老师'}}</text>
+          </view>
+        </view>
+        <view wx:if="{{item.durationShort}}" class="bk-summary__dur">{{item.durationShort}}</view>
       </view>
 
-      <view class="draft-card__subject">
-        <subject-picker
-          subjects="{{subjects}}"
-          value="{{item.subjectId}}"
-          data-index="{{index}}"
-          bind:change="onDraftSubjectChange"
-          bind:add="onDraftSubjectAdd"
-        />
-      </view>
-
-      <view class="form">
-        <name-suggest
-          label="学员"
-          placeholder="必填"
-          value="{{item.studentName}}"
-          suggestions="{{studentSuggestions}}"
-          data-index="{{index}}"
-          bind:input="onDraftStudentSuggest"
-        />
-        <name-suggest
-          label="老师"
-          placeholder="必填"
-          value="{{item.teacherName}}"
-          suggestions="{{teacherSuggestions}}"
-          data-index="{{index}}"
-          bind:input="onDraftTeacherSuggest"
-        />
+      <!-- 展开编辑 -->
+      <block wx:else>
+        <view class="bk-card__head">
+          <view class="bk-card__badge">{{index + 1}}</view>
+          <view
+            class="bk-card__subject"
+            data-index="{{index}}"
+            catchtap="onPickDraftSubject"
+          >
+            <text class="bk-card__subject-name">{{item.subjectName || '未选科目'}}</text>
+            <text class="bk-card__subject-hint">切换</text>
+          </view>
+          <view class="bk-card__tools">
+            <view
+              class="bk-ico-btn"
+              data-index="{{index}}"
+              catchtap="onDraftReorder"
+              hover-class="bk-ico-btn--active"
+            >
+              <view class="bk-tool__dots">
+                <view class="bk-tool__dot"></view>
+                <view class="bk-tool__dot"></view>
+                <view class="bk-tool__dot"></view>
+                <view class="bk-tool__dot"></view>
+                <view class="bk-tool__dot"></view>
+                <view class="bk-tool__dot"></view>
+              </view>
+            </view>
+            <view
+              class="bk-ico-btn bk-ico-btn--copy"
+              data-index="{{index}}"
+              catchtap="onCopyDraft"
+              hover-class="bk-ico-btn--active"
+            >⧉</view>
+            <view
+              class="bk-ico-btn bk-ico-btn--danger"
+              data-index="{{index}}"
+              catchtap="onRemoveDraft"
+              hover-class="bk-ico-btn--active"
+            >×</view>
+            <view
+              class="bk-ico-btn"
+              data-index="{{index}}"
+              catchtap="onToggleDraft"
+              hover-class="bk-ico-btn--active"
+            >︿</view>
+          </view>
+        </view>
 
         <picker
           mode="date"
@@ -79,108 +165,212 @@
           data-index="{{index}}"
           bindchange="onDraftDateChange"
         >
-          <view class="soft-field soft-field--tappable">
-            <text class="soft-field__label">日期</text>
-            <text class="soft-field__value">{{item.date}}</text>
-            <text class="soft-field__chev">›</text>
+          <view class="bk-field bk-field--tap">
+            <view class="bk-ico bk-ico--blue">日</view>
+            <view class="bk-field__body">
+              <text class="bk-field__label">日期</text>
+              <text class="bk-field__value">{{item.dateLabel || item.date}}</text>
+            </view>
+            <text class="bk-field__chev">›</text>
           </view>
         </picker>
 
-        <picker
-          mode="time"
-          value="{{item.startTime}}"
-          data-index="{{index}}"
-          bindchange="onDraftStartTimeChange"
-        >
-          <view class="soft-field soft-field--tappable">
-            <text class="soft-field__label">开始</text>
-            <text class="soft-field__value">{{item.startTime}}</text>
-            <text class="soft-field__chev">›</text>
+        <view class="bk-split">
+          <view class="bk-split__cell">
+            <name-suggest
+              layout="stack"
+              iconTone="purple"
+              iconText="学"
+              label="学员"
+              placeholder="必填"
+              value="{{item.studentName}}"
+              suggestions="{{studentSuggestions}}"
+              data-index="{{index}}"
+              bind:input="onDraftStudentSuggest"
+            />
           </view>
-        </picker>
-
-        <picker
-          mode="time"
-          value="{{item.endTime}}"
-          data-index="{{index}}"
-          bindchange="onDraftEndTimeChange"
-        >
-          <view class="soft-field soft-field--tappable">
-            <text class="soft-field__label">结束</text>
-            <text class="soft-field__value">{{item.endTime}}</text>
-            <text class="soft-field__chev">›</text>
+          <view class="bk-split__line"></view>
+          <view class="bk-split__cell">
+            <name-suggest
+              layout="stack"
+              iconTone="green"
+              iconText="师"
+              label="老师"
+              placeholder="必填"
+              value="{{item.teacherName}}"
+              suggestions="{{teacherSuggestions}}"
+              data-index="{{index}}"
+              bind:input="onDraftTeacherSuggest"
+            />
           </view>
-        </picker>
+        </view>
 
-        <view class="soft-field soft-field--last">
-          <text class="soft-field__label">备注</text>
-          <input
-            class="soft-field__input"
-            data-index="{{index}}"
-            value="{{item.note}}"
-            bindinput="onDraftNoteInput"
-            placeholder="可选"
-            placeholder-class="ph"
+        <view class="bk-time-wrap">
+          <view class="bk-split bk-split--time">
+            <view class="bk-split__cell">
+              <picker
+                mode="time"
+                value="{{item.startTime}}"
+                data-index="{{index}}"
+                bindchange="onDraftStartTimeChange"
+              >
+                <view class="bk-field bk-field--tap bk-field--compact">
+                  <view class="bk-ico bk-ico--blue">始</view>
+                  <view class="bk-field__body">
+                    <text class="bk-field__label">开始时间</text>
+                    <text class="bk-field__value">{{item.startTime}}</text>
+                  </view>
+                  <text class="bk-field__chev">›</text>
+                </view>
+              </picker>
+            </view>
+            <view class="bk-split__line"></view>
+            <view class="bk-split__cell">
+              <picker
+                mode="time"
+                value="{{item.endTime}}"
+                data-index="{{index}}"
+                bindchange="onDraftEndTimeChange"
+              >
+                <view class="bk-field bk-field--tap bk-field--compact">
+                  <view class="bk-ico bk-ico--orange">终</view>
+                  <view class="bk-field__body">
+                    <text class="bk-field__label">结束时间</text>
+                    <text class="bk-field__value">{{item.endTime}}</text>
+                  </view>
+                  <text class="bk-field__chev">›</text>
+                </view>
+              </picker>
+            </view>
+          </view>
+          <view wx:if="{{item.durationLabel}}" class="bk-duration">{{item.durationLabel}}</view>
+        </view>
+
+        <view class="bk-field">
+          <view class="bk-ico bk-ico--blue">态</view>
+          <view class="bk-field__body">
+            <text class="bk-field__label">状态</text>
+            <text class="bk-field__value">待上（按时间自动）</text>
+          </view>
+        </view>
+
+        <view class="bk-field bk-field--note">
+          <view class="bk-ico bk-ico--yellow">备</view>
+          <view class="bk-field__body">
+            <text class="bk-field__label">备注</text>
+            <input
+              class="bk-field__input"
+              data-index="{{index}}"
+              value="{{item.note}}"
+              maxlength="{{noteMaxLen}}"
+              bindinput="onDraftNoteInput"
+              placeholder="可选，填写备注信息..."
+              placeholder-class="ph"
+            />
+          </view>
+          <text class="bk-field__count">{{item.noteLen || 0}}/{{noteMaxLen}}</text>
+        </view>
+      </block>
+    </view>
+
+    <view class="draft-add-dash" bindtap="onAddDraft">＋ 添加一条约课</view>
+
+    <view wx:if="{{showEditTip}}" class="edit-tip">
+      <view class="edit-tip__ico">i</view>
+      <text class="edit-tip__text">小贴士：点击卡片展开编辑，同一时间仅一张处于编辑状态</text>
+      <text class="edit-tip__close" bindtap="onDismissEditTip">×</text>
+    </view>
+
+    <view class="footer-spacer"></view>
+  </block>
+
+  <view wx:if="{{isEdit && !formReady && !showSubscribeGate}}" class="draft-loading">
+    <text class="draft-loading__text">加载约课中…</text>
+  </view>
+
+  <!-- 编辑态：始终展开单卡 -->
+  <block wx:if="{{isEdit && formReady && !showSubscribeGate}}">
+    <view class="list-head">
+      <text class="list-head__title">编辑约课</text>
+    </view>
+
+    <view class="bk-card bk-card--expanded">
+      <view class="bk-card__head bk-card__head--edit">
+        <view class="bk-card__subject" bindtap="onPickEditSubject">
+          <text class="bk-card__subject-name">{{subjectName || '未选科目'}}</text>
+          <text class="bk-card__subject-hint">切换</text>
+        </view>
+      </view>
+
+      <picker mode="date" value="{{date}}" bindchange="onDateChange">
+        <view class="bk-field bk-field--tap">
+          <view class="bk-ico bk-ico--blue">日</view>
+          <view class="bk-field__body">
+            <text class="bk-field__label">日期</text>
+            <text class="bk-field__value">{{dateLabel || date}}</text>
+          </view>
+          <text class="bk-field__chev">›</text>
+        </view>
+      </picker>
+
+      <view class="bk-split">
+        <view class="bk-split__cell">
+          <name-suggest
+            layout="stack"
+            iconTone="purple"
+            iconText="学"
+            label="学员"
+            placeholder="必填"
+            value="{{studentName}}"
+            suggestions="{{studentSuggestions}}"
+            bind:input="onStudentSuggest"
+          />
+        </view>
+        <view class="bk-split__line"></view>
+        <view class="bk-split__cell">
+          <name-suggest
+            layout="stack"
+            iconTone="green"
+            iconText="师"
+            label="老师"
+            placeholder="必填"
+            value="{{teacherName}}"
+            suggestions="{{teacherSuggestions}}"
+            bind:input="onTeacherSuggest"
           />
         </view>
       </view>
-    </view>
 
-    <view class="section">
-      <button class="soft-btn soft-btn--ghost draft-add" bindtap="onAddDraft">＋ 添加一条</button>
-    </view>
-  </block>
-
-  <!-- 编辑态：单表单 -->
-  <block wx:if="{{_id && !showSubscribeGate}}">
-    <view class="section">
-      <subject-picker
-        subjects="{{subjects}}"
-        value="{{subjectId}}"
-        bind:change="onSubjectChange"
-        bind:add="onSubjectAdd"
-      />
-    </view>
-
-    <view class="section surface-card soft-block form">
-      <name-suggest
-        label="学员"
-        placeholder="必填"
-        value="{{studentName}}"
-        suggestions="{{studentSuggestions}}"
-        bind:input="onStudentSuggest"
-      />
-      <name-suggest
-        label="老师"
-        placeholder="必填"
-        value="{{teacherName}}"
-        suggestions="{{teacherSuggestions}}"
-        bind:input="onTeacherSuggest"
-      />
-
-      <picker mode="date" value="{{date}}" bindchange="onDateChange">
-        <view class="soft-field soft-field--tappable">
-          <text class="soft-field__label">日期</text>
-          <text class="soft-field__value">{{date}}</text>
-          <text class="soft-field__chev">›</text>
+      <view class="bk-time-wrap">
+        <view class="bk-split bk-split--time">
+          <view class="bk-split__cell">
+            <picker mode="time" value="{{startTime}}" bindchange="onStartTimeChange">
+              <view class="bk-field bk-field--tap bk-field--compact">
+                <view class="bk-ico bk-ico--blue">始</view>
+                <view class="bk-field__body">
+                  <text class="bk-field__label">开始时间</text>
+                  <text class="bk-field__value">{{startTime}}</text>
+                </view>
+                <text class="bk-field__chev">›</text>
+              </view>
+            </picker>
+          </view>
+          <view class="bk-split__line"></view>
+          <view class="bk-split__cell">
+            <picker mode="time" value="{{endTime}}" bindchange="onEndTimeChange">
+              <view class="bk-field bk-field--tap bk-field--compact">
+                <view class="bk-ico bk-ico--orange">终</view>
+                <view class="bk-field__body">
+                  <text class="bk-field__label">结束时间</text>
+                  <text class="bk-field__value">{{endTime}}</text>
+                </view>
+                <text class="bk-field__chev">›</text>
+              </view>
+            </picker>
+          </view>
         </view>
-      </picker>
-
-      <picker mode="time" value="{{startTime}}" bindchange="onStartTimeChange">
-        <view class="soft-field soft-field--tappable">
-          <text class="soft-field__label">开始</text>
-          <text class="soft-field__value">{{startTime}}</text>
-          <text class="soft-field__chev">›</text>
-        </view>
-      </picker>
-
-      <picker mode="time" value="{{endTime}}" bindchange="onEndTimeChange">
-        <view class="soft-field soft-field--tappable">
-          <text class="soft-field__label">结束</text>
-          <text class="soft-field__value">{{endTime}}</text>
-          <text class="soft-field__chev">›</text>
-        </view>
-      </picker>
+        <view wx:if="{{durationLabel}}" class="bk-duration">{{durationLabel}}</view>
+      </view>
 
       <picker
         mode="selector"
@@ -189,41 +379,44 @@
         value="{{statusIndex}}"
         bindchange="onStatusChange"
       >
-        <view class="soft-field soft-field--tappable">
-          <text class="soft-field__label">状态</text>
-          <text class="soft-field__value">{{statusDisplay}}</text>
-          <text class="soft-field__chev">›</text>
+        <view class="bk-field bk-field--tap">
+          <view class="bk-ico bk-ico--blue">态</view>
+          <view class="bk-field__body">
+            <text class="bk-field__label">状态</text>
+            <text class="bk-field__value">{{statusDisplay}}</text>
+          </view>
+          <text class="bk-field__chev">›</text>
         </view>
       </picker>
 
-      <view class="soft-field soft-field--last">
-        <text class="soft-field__label">备注</text>
-        <input
-          class="soft-field__input"
-          data-field="note"
-          value="{{note}}"
-          bindinput="onFieldInput"
-          placeholder="可选"
-          placeholder-class="ph"
-        />
+      <view class="bk-field bk-field--note">
+        <view class="bk-ico bk-ico--yellow">备</view>
+        <view class="bk-field__body">
+          <text class="bk-field__label">备注</text>
+          <input
+            class="bk-field__input"
+            data-field="note"
+            value="{{note}}"
+            maxlength="{{noteMaxLen}}"
+            bindinput="onFieldInput"
+            placeholder="可选，填写备注信息..."
+            placeholder-class="ph"
+          />
+        </view>
+        <text class="bk-field__count">{{noteLen}}/{{noteMaxLen}}</text>
       </view>
     </view>
+
+    <view class="footer-spacer footer-spacer--edit"></view>
   </block>
 
-  <view wx:if="{{!showSubscribeGate}}" class="actions {{_id ? 'actions--split' : ''}}">
-    <button
-      wx:if="{{_id}}"
-      class="soft-btn soft-btn--danger actions__btn"
-      bindtap="onDelete"
-    >
-      删除
-    </button>
-    <button
-      class="soft-btn soft-btn--primary actions__btn actions__btn--save"
-      loading="{{saving}}"
-      bindtap="onSave"
-    >
-      保存约课
+  <view wx:if="{{formReady && !showSubscribeGate}}" class="footer-bar">
+    <block wx:if="{{isEdit}}">
+      <button class="footer-bar__danger" bindtap="onDelete">删除</button>
+      <button class="footer-bar__save" loading="{{saving}}" bindtap="onSave">保存约课</button>
+    </block>
+    <button wx:else class="footer-bar__save footer-bar__save--full" loading="{{saving}}" bindtap="onSave">
+      {{saveLabel}}
     </button>
   </view>
 </view>

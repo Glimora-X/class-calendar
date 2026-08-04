@@ -5,31 +5,40 @@
   box-shadow: 0 12rpx 40rpx rgba(27, 36, 48, 0.08);
 }
 
+.subject-picker--embedded {
+  background: transparent;
+  border-radius: 0;
+  padding: 18rpx 4rpx 22rpx;
+  box-shadow: none;
+  border-bottom: 1rpx solid #f0f2f5;
+}
+
 .subject-picker__label {
-  font-size: 22rpx;
-  color: #8b95a5;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  margin-bottom: 12rpx;
+  font-size: 20rpx;
+  color: #9aa3b2;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  margin-bottom: 10rpx;
 }
 
 .subject-picker__row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 64rpx;
+  min-height: 52rpx;
 }
 
 .subject-picker__value {
   font-size: 34rpx;
-  font-weight: 700;
-  color: #1b2430;
+  font-weight: 600;
+  color: #1a2332;
 }
 
 .subject-picker__action {
   font-size: 24rpx;
-  color: #3b82f6;
+  color: #5b8def;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .subject-picker__add {

@@ -1,23 +1,66 @@
-<view class="ns">
-  <view class="soft-field">
-    <text class="soft-field__label">{{label}}</text>
-    <input
-      class="soft-field__input"
-      value="{{value}}"
-      placeholder="{{placeholder}}"
-      placeholder-class="ph"
-      bindinput="onInput"
-      bindfocus="onFocus"
-      bindblur="onBlur"
-    />
-  </view>
-  <view wx:if="{{open && filtered.length}}" class="ns__list">
-    <view
-      wx:for="{{filtered}}"
-      wx:key="*this"
-      class="ns__item"
-      data-name="{{item}}"
-      bindtap="onPick"
-    >{{item}}</view>
-  </view>
+<view class="ns {{compact ? 'ns--compact' : ''}} {{layout === 'stack' ? 'ns--stack' : ''}}">
+  <!-- stack：点选优先 -->
+  <block wx:if="{{layout === 'stack'}}">
+    <view class="ns-stack" bindtap="onTapField">
+      <view class="ns-stack__ico ns-stack__ico--{{iconTone}}">{{iconText || '·'}}</view>
+      <view class="ns-stack__body">
+        <text class="ns-stack__label">{{label}}</text>
+        <text class="ns-stack__value {{value ? '' : 'ns-stack__value--ph'}}">
+          {{value || placeholder || '请选择'}}
+        </text>
+      </view>
+      <text wx:if="{{showChevron}}" class="ns-stack__chev">›</text>
+    </view>
+  </block>
+
+  <!-- row：输入联想（兼容旧用法） -->
+  <block wx:else>
+    <view class="soft-field">
+      <text class="soft-field__label">{{label}}</text>
+      <input
+        class="soft-field__input"
+        value="{{value}}"
+        placeholder="{{placeholder}}"
+        placeholder-class="ph"
+        bindinput="onInput"
+        bindfocus="onFocus"
+        bindblur="onBlur"
+      />
+    </view>
+    <view wx:if="{{open && filtered.length}}" class="ns__list">
+      <view
+        wx:for="{{filtered}}"
+        wx:key="*this"
+        class="ns__item"
+        data-name="{{item}}"
+        catchtouchend="onPickTouch"
+        bindtap="onPick"
+      >{{item}}</view>
+    </view>
+  </block>
 </view>
+
+<!-- 手动输入弹层：提到页面根，避免被卡片 overflow 裁切 / 焦点被抢 -->
+<root-portal wx:if="{{showManual}}">
+  <view class="ns-modal" catchtouchmove="onMaskTap">
+    <view class="ns-modal__mask" catchtap="onMaskTap"></view>
+    <view class="ns-modal__panel">
+      <view class="ns-modal__title">输入{{label || '名称'}}</view>
+      <input
+        class="ns-modal__input"
+        value="{{draftName}}"
+        placeholder="{{placeholder || '请输入'}}"
+        placeholder-class="ph"
+        focus="{{manualFocus}}"
+        confirm-type="done"
+        maxlength="20"
+        bindinput="onDraftInput"
+        bindconfirm="onManualOk"
+      />
+      <view class="ns-modal__actions">
+        <button class="ns-modal__btn ns-modal__btn--ghost" bindtap="onManualCancel">取消</button>
+        <button class="ns-modal__btn ns-modal__btn--primary" bindtap="onManualOk">确定</button>
+      </view>
+    </view>
+  </view>
+</root-portal>

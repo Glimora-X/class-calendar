@@ -5,7 +5,9 @@ Component({
     /** 当前选中 subjectId */
     value: { type: String, value: '' },
     /** 是否允许新增 */
-    allowAdd: { type: Boolean, value: true }
+    allowAdd: { type: Boolean, value: true },
+    /** 嵌入卡片内：去掉独立阴影卡片皮 */
+    embedded: { type: Boolean, value: false }
   },
   data: {
     currentName: '',
