@@ -31,6 +31,13 @@
   color: #8b95a5;
 }
 
+.tl__today {
+  font-size: 22rpx;
+  font-weight: 400;
+  color: #94a3b8;
+  line-height: 1.2;
+}
+
 .tl__rail {
   width: 28rpx;
   flex-shrink: 0;

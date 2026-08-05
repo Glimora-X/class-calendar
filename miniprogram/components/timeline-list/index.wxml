@@ -3,6 +3,7 @@
     <view class="tl__date">
       <text class="tl__day">{{item.day}}</text>
       <text class="tl__wd">{{item.weekdayLabel}}</text>
+      <text wx:if="{{item.isToday}}" class="tl__today">今天</text>
     </view>
     <view class="tl__rail">
       <view class="tl__dot tl__dot--{{item.statusDotClass || 'pending'}}"></view>

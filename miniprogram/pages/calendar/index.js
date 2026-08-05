@@ -274,6 +274,7 @@ Page({
     const dayBookings = (byDate[selectedDate] || []).slice().sort(byStartTime)
     const selectedLabel = formatSelectedLabel(selectedDate)
 
+    const todayStr = formatDate(new Date())
     const timelineGroups = Object.keys(byDate)
       .sort()
       .map((date) => {
@@ -286,6 +287,7 @@ Page({
           date,
           day: pad(d.getDate()),
           weekdayLabel: WEEKDAY_CN[d.getDay()],
+          isToday: date === todayStr,
           statusDotClass,
           items
         }
