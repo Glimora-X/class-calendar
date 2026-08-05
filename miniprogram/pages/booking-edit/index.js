@@ -16,7 +16,11 @@ const {
   listBookings,
   batchCreateBookings
 } = require('../../services/booking')
-const { appendName, fetchNameList } = require('../../services/name-list')
+const {
+  appendName,
+  fetchNameList,
+  studentNames
+} = require('../../services/name-list')
 const { getLastSubjectId, setLastSubjectId } = require('../../utils/cache')
 const { showApiError, showWriteError } = require('../../utils/errors')
 const { callFunction } = require('../../utils/request')
@@ -35,6 +39,12 @@ const {
   explainSubscribeResult
 } = require('../../utils/reminder')
 const { getSubscribeTmplId } = require('../../utils/env-config')
+const {
+  parsePriceInput,
+  formatPriceInput,
+  teacherDefaultPrice,
+  priceAfterTeacherChange
+} = require('../../utils/price')
 
 const WEEKDAY_SHORT = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
 const NOTE_MAX_LEN = 100
@@ -69,13 +79,22 @@ function decorateDraft(draft) {
   const note = draft && draft.note != null ? String(draft.note) : ''
   const startTime = draft.startTime || ''
   const endTime = draft.endTime || ''
+  const price =
+    draft && draft.priceText != null && draft.priceText !== ''
+      ? parsePriceInput(draft.priceText)
+      : draft && draft.price != null && draft.price !== ''
+        ? parsePriceInput(draft.price)
+        : null
   return Object.assign({}, draft, {
     dateLabel: formatDateLabel(draft.date),
     durationLabel: formatDurationLabel(startTime, endTime),
     durationShort: formatDurationShort(startTime, endTime),
     summaryDate: formatSummaryDate(draft.date),
     summaryTime: startTime && endTime ? `${startTime}-${endTime}` : startTime || endTime || '',
-    noteLen: Math.min(note.length, NOTE_MAX_LEN)
+    noteLen: Math.min(note.length, NOTE_MAX_LEN),
+    price,
+    priceText:
+      draft.priceText != null ? String(draft.priceText) : formatPriceInput(price)
   })
 }
 
@@ -88,6 +107,9 @@ Page({
     formReady: false,
     studentName: '',
     teacherName: '',
+    price: null,
+    priceText: '',
+    teacherProfiles: [],
     subjectId: '',
     subjectName: DEFAULT_SUBJECT_NAME,
     date: '',
@@ -194,6 +216,7 @@ Page({
         subjectName: this.data.subjectName || DEFAULT_SUBJECT_NAME,
         studentName: '',
         teacherName: '',
+        price: null,
         date: formatDate(now),
         startTime,
         endTime: addMinutesToTime(startTime, getClassDurationMinutes()),
@@ -248,16 +271,35 @@ Page({
 
   async loadNames() {
     try {
-      const list = await fetchNameList({ silent: true })
-      const teachers = (list.teachers || [])
+      const list = await fetchNameList({ silent: true, force: true })
+      const profiles = list.teachers || []
+      const teachers = profiles
         .map((t) => (typeof t === 'string' ? t : t.name))
         .filter(Boolean)
       this.setData({
-        studentSuggestions: list.students || [],
-        teacherSuggestions: teachers
+        studentSuggestions: studentNames(list.students),
+        teacherSuggestions: teachers,
+        teacherProfiles: profiles
       })
     } catch (e) {
       /* ignore */
+    }
+  },
+
+  applyTeacherPrice(teacherName, currentPrice) {
+    const profiles = this.data.teacherProfiles || []
+    const oldName = this.data.teacherName
+    const oldDefault = teacherDefaultPrice(profiles, oldName)
+    const newDefault = teacherDefaultPrice(profiles, teacherName)
+    const next = priceAfterTeacherChange(
+      currentPrice != null ? currentPrice : parsePriceInput(this.data.priceText),
+      oldDefault,
+      newDefault
+    )
+    return {
+      teacherName,
+      price: next,
+      priceText: formatPriceInput(next)
     }
   },
 
@@ -346,7 +388,9 @@ Page({
         endTime: row.endTime,
         durationLabel: formatDurationLabel(row.startTime, row.endTime),
         note: row.note || '',
-        noteLen: Math.min(String(row.note || '').length, NOTE_MAX_LEN)
+        noteLen: Math.min(String(row.note || '').length, NOTE_MAX_LEN),
+        price: parsePriceInput(row.price),
+        priceText: formatPriceInput(row.price)
       })
       this.syncStatusPicker(row.status, !!row.statusManual, row.date, row.startTime)
       if (row.subjectId) setLastSubjectId(row.subjectId)
@@ -371,7 +415,17 @@ Page({
   },
 
   onTeacherSuggest(e) {
-    this.setData({ teacherName: e.detail.value })
+    const teacherName = e.detail.value
+    const patch = this.applyTeacherPrice(teacherName, parsePriceInput(this.data.priceText))
+    this.setData(patch)
+  },
+
+  onPriceInput(e) {
+    const priceText = e.detail.value || ''
+    this.setData({
+      priceText,
+      price: parsePriceInput(priceText)
+    })
   },
 
   onDateChange(e) {
@@ -533,7 +587,8 @@ Page({
         date: src.date,
         startTime: src.startTime,
         endTime: src.endTime,
-        note: src.note || ''
+        note: src.note || '',
+        price: src.price != null ? src.price : null
       })
     )
     drafts.splice(index + 1, 0, copy)
@@ -628,7 +683,28 @@ Page({
 
   onDraftTeacherSuggest(e) {
     const index = Number(e.currentTarget.dataset.index)
-    this.updateDraft(index, { teacherName: e.detail.value })
+    const drafts = this.data.drafts || []
+    const draft = drafts[index]
+    if (!draft) return
+    const teacherName = e.detail.value
+    const profiles = this.data.teacherProfiles || []
+    const oldDefault = teacherDefaultPrice(profiles, draft.teacherName)
+    const newDefault = teacherDefaultPrice(profiles, teacherName)
+    const nextPrice = priceAfterTeacherChange(
+      parsePriceInput(draft.priceText != null ? draft.priceText : draft.price),
+      oldDefault,
+      newDefault
+    )
+    this.updateDraft(index, {
+      teacherName,
+      price: nextPrice
+    })
+  },
+
+  onDraftPriceInput(e) {
+    const index = Number(e.currentTarget.dataset.index)
+    const priceText = e.detail.value || ''
+    this.updateDraft(index, { price: parsePriceInput(priceText), priceText })
   },
 
   onDraftDateChange(e) {
@@ -674,7 +750,7 @@ Page({
     let teachers = []
     try {
       const list = await fetchNameList()
-      students = list.students || []
+      students = studentNames(list.students)
       teachers = (list.teachers || [])
         .map((t) => (typeof t === 'string' ? t : t.name))
         .filter(Boolean)
@@ -700,10 +776,12 @@ Page({
 
     const preferredId = this.data.subjectId
     const preferredName = this.data.subjectName || DEFAULT_SUBJECT_NAME
+    const profiles = this.data.teacherProfiles || []
     const drafts = okItems.map(({ data }) => {
       const matched = (this.data.subjects || []).find(
         (s) => s.name === data.subjectName
       )
+      const price = teacherDefaultPrice(profiles, data.teacherName)
       return decorateDraft(
         this.makeEmptyDraft({
           studentName: data.studentName,
@@ -713,7 +791,8 @@ Page({
           endTime: data.endTime,
           subjectName: data.subjectName,
           subjectId: matched ? matched._id : preferredId,
-          note: ''
+          note: '',
+          price
         })
       )
     })
@@ -788,7 +867,8 @@ Page({
       date: d.date,
       startTime: d.startTime,
       endTime: d.endTime,
-      note: d.note ? String(d.note).trim() : null
+      note: d.note ? String(d.note).trim() : null,
+      price: parsePriceInput(d.priceText != null ? d.priceText : d.price)
     }))
 
     const tmplId = getSubscribeTmplId()
@@ -872,6 +952,7 @@ Page({
       note,
       status,
       statusManual,
+      priceText,
       saving
     } = this.data
     if (saving) return
@@ -881,6 +962,10 @@ Page({
     }
     if (String(subjectId).indexOf('local-') === 0) {
       wx.showToast({ title: '请先开通云开发并部署科目云函数', icon: 'none' })
+      return
+    }
+    if (priceText && parsePriceInput(priceText) == null) {
+      wx.showToast({ title: '单价格式不正确', icon: 'none' })
       return
     }
 
@@ -900,6 +985,7 @@ Page({
       startTime,
       endTime,
       note: note ? note.trim() : null,
+      price: parsePriceInput(priceText),
       status: finalStatus.status,
       statusManual: finalStatus.statusManual,
       remindMinutesBefore: getRemindMinutesBefore()

@@ -29,6 +29,11 @@ function computeRemindAt(date, startTime, minutesBefore) {
 function pickFields(event) {
   const status = String(event.status || '').trim()
   const statusManual = !!event.statusManual
+  let price = null
+  if (event.price != null && event.price !== '') {
+    const n = Math.round(Number(event.price) * 10) / 10
+    if (Number.isFinite(n) && n >= 0) price = n
+  }
   return {
     studentName: String(event.studentName || '').trim(),
     teacherName: String(event.teacherName || '').trim(),
@@ -40,7 +45,8 @@ function pickFields(event) {
     note: event.note == null || event.note === '' ? null : String(event.note).trim(),
     batchId: event.batchId == null || event.batchId === '' ? null : event.batchId,
     status: status || 'pending',
-    statusManual
+    statusManual,
+    price
   }
 }
 
@@ -112,6 +118,7 @@ exports.main = async (event) => {
         batchId: fields.batchId,
         status: fields.status,
         statusManual: fields.statusManual,
+        price: fields.price,
         remindAt,
         updatedAt: now
       }
@@ -137,6 +144,7 @@ exports.main = async (event) => {
         batchId: fields.batchId,
         status: fields.status,
         statusManual: fields.statusManual,
+        price: fields.price,
         remindAt,
         remindSentAt: null,
         createdAt: now,

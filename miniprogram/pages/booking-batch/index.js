@@ -8,7 +8,11 @@ const {
 } = require('../../utils/format')
 const { listSubjects } = require('../../services/subject')
 const { batchCreateBookings } = require('../../services/booking')
-const { fetchNameList, appendName } = require('../../services/name-list')
+const {
+  fetchNameList,
+  appendName,
+  studentNames
+} = require('../../services/name-list')
 const { getLastSubjectId, setLastSubjectId } = require('../../utils/cache')
 const { showApiError, showWriteError } = require('../../utils/errors')
 const {
@@ -89,7 +93,7 @@ Page({
         .map((t) => (typeof t === 'string' ? t : t.name))
         .filter(Boolean)
       this.setData({
-        studentSuggestions: list.students || [],
+        studentSuggestions: studentNames(list.students),
         teacherSuggestions: teachers
       })
     } catch (e) {

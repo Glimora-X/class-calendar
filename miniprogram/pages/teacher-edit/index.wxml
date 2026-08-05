@@ -1,0 +1,67 @@
+<view class="page page--no-tab">
+  <view class="surface-card form">
+    <view class="avatar-block" bindtap="onPickAvatar">
+      <image
+        wx:if="{{avatarUrl}}"
+        class="avatar-block__img"
+        src="{{avatarUrl}}"
+        mode="aspectFill"
+      />
+      <view wx:else class="avatar-block__img avatar-block__img--text">{{initial}}</view>
+      <text class="avatar-block__hint">点击更换头像</text>
+    </view>
+
+    <view class="soft-field">
+      <text class="soft-field__label">名字</text>
+      <input
+        class="soft-field__input"
+        value="{{name}}"
+        maxlength="20"
+        placeholder="必填"
+        placeholder-class="ph"
+        bindinput="onNameInput"
+      />
+    </view>
+
+    <view class="soft-field soft-field--tappable" bindtap="onPickSubject">
+      <text class="soft-field__label">主科</text>
+      <text class="soft-field__value {{subjectName ? '' : 'ph'}}">
+        {{subjectName || '点击选择'}}
+      </text>
+      <text class="soft-field__chev">›</text>
+    </view>
+
+    <view class="soft-field">
+      <text class="soft-field__label">单价</text>
+      <input
+        class="soft-field__input"
+        type="digit"
+        value="{{priceText}}"
+        placeholder="元/节，可选"
+        placeholder-class="ph"
+        bindinput="onPriceInput"
+      />
+    </view>
+
+    <view class="soft-field soft-field--note soft-field--last">
+      <text class="soft-field__label">备注</text>
+      <textarea
+        class="soft-field__textarea"
+        value="{{note}}"
+        maxlength="{{noteMax}}"
+        placeholder="可选"
+        placeholder-class="ph"
+        bindinput="onNoteInput"
+      />
+      <text class="soft-field__count">{{noteLen}}/{{noteMax}}</text>
+    </view>
+  </view>
+
+  <button class="save-btn" loading="{{saving}}" bindtap="onSave">保存</button>
+
+  <view
+    wx:if="{{isEdit}}"
+    class="danger-link"
+    bindtap="onDelete"
+  >删除老师</view>
+</view>

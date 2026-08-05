@@ -30,6 +30,8 @@
 
   <view class="section-label">功能</view>
   <view class="menu surface-card">
+    <view class="menu__item" bindtap="onTeachers">维护老师</view>
+    <view class="menu__item" bindtap="onStudents">维护学员</view>
     <view class="menu__item" bindtap="onCopyMonth">复制上月课程</view>
     <view class="menu__item" bindtap="onBatch">批量约课</view>
     <view class="menu__item" bindtap="onAbout">关于约课</view>

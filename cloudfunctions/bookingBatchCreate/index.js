@@ -56,7 +56,12 @@ exports.main = async (event) => {
       date: String(item.date || '').trim(),
       startTime: String(item.startTime || '').trim(),
       endTime: String(item.endTime || '').trim(),
-      note: item.note == null || item.note === '' ? null : String(item.note).trim()
+      note: item.note == null || item.note === '' ? null : String(item.note).trim(),
+      price: null
+    }
+    if (item.price != null && item.price !== '') {
+      const n = Math.round(Number(item.price) * 10) / 10
+      if (Number.isFinite(n) && n >= 0) row.price = n
     }
 
     if (

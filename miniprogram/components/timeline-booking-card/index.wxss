@@ -79,6 +79,13 @@
   justify-content: center;
   line-height: 1;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.tbc__avatar--img {
+  display: block;
+  padding: 0;
+  background: #e8eef6;
 }
 
 .tbc__teacher-name {

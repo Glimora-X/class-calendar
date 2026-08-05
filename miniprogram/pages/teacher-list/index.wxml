@@ -1,0 +1,35 @@
+<view class="page page--no-tab">
+  <view wx:if="{{loading && !teachers.length}}" class="empty">加载中…</view>
+
+  <view wx:elif="{{!teachers.length}}" class="empty">
+    <text class="empty__title">暂无老师</text>
+    <text class="empty__desc">新增后可维护头像、主科与备注</text>
+    <view class="soft-btn soft-btn--primary empty__btn" bindtap="onAdd">新增老师</view>
+  </view>
+
+  <block wx:else>
+    <view
+      wx:for="{{teachers}}"
+      wx:key="name"
+      class="row surface-card"
+      data-name="{{item.name}}"
+      bindtap="onOpen"
+    >
+      <image
+        wx:if="{{item.avatarUrl}}"
+        class="row__avatar"
+        src="{{item.avatarUrl}}"
+        mode="aspectFill"
+      />
+      <view wx:else class="row__avatar row__avatar--text">{{item.initial}}</view>
+      <view class="row__body">
+        <text class="row__name">{{item.name}}</text>
+        <text class="row__meta">{{item.subjectName || '未设主科'}}{{item.priceLabel ? ' · ' + item.priceLabel : ''}}{{item.note ? ' · ' + item.note : ''}}</text>
+      </view>
+      <text class="row__chev">›</text>
+    </view>
+  </block>
+
+  <view wx:if="{{teachers.length}}" class="fab-space"></view>
+  <view wx:if="{{teachers.length}}" class="fab" bindtap="onAdd">＋ 新增老师</view>
+</view>

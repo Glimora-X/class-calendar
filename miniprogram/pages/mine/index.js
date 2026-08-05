@@ -70,6 +70,14 @@ Page({
     wx.navigateTo({ url: '/pages/booking-batch/index' })
   },
 
+  onTeachers() {
+    wx.navigateTo({ url: '/pages/teacher-list/index' })
+  },
+
+  onStudents() {
+    wx.navigateTo({ url: '/pages/student-list/index' })
+  },
+
   onCopyMonth() {
     wx.navigateTo({ url: '/pages/booking-copy-month/index' })
   },

@@ -48,6 +48,7 @@ Page({
     timelineGroups: [],
     monthBookings: [],
     teacherColorMap: {},
+    teacherAvatarUrlMap: {},
     loading: false
   },
 
@@ -74,14 +75,47 @@ Page({
 
   async loadTeacherColors() {
     try {
-      const list = await fetchNameList({ silent: true })
+      const list = await fetchNameList({ silent: true, force: true })
       const map = {}
+      const fileByName = {}
+      const fileIds = []
       ;(list.teachers || []).forEach((t) => {
         if (!t) return
-        if (typeof t === 'string') map[t] = 'primary'
-        else if (t.name) map[t.name] = COLOR_TO_TONE[t.color] || 'primary'
+        if (typeof t === 'string') {
+          map[t] = 'primary'
+          return
+        }
+        if (!t.name) return
+        map[t.name] = COLOR_TO_TONE[t.color] || 'primary'
+        if (t.avatarFileID) {
+          fileByName[t.name] = t.avatarFileID
+          fileIds.push(t.avatarFileID)
+        }
       })
-      this.setData({ teacherColorMap: map })
+
+      const urlByFile = {}
+      if (fileIds.length && wx.cloud && wx.cloud.getTempFileURL) {
+        try {
+          const unique = []
+          fileIds.forEach((id) => {
+            if (unique.indexOf(id) === -1) unique.push(id)
+          })
+          const r = await wx.cloud.getTempFileURL({ fileList: unique })
+          ;(r.fileList || []).forEach((f) => {
+            if (f.fileID && f.tempFileURL) urlByFile[f.fileID] = f.tempFileURL
+          })
+        } catch (e) {
+          /* 无 URL 时时间轴退回首字 */
+        }
+      }
+
+      const teacherAvatarUrlMap = {}
+      Object.keys(fileByName).forEach((name) => {
+        const fid = fileByName[name]
+        if (urlByFile[fid]) teacherAvatarUrlMap[name] = urlByFile[fid]
+      })
+
+      this.setData({ teacherColorMap: map, teacherAvatarUrlMap })
       if (this.data.monthBookings && this.data.monthBookings.length) {
         this.recomputeViews(this.data.monthBookings)
       }
@@ -195,7 +229,7 @@ Page({
   },
 
   recomputeViews(list) {
-    const { filterTeacher, selectedDate, teacherColorMap } = this.data
+    const { filterTeacher, selectedDate, teacherColorMap, teacherAvatarUrlMap } = this.data
     const filtered = filterTeacher
       ? list.filter((b) => b.teacherName === filterTeacher)
       : list
@@ -219,7 +253,9 @@ Page({
     const byDate = {}
     filtered.forEach((b) => {
       if (!byDate[b.date]) byDate[b.date] = []
-      byDate[b.date].push(decorateBooking(b, teacherColorMap))
+      byDate[b.date].push(
+        decorateBooking(b, teacherColorMap, teacherAvatarUrlMap)
+      )
     })
 
     const marks = Object.keys(byDate).map((date) => {
@@ -301,8 +337,9 @@ function byStartTime(a, b) {
   return String(a.startTime).localeCompare(String(b.startTime))
 }
 
-function decorateBooking(b, teacherColorMap) {
+function decorateBooking(b, teacherColorMap, teacherAvatarUrlMap) {
   const map = teacherColorMap || {}
+  const avatarMap = teacherAvatarUrlMap || {}
   const fromTeacher = b.teacherName && map[b.teacherName]
   const fallback = ['surface', 'primary', 'mint'][(b.studentName || '').length % 3]
   const resolved = resolveBookingStatus(b)
@@ -313,6 +350,7 @@ function decorateBooking(b, teacherColorMap) {
     status: resolved,
     statusLabel: statusLabel(resolved),
     teacherInitial: teacherInitial(b.teacherName),
+    teacherAvatarUrl: (b.teacherName && avatarMap[b.teacherName]) || '',
     metaLine: `${student} | ${subject}`
   })
 }

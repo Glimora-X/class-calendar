@@ -20,6 +20,7 @@
         status-label="{{b.statusLabel}}"
         teacher-name="{{b.teacherName}}"
         teacher-initial="{{b.teacherInitial}}"
+        teacher-avatar-url="{{b.teacherAvatarUrl}}"
         student-name="{{b.studentName}}"
         subject-name="{{b.subjectName}}"
         meta-line="{{b.metaLine}}"

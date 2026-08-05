@@ -254,6 +254,22 @@
           </view>
         </view>
 
+        <view class="bk-field">
+          <view class="bk-ico bk-ico--orange">价</view>
+          <view class="bk-field__body">
+            <text class="bk-field__label">单价（元/节）</text>
+            <input
+              class="bk-field__input"
+              type="digit"
+              data-index="{{index}}"
+              value="{{item.priceText}}"
+              bindinput="onDraftPriceInput"
+              placeholder="可选，默认取老师单价"
+              placeholder-class="ph"
+            />
+          </view>
+        </view>
+
         <view class="bk-field bk-field--note">
           <view class="bk-ico bk-ico--yellow">备</view>
           <view class="bk-field__body">
@@ -388,6 +404,21 @@
           <text class="bk-field__chev">›</text>
         </view>
       </picker>
+
+      <view class="bk-field">
+        <view class="bk-ico bk-ico--orange">价</view>
+        <view class="bk-field__body">
+          <text class="bk-field__label">单价（元/节）</text>
+          <input
+            class="bk-field__input"
+            type="digit"
+            value="{{priceText}}"
+            bindinput="onPriceInput"
+            placeholder="可选，默认取老师单价"
+            placeholder-class="ph"
+          />
+        </view>
+      </view>
 
       <view class="bk-field bk-field--note">
         <view class="bk-ico bk-ico--yellow">备</view>

@@ -8,6 +8,7 @@ Component({
     statusLabel: { type: String, value: '' },
     teacherName: { type: String, value: '' },
     teacherInitial: { type: String, value: '?' },
+    teacherAvatarUrl: { type: String, value: '' },
     studentName: { type: String, value: '' },
     subjectName: { type: String, value: '' },
     /** 可选；有则优先，否则用学员|科目拼接 */

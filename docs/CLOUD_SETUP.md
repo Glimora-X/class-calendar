@@ -37,7 +37,7 @@ module.exports = {
 - `bookingDelete`
 - `bookingBatchCreate`
 - `bookingClearAll`（清空当前用户全部约课）
-- `nameList`
+- `nameList`（读名单 / append；另支持 `action: updateTeacher|removeTeacher`，改名会同步 `bookings.teacherName`）
 - `subjectList`
 - `subjectUpsert`
 - `reminderTick`（课前提醒；需配置模板 ID + 定时触发器）
