@@ -16,7 +16,8 @@ page {
   --shadow-fab: 0 16rpx 36rpx rgba(59, 130, 246, 0.35);
   --radius-card: 28rpx;
   --radius-chip: 999rpx;
-  --tab-bar-height: 120rpx;
+  /* 悬浮 tab：底垫 16 + 栏高 112 + 中间 + 上凸约 56 */
+  --tab-bar-height: 184rpx;
   --page-pad: 32rpx;
 
   background: var(--color-bg);
@@ -38,7 +39,8 @@ textarea {
 .page {
   min-height: 100vh;
   padding: var(--page-pad);
-  padding-bottom: calc(var(--tab-bar-height) + env(safe-area-inset-bottom) + 48rpx);
+  /* 额外 64rpx：最后一节能完整滚到 FAB 上方可读 */
+  padding-bottom: calc(var(--tab-bar-height) + env(safe-area-inset-bottom) + 64rpx);
 }
 
 .page--no-tab {
