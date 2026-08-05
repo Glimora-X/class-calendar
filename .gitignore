@@ -7,3 +7,4 @@ cloudfunctions/**/node_modules/
 miniprogram/config/env.js
 .idea/
 .vscode/
+.worktrees/
