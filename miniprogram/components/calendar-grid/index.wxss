@@ -1,7 +1,7 @@
 .cal {
   background: #fff;
   border-radius: 32rpx;
-  padding: 28rpx 20rpx 20rpx;
+  padding: 28rpx 20rpx 24rpx;
   box-shadow: 0 12rpx 40rpx rgba(27, 36, 48, 0.08);
   margin-bottom: 32rpx;
 }
@@ -50,6 +50,17 @@
   text-align: center;
 }
 
+.cal__cell.is-other .cal__day {
+  color: #c5cdd8;
+  font-weight: 500;
+  background: transparent;
+  box-shadow: none;
+}
+
+.cal__cell.is-other {
+  pointer-events: none;
+}
+
 .cal__holiday {
   font-size: 16rpx;
   color: #ef4444;
@@ -86,8 +97,20 @@
   background: #3b82f6;
 }
 
-.cal__cell.is-empty {
-  pointer-events: none;
+.cal__dot.tone-primary {
+  background: #3b82f6;
+}
+
+.cal__dot.tone-mint {
+  background: #34d399;
+}
+
+.cal__dot.tone-pro {
+  background: #8b5cf6;
+}
+
+.cal__dot.tone-warning {
+  background: #f59e0b;
 }
 
 .cal__cell.has-mark .cal__day {
@@ -105,10 +128,6 @@
   box-shadow: 0 8rpx 24rpx rgba(52, 211, 153, 0.28);
 }
 
-.cal__cell.tone-mint .cal__dot {
-  background: #34d399;
-}
-
 .cal__cell.tone-mint .cal__summary {
   color: #059669;
 }
@@ -119,10 +138,6 @@
   box-shadow: 0 8rpx 24rpx rgba(139, 92, 246, 0.28);
 }
 
-.cal__cell.tone-pro .cal__dot {
-  background: #8b5cf6;
-}
-
 .cal__cell.tone-pro .cal__summary {
   color: #7c3aed;
 }
@@ -131,10 +146,6 @@
   background: rgba(245, 158, 11, 0.22);
   color: #d97706;
   box-shadow: 0 8rpx 24rpx rgba(245, 158, 11, 0.28);
-}
-
-.cal__cell.tone-warning .cal__dot {
-  background: #f59e0b;
 }
 
 .cal__cell.tone-warning .cal__summary {
@@ -152,10 +163,68 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
-.cal__cell.is-selected .cal__dot {
-  background: #fff;
+/* 选中日圆点保持老师色（不改白） */
+.cal__cell.is-selected .cal__dot.tone-primary {
+  background: #3b82f6;
+}
+
+.cal__cell.is-selected .cal__dot.tone-mint {
+  background: #34d399;
+}
+
+.cal__cell.is-selected .cal__dot.tone-pro {
+  background: #8b5cf6;
+}
+
+.cal__cell.is-selected .cal__dot.tone-warning {
+  background: #f59e0b;
 }
 
 .cal__cell.is-today:not(.is-selected) .cal__day {
   border: 2rpx solid #3b82f6;
+}
+
+.cal__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 24rpx;
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #eef1f6;
+}
+
+.cal__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.cal__legend-dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: #3b82f6;
+}
+
+.cal__legend-dot.tone-primary {
+  background: #3b82f6;
+}
+
+.cal__legend-dot.tone-mint {
+  background: #34d399;
+}
+
+.cal__legend-dot.tone-pro {
+  background: #8b5cf6;
+}
+
+.cal__legend-dot.tone-warning {
+  background: #f59e0b;
+}
+
+.cal__legend-name {
+  font-size: 22rpx;
+  color: #8b95a5;
 }

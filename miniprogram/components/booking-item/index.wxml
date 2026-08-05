@@ -1,12 +1,26 @@
 <view class="card tone-{{tone}}" bindtap="onTap">
-  <view class="card__main">
+  <view class="card__accent"></view>
+  <view class="card__time">
+    <text class="card__time-start">{{startTime}}</text>
+    <text class="card__time-sep">—</text>
+    <text class="card__time-end">{{endTime}}</text>
+  </view>
+  <image
+    wx:if="{{teacherAvatarUrl}}"
+    class="card__avatar"
+    src="{{teacherAvatarUrl}}"
+    mode="aspectFill"
+  />
+  <view wx:else class="card__avatar card__avatar--text">{{teacherInitial}}</view>
+  <view class="card__body">
     <text class="card__title">{{studentName}} · {{subjectName}}</text>
-    <text class="card__time">{{startTime}} — {{endTime}}</text>
-    <view class="card__meta-row">
+    <view class="card__meta">
       <text class="card__teacher tone-{{teacherTone || tone}}">{{teacherName}}</text>
-      <text wx:if="{{dateLabel}}" class="card__meta"> · {{dateLabel}}</text>
-      <text wx:if="{{statusLabel}}" class="card__meta"> · {{statusLabel}}</text>
+      <block wx:if="{{note}}">
+        <text class="card__note-icon">⌖</text>
+        <text class="card__note">{{note}}</text>
+      </block>
     </view>
   </view>
-  <text class="card__more">···</text>
+  <text wx:if="{{statusLabel}}" class="card__status status-{{status || 'pending'}}">{{statusLabel}}</text>
 </view>

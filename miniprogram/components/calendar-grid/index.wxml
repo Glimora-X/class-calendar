@@ -6,9 +6,10 @@
     <view
       wx:for="{{cells}}"
       wx:key="key"
-      class="cal__cell {{item.empty ? 'is-empty' : ''}} {{item.selected ? 'is-selected' : ''}} {{item.tone ? 'has-mark tone-' + item.tone : ''}} {{item.isToday ? 'is-today' : ''}} {{item.summary ? 'has-summary' : ''}}"
+      class="cal__cell {{item.otherMonth ? 'is-other' : ''}} {{item.selected ? 'is-selected' : ''}} {{item.tone && !item.otherMonth ? 'has-mark tone-' + item.tone : ''}} {{item.isToday ? 'is-today' : ''}} {{item.summary ? 'has-summary' : ''}}"
       data-date="{{item.date}}"
       data-empty="{{item.empty}}"
+      data-disabled="{{item.disabled}}"
       bindtap="onSelect"
     >
       <view wx:if="{{!item.empty}}" class="cal__inner">
@@ -19,11 +20,18 @@
           <view
             wx:for="{{item.dots}}"
             wx:for-item="dot"
-            wx:key="*this"
-            class="cal__dot"
+            wx:for-index="dotIdx"
+            wx:key="dotIdx"
+            class="cal__dot tone-{{dot.tone}}"
           />
         </view>
       </view>
+    </view>
+  </view>
+  <view wx:if="{{legend.length}}" class="cal__legend">
+    <view wx:for="{{legend}}" wx:key="name" class="cal__legend-item">
+      <view class="cal__legend-dot tone-{{item.tone}}"></view>
+      <text class="cal__legend-name">{{item.name}}</text>
     </view>
   </view>
 </view>

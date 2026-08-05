@@ -1,6 +1,7 @@
 const WEEKDAY_CN = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
 
 const { DAY_CELL_SUMMARY_THRESHOLD } = require('../../utils/constants')
+const { buildMarks, buildLegend } = require('../../utils/calendar-marks')
 const { addMonths } = require('../../utils/date-utils')
 const { formatMonthKey, monthRange, formatDate, pad } = require('../../utils/format')
 const {
@@ -43,6 +44,7 @@ Page({
     filterTeacher: '',
     chips: [],
     marks: [],
+    legend: [],
     holidays: {},
     dayBookings: [],
     timelineGroups: [],
@@ -258,18 +260,12 @@ Page({
       )
     })
 
-    const marks = Object.keys(byDate).map((date) => {
-      const items = byDate[date] || []
-      const count = items.length
-      const firstTone = (items[0] && items[0].cardTone) || 'primary'
-      const tone = firstTone === 'surface' ? 'primary' : firstTone
-      return {
-        date,
-        tone,
-        count,
-        summary: count > DAY_CELL_SUMMARY_THRESHOLD ? `${count}节` : ''
-      }
+    const flatForMarks = []
+    Object.keys(byDate).forEach((date) => {
+      ;(byDate[date] || []).forEach((b) => flatForMarks.push(b))
     })
+    const marks = buildMarks(flatForMarks, DAY_CELL_SUMMARY_THRESHOLD)
+    const legend = buildLegend(teachers, teacherColorMap)
 
     const dayBookings = (byDate[selectedDate] || []).slice().sort(byStartTime)
     const selectedLabel = formatSelectedLabel(selectedDate)
@@ -296,6 +292,7 @@ Page({
     this.setData({
       chips,
       marks,
+      legend,
       dayBookings,
       selectedLabel,
       timelineGroups,

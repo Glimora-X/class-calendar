@@ -41,7 +41,7 @@
 - Create: `miniprogram/utils/calendar-marks.js`
 - Create: `miniprogram/utils/calendar-marks.test.js`
 
-- [ ] **Step 1: 写失败单测**
+- [x] **Step 1: 写失败单测**
 
 ```js
 /**

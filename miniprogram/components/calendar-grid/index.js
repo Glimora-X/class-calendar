@@ -8,11 +8,13 @@ Component({
     selectedDate: { type: String, value: '' },
     /**
      * 有课日期标记
-     * [{ date, tone, count?, summary? }]
+     * [{ date, tone, count?, summary?, tones?: string[] }]
      */
     marks: { type: Array, value: [] },
     /** { 'YYYY-MM-DD': '国庆' } */
-    holidays: { type: Object, value: {} }
+    holidays: { type: Object, value: {} },
+    /** [{ name, tone }] */
+    legend: { type: Array, value: [] }
   },
   data: {
     weekdays: WEEKDAYS,
@@ -43,6 +45,7 @@ Component({
       const first = new Date(year, month - 1, 1)
       const startWeekday = first.getDay()
       const daysInMonth = new Date(year, month, 0).getDate()
+      const prevDays = new Date(year, month - 1, 0).getDate()
       const today = new Date()
       const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(
         today.getDate()
@@ -50,7 +53,22 @@ Component({
 
       const cells = []
       for (let i = 0; i < startWeekday; i++) {
-        cells.push({ key: `e-${i}`, empty: true })
+        const day = prevDays - startWeekday + i + 1
+        cells.push({
+          key: `p-${day}`,
+          empty: false,
+          otherMonth: true,
+          disabled: true,
+          day,
+          date: '',
+          tone: '',
+          count: 0,
+          summary: '',
+          dots: [],
+          holiday: '',
+          selected: false,
+          isToday: false
+        })
       }
       for (let d = 1; d <= daysInMonth; d++) {
         const date = `${year}-${pad(month)}-${pad(d)}`
@@ -58,14 +76,20 @@ Component({
         const holiday = holidayMap[date] || ''
         const count = mark ? Number(mark.count) || 0 : 0
         const summary = (mark && mark.summary) || ''
-        const dots = !summary && count > 0
-          ? count === 1
-            ? [1]
-            : [1, 2]
-          : []
+        let dots = []
+        if (!summary && mark) {
+          if (Array.isArray(mark.tones) && mark.tones.length) {
+            dots = mark.tones.map((t) => ({ tone: t || 'primary' }))
+          } else if (count > 0) {
+            const tone = (mark && mark.tone) || 'primary'
+            dots = count === 1 ? [{ tone }] : [{ tone }, { tone }]
+          }
+        }
         cells.push({
           key: date,
           empty: false,
+          otherMonth: false,
+          disabled: false,
           day: d,
           date,
           tone: (mark && mark.tone) || '',
@@ -77,11 +101,30 @@ Component({
           isToday: date === todayStr
         })
       }
+      let nextDay = 1
+      while (cells.length % 7 !== 0) {
+        cells.push({
+          key: `n-${nextDay}`,
+          empty: false,
+          otherMonth: true,
+          disabled: true,
+          day: nextDay,
+          date: '',
+          tone: '',
+          count: 0,
+          summary: '',
+          dots: [],
+          holiday: '',
+          selected: false,
+          isToday: false
+        })
+        nextDay += 1
+      }
       this.setData({ cells })
     },
     onSelect(e) {
-      const { date, empty } = e.currentTarget.dataset
-      if (empty || !date) return
+      const { date, empty, disabled } = e.currentTarget.dataset
+      if (empty || disabled || !date) return
       this.triggerEvent('select', { date })
     }
   }

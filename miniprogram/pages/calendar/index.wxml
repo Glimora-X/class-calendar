@@ -16,15 +16,21 @@
       selectedDate="{{selectedDate}}"
       marks="{{marks}}"
       holidays="{{holidays}}"
+      legend="{{legend}}"
       bind:select="onSelectDate"
     />
 
     <view class="section-head">
       <text class="section-title">{{selectedLabel}}</text>
       <view class="section-actions">
-        <text class="section-link" bindtap="onTapCopyMonth">复制上月</text>
-        <text class="section-link" bindtap="onTapBatch">批量约课</text>
-        <text class="section-sub">{{summaryText}}</text>
+        <view class="section-btn" bindtap="onTapBatch">
+          <text class="section-btn__icon">▦</text>
+          <text>批量约课</text>
+        </view>
+        <view class="section-btn" bindtap="onTapCopyMonth">
+          <text class="section-btn__icon">⧉</text>
+          <text>复制上月</text>
+        </view>
       </view>
     </view>
 
@@ -41,6 +47,10 @@
         tone="{{item.cardTone}}"
         teacherTone="{{item.cardTone}}"
         statusLabel="{{item.statusLabel}}"
+        status="{{item.status}}"
+        teacherAvatarUrl="{{item.teacherAvatarUrl}}"
+        teacherInitial="{{item.teacherInitial}}"
+        note="{{item.note}}"
         bind:tap="onTapBooking"
       />
     </view>
