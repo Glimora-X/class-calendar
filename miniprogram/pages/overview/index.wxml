@@ -1,0 +1,170 @@
+<view class="page overview" style="padding-top: {{navPadTop}}px;">
+  <view class="ov-brand">
+    <view class="ov-brand__left">
+      <view class="ov-brand__stars">✦</view>
+      <text class="ov-brand__title">小课记录本</text>
+      <view class="ov-brand__underline"></view>
+    </view>
+    <image class="ov-brand__hero" src="/assets/overview/hero.png" mode="aspectFit" />
+  </view>
+
+  <view class="ov-period">
+    <view class="ov-period__left">
+      <view class="ov-period__date" bindtap="onOpenCustom">
+        <text class="ov-period__label">{{periodLabel}}</text>
+        <text class="ov-period__caret">▾</text>
+      </view>
+      <view class="ov-period__wave"></view>
+      <view class="ov-chips">
+        <view
+          wx:for="{{chips}}"
+          wx:key="id"
+          class="ov-chip {{item.active ? 'is-active' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="onChip"
+        >{{item.label}}</view>
+      </view>
+    </view>
+    <view class="ov-period__right">
+      <view class="ov-pick {{customOpen ? 'is-active' : ''}}" bindtap="onOpenCustom">
+        <text class="ov-pick__ico">📅</text>
+        <text class="ov-pick__text">选择日期</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{customOpen}}" class="ov-custom">
+    <view class="ov-custom__row">
+      <text class="ov-custom__label">开始</text>
+      <picker mode="date" value="{{customStart}}" bindchange="onCustomStart">
+        <view class="ov-custom__value">{{customStart}} ›</view>
+      </picker>
+    </view>
+    <view class="ov-custom__row">
+      <text class="ov-custom__label">结束</text>
+      <picker mode="date" value="{{customEnd}}" bindchange="onCustomEnd">
+        <view class="ov-custom__value">{{customEnd}} ›</view>
+      </picker>
+    </view>
+    <view class="ov-custom__apply" bindtap="onApplyCustom">应用</view>
+  </view>
+
+  <!-- 课程卡 -->
+  <view class="ov-card ov-card--course" bindtap="onTapCourses">
+    <view class="ov-card__head">
+      <view class="ov-card__icon ov-card__icon--book">
+        <view class="ov-ico-book"></view>
+      </view>
+      <text class="ov-card__title">{{courseTitle}}</text>
+    </view>
+
+    <view class="ov-course-body">
+      <view class="ov-course-main">
+        <view class="ov-course-hero">
+          <text class="ov-course-num">{{total}}</text>
+          <text class="ov-course-unit">节</text>
+        </view>
+        <view wx:if="{{trendText}}" class="ov-trend {{trendUp ? 'is-up' : ''}} {{trendFlat ? 'is-flat' : ''}}">
+          <text wx:if="{{!trendFlat}}" class="ov-trend__arrow">{{trendUp ? '▲' : '▼'}}</text>
+          <text class="ov-trend__text">{{trendText}}</text>
+        </view>
+      </view>
+      <view class="ov-donut-wrap">
+        <view class="ov-donut" style="{{donutStyle}}">
+          <view class="ov-donut__hole"></view>
+        </view>
+        <view class="ov-donut-arrow">↳</view>
+      </view>
+    </view>
+
+    <view class="ov-status">
+      <view class="ov-status__item" data-filter="done" catchtap="onTapCourses">
+        <view class="ov-status__badge ov-status__badge--done">✓</view>
+        <text class="ov-status__n">{{done}} 节</text>
+        <text class="ov-status__t">已上</text>
+      </view>
+      <view class="ov-status__divider"></view>
+      <view class="ov-status__item" data-filter="pending" catchtap="onTapCourses">
+        <view class="ov-status__badge ov-status__badge--pending">◷</view>
+        <text class="ov-status__n">{{pending}} 节</text>
+        <text class="ov-status__t">待上</text>
+      </view>
+      <view class="ov-status__divider"></view>
+      <view class="ov-status__item" data-filter="closed" catchtap="onTapCourses">
+        <view class="ov-status__badge ov-status__badge--closed">↺</view>
+        <text class="ov-status__n">{{closed}} 节</text>
+        <text class="ov-status__t">退转</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 支出卡 -->
+  <view class="ov-card ov-card--expense" bindtap="onTapExpense">
+    <image class="ov-expense-pig" src="/assets/overview/piggy.png" mode="aspectFit" />
+    <view class="ov-card__head">
+      <view class="ov-card__icon ov-card__icon--wallet">
+        <view class="ov-ico-wallet"></view>
+      </view>
+      <text class="ov-card__title">{{expenseTitle}}</text>
+    </view>
+    <view class="ov-expense-body">
+      <view class="ov-expense-main">
+        <view class="ov-expense-money-wrap">
+          <text class="ov-expense-money">{{expenseLabel}}</text>
+          <view class="ov-expense-underline"></view>
+        </view>
+        <text class="ov-expense-sub">已支付 {{paidCount}} 节课程</text>
+      </view>
+      <view class="ov-expense-avg">
+        <text class="ov-expense-avg__n">{{avgLabel}}</text>
+        <view class="ov-expense-avg__row">
+          <text class="ov-expense-avg__t">平均每节</text>
+          <text class="ov-expense-avg__i" catchtap="onAvgInfo">ⓘ</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 老师课时 -->
+  <view class="ov-card ov-card--teacher">
+    <view class="ov-teacher-head">
+      <text class="ov-teacher-head__title">老师课时 & 支出</text>
+      <view class="ov-teacher-head__more" bindtap="onTapAllTeachers">查看全部 ›</view>
+    </view>
+
+    <block wx:if="{{teachersPreview.length}}">
+      <view
+        wx:for="{{teachersPreview}}"
+        wx:key="name"
+        class="ov-teacher"
+        data-name="{{item.name}}"
+        bindtap="onTapTeacher"
+      >
+        <view class="ov-teacher__avatar tone-{{item.tone}}">
+          <image wx:if="{{item.avatarUrl}}" class="ov-teacher__img" src="{{item.avatarUrl}}" mode="aspectFill" />
+          <text wx:else>{{item.initial}}</text>
+        </view>
+        <view class="ov-teacher__mid">
+          <view class="ov-teacher__name-row">
+            <text class="ov-teacher__name">{{item.name}}</text>
+            <text class="ov-teacher__star tone-{{item.tone}}">★</text>
+          </view>
+          <text class="ov-teacher__lessons">{{item.lessonCount}} 节课</text>
+          <view class="ov-teacher__bar-row">
+            <view class="ov-teacher__bar">
+              <view class="ov-teacher__bar-fill tone-{{item.tone}}" style="width: {{item.barWidth}};"></view>
+            </view>
+            <text class="ov-teacher__pct">{{item.percentLabel}}</text>
+          </view>
+        </view>
+        <view class="ov-teacher__right">
+          <text class="ov-teacher__amount">{{item.amountLabel}}</text>
+          <text class="ov-teacher__chev">›</text>
+        </view>
+      </view>
+    </block>
+    <view wx:else class="ov-empty-inline">这段时间还没有老师费用</view>
+  </view>
+
+  <view wx:if="{{empty && !loading}}" class="ov-hint">这段时间还没有约课</view>
+</view>

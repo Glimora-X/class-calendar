@@ -17,12 +17,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 48rpx;
+  padding: 0 28rpx;
   position: relative;
 }
 
 .tab-item {
-  width: 120rpx;
+  width: 96rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -56,12 +56,48 @@
   background: rgba(59, 130, 246, 0.12);
 }
 
+.tab-icon--overview {
+  border-radius: 8rpx;
+  background: linear-gradient(
+    135deg,
+    transparent 0 42%,
+    currentColor 42% 58%,
+    transparent 58%
+  );
+  border-color: #8b95a5;
+  position: relative;
+}
+
+.tab-icon--overview::before,
+.tab-icon--overview::after {
+  content: '';
+  position: absolute;
+  left: 8rpx;
+  right: 8rpx;
+  height: 4rpx;
+  background: #8b95a5;
+  border-radius: 2rpx;
+}
+
+.tab-icon--overview::before {
+  top: 10rpx;
+}
+
+.tab-icon--overview::after {
+  bottom: 10rpx;
+}
+
+.tab-item.is-active .tab-icon--overview::before,
+.tab-item.is-active .tab-icon--overview::after {
+  background: #3b82f6;
+}
+
 .tab-icon--mine {
   border-radius: 50%;
 }
 
 .tab-fab-slot {
-  width: 120rpx;
+  width: 104rpx;
   display: flex;
   justify-content: center;
 }

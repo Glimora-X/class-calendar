@@ -1,6 +1,8 @@
 {
   "pages": [
     "pages/calendar/index",
+    "pages/overview/index",
+    "pages/overview-list/index",
     "pages/booking-edit/index",
     "pages/booking-batch/index",
     "pages/booking-copy-month/index",
@@ -29,6 +31,12 @@
         "text": "日历",
         "iconPath": "assets/tab-calendar.png",
         "selectedIconPath": "assets/tab-calendar-active.png"
+      },
+      {
+        "pagePath": "pages/overview/index",
+        "text": "概览",
+        "iconPath": "assets/tab-overview.png",
+        "selectedIconPath": "assets/tab-overview-active.png"
       },
       {
         "pagePath": "pages/mine/index",

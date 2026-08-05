@@ -8,6 +8,11 @@ Component({
         icon: 'calendar'
       },
       {
+        pagePath: '/pages/overview/index',
+        text: '概览',
+        icon: 'overview'
+      },
+      {
         pagePath: '/pages/mine/index',
         text: '我的',
         icon: 'mine'

@@ -9,6 +9,15 @@
       <text class="tab-text">日历</text>
     </view>
 
+    <view
+      class="tab-item {{selected === 1 ? 'is-active' : ''}}"
+      data-index="1"
+      bindtap="switchTab"
+    >
+      <view class="tab-icon tab-icon--overview"></view>
+      <text class="tab-text">概览</text>
+    </view>
+
     <view class="tab-fab-slot">
       <view class="tab-fab" bindtap="onFab">
         <text class="tab-fab__plus">+</text>
@@ -16,8 +25,8 @@
     </view>
 
     <view
-      class="tab-item {{selected === 1 ? 'is-active' : ''}}"
-      data-index="1"
+      class="tab-item {{selected === 2 ? 'is-active' : ''}}"
+      data-index="2"
       bindtap="switchTab"
     >
       <view class="tab-icon tab-icon--mine"></view>

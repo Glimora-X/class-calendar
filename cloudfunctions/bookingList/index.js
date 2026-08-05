@@ -33,7 +33,7 @@ exports.main = async (event) => {
       })
       .orderBy('date', 'asc')
       .orderBy('startTime', 'asc')
-      .limit(200)
+      .limit(1000)
       .get()
 
     return { list: res.data || [] }

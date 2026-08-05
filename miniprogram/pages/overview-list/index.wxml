@@ -1,0 +1,60 @@
+<view class="page page--no-tab ov-list">
+  <view wx:if="{{periodLabel}}" class="ov-list__period">{{periodLabel}}</view>
+
+  <view wx:if="{{chips.length}}" class="ov-list__chips">
+    <view
+      wx:for="{{chips}}"
+      wx:key="id"
+      class="ov-list__chip {{item.active ? 'is-active' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onChip"
+    >{{item.label}}</view>
+  </view>
+
+  <block wx:if="{{mode === 'teachers'}}">
+    <view
+      wx:for="{{teachers}}"
+      wx:key="name"
+      class="ov-list__teacher surface-card"
+      data-name="{{item.name}}"
+      bindtap="onTapTeacher"
+    >
+      <view class="ov-list__teacher-left">
+        <view class="ov-list__avatar">{{item.initial}}</view>
+        <view>
+          <text class="ov-list__teacher-name">{{item.name}}</text>
+          <text class="ov-list__teacher-sub">{{item.lessonCount}}节</text>
+        </view>
+      </view>
+      <text class="ov-list__amount">{{item.amountLabel}}</text>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view
+      wx:for="{{rows}}"
+      wx:key="_id"
+      class="ov-list__row surface-card"
+      data-id="{{item._id}}"
+      bindtap="onTapRow"
+    >
+      <view class="ov-list__main">
+        <view class="ov-list__line1">
+          <text class="ov-list__date">{{item.dateLabel}} {{item.weekday}}</text>
+          <text wx:if="{{item.time}}" class="ov-list__time">{{item.time}}</text>
+        </view>
+        <view class="ov-list__line2">
+          <text wx:if="{{mode === 'expense'}}">{{item.teacherName}}</text>
+          <text wx:elif="{{mode === 'teacher'}}">{{item.studentName}} · {{item.subjectName}}</text>
+          <text wx:else>{{item.teacherName}} · {{item.studentName}}</text>
+        </view>
+      </view>
+      <view class="ov-list__right">
+        <text wx:if="{{item.amountLabel}}" class="ov-list__amount">{{item.amountLabel}}</text>
+        <text wx:else class="ov-list__badge {{item.statusClass}}">{{item.statusLabel}}</text>
+      </view>
+    </view>
+  </block>
+
+  <empty-state wx:if="{{empty && !loading}}" text="暂无记录" hint="换个时间范围试试" />
+</view>
