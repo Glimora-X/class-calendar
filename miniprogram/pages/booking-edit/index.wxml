@@ -15,6 +15,7 @@
 
   <!-- 新增态 -->
   <block wx:if="{{!isEdit && formReady && !showSubscribeGate}}">
+    <view wx:if="{{holdTip}}" class="hold-tip">{{holdTip}}</view>
     <view class="parse-card {{parseExpanded ? '' : 'parse-card--collapsed'}}">
       <view class="parse-card__head" bindtap="onToggleParse">
         <view class="parse-card__titles">
@@ -323,6 +324,7 @@
 
   <!-- 编辑态：始终展开单卡 -->
   <block wx:if="{{isEdit && formReady && !showSubscribeGate}}">
+    <view wx:if="{{holdTip}}" class="hold-tip">{{holdTip}}</view>
     <view class="list-head">
       <text class="list-head__title">编辑课程</text>
     </view>

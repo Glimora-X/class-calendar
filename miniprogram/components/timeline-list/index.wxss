@@ -76,3 +76,24 @@
   min-width: 0;
   padding-bottom: 24rpx;
 }
+
+.tl__hold {
+  margin-bottom: 12rpx;
+  padding: 12rpx 16rpx;
+  border-radius: 16rpx;
+  background: rgba(100, 116, 139, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.tl__hold-title {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #475569;
+}
+
+.tl__hold-reason {
+  font-size: 22rpx;
+  color: #64748b;
+}

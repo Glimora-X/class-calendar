@@ -1,0 +1,9 @@
+{
+  "name": "dayHold",
+  "version": "1.0.0",
+  "description": "某日其他安排 dayHold（list / upsert / remove）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

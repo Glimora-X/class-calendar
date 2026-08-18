@@ -15,11 +15,24 @@ const { formatMonthKey, monthRange, formatDate, pad } = require('../../utils/for
 const {
   getMonthBookings,
   setMonthBookings,
-  isMonthBookingsFresh
+  isMonthBookingsFresh,
+  getMonthHolds,
+  setMonthHolds,
+  isMonthHoldsFresh
 } = require('../../utils/cache')
 const { listBookings } = require('../../services/booking')
 const { fetchNameList } = require('../../services/name-list')
-const { showApiError } = require('../../utils/errors')
+const {
+  listDayHolds,
+  upsertDayHold,
+  removeDayHold
+} = require('../../services/day-hold')
+const { showApiError, showWriteError } = require('../../utils/errors')
+const {
+  holdsToMap,
+  isHoldDate,
+  normalizeReason
+} = require('../../utils/day-hold')
 const { consumeBookingsDirty } = require('../../utils/sync-flags')
 const {
   resolveBookingStatus,
@@ -60,6 +73,10 @@ Page({
     marks: [],
     legend: [],
     holidays: {},
+    holdMap: {},
+    selectedHoldReason: '',
+    showHoldEditor: false,
+    holdReasonDraft: '',
     dayBookings: [],
     timelineGroups: [],
     monthBookings: [],
@@ -172,7 +189,9 @@ Page({
       holidays: holidaysInMonth(year, month),
       dayBookings: [],
       timelineGroups: [],
-      summaryText: ''
+      summaryText: '',
+      showHoldEditor: false,
+      holdReasonDraft: ''
     })
     const force = !(options && options.force === false)
     this.refreshMonth({ force })
@@ -219,8 +238,73 @@ Page({
 
   onSelectDate(e) {
     const date = e.detail.date
-    this.setData({ selectedDate: date })
+    this.setData({
+      selectedDate: date,
+      showHoldEditor: false,
+      holdReasonDraft: ''
+    })
     this.recomputeViews(this.data.monthBookings)
+  },
+
+  onTapMarkHold() {
+    this.setData({
+      showHoldEditor: true,
+      holdReasonDraft: this.data.selectedHoldReason || ''
+    })
+  },
+
+  onTapEditHold() {
+    this.setData({
+      showHoldEditor: true,
+      holdReasonDraft: this.data.selectedHoldReason || ''
+    })
+  },
+
+  onCancelHoldEditor() {
+    this.setData({ showHoldEditor: false, holdReasonDraft: '' })
+  },
+
+  onHoldReasonInput(e) {
+    this.setData({ holdReasonDraft: e.detail.value })
+  },
+
+  async onSaveHold() {
+    const date = this.data.selectedDate
+    const parsed = normalizeReason(this.data.holdReasonDraft)
+    if (!parsed.ok) {
+      wx.showToast({ title: parsed.message, icon: 'none' })
+      return
+    }
+    try {
+      await upsertDayHold({ date, reason: parsed.reason })
+      const holdMap = Object.assign({}, this.data.holdMap, { [date]: parsed.reason })
+      this.applyHoldMap(holdMap)
+      this.setData({ showHoldEditor: false, holdReasonDraft: '' })
+      wx.showToast({ title: '已记下', icon: 'none' })
+    } catch (err) {
+      showWriteError(err)
+    }
+  },
+
+  async onTapRemoveHold() {
+    const date = this.data.selectedDate
+    const confirm = await new Promise((resolve) => {
+      wx.showModal({
+        title: '取消标记',
+        content: '这天就不再标其他安排了？',
+        success: (res) => resolve(!!res.confirm)
+      })
+    })
+    if (!confirm) return
+    try {
+      await removeDayHold({ date })
+      const holdMap = Object.assign({}, this.data.holdMap)
+      delete holdMap[date]
+      this.applyHoldMap(holdMap)
+      wx.showToast({ title: '已取消', icon: 'none' })
+    } catch (err) {
+      showWriteError(err)
+    }
   },
 
   onTapBatch() {
@@ -272,22 +356,43 @@ Page({
     const force = !!(options && options.force)
     const { year, month } = this.data
     const monthKey = formatMonthKey(year, month)
-    const cached = getMonthBookings(monthKey)
-    if (cached) this.applyMonthList(cached)
+    const cachedBookings = getMonthBookings(monthKey)
+    const cachedHolds = getMonthHolds(monthKey)
+    if (cachedBookings) this.applyMonthList(cachedBookings)
+    if (cachedHolds) this.applyHoldMap(holdsToMap(cachedHolds), { skipPersist: true })
 
-    if (!force && cached && isMonthBookingsFresh(monthKey)) {
+    const bookingsFresh = !force && cachedBookings && isMonthBookingsFresh(monthKey)
+    const holdsFresh = !force && cachedHolds && isMonthHoldsFresh(monthKey)
+    if (bookingsFresh && holdsFresh) {
       return
     }
 
     this.setData({ loading: true })
+    const { start, end } = monthRange(year, month)
     try {
-      const { start, end } = monthRange(year, month)
-      const { list } = await listBookings({ start, end }, { silent: !force && !!cached })
-      const rows = list || []
-      setMonthBookings(monthKey, rows)
-      this.applyMonthList(rows)
+      const tasks = []
+      if (!bookingsFresh) {
+        tasks.push(
+          listBookings({ start, end }, { silent: !force && !!cachedBookings }).then((res) => {
+            const rows = (res && res.list) || []
+            setMonthBookings(monthKey, rows)
+            this.applyMonthList(rows)
+          })
+        )
+      }
+      if (!holdsFresh) {
+        tasks.push(
+          listDayHolds({ start, end }, { silent: !force && !!cachedHolds }).then((res) => {
+            const rows = (res && res.list) || []
+            setMonthHolds(monthKey, rows)
+            this.applyHoldMap(holdsToMap(rows), { skipPersist: true })
+          })
+        )
+      }
+      await Promise.all(tasks)
     } catch (err) {
-      if (!cached) this.applyMonthList([])
+      if (!cachedBookings) this.applyMonthList([])
+      if (!cachedHolds) this.applyHoldMap({}, { skipPersist: true })
       showApiError(err)
     } finally {
       this.setData({ loading: false })
@@ -300,6 +405,18 @@ Page({
     this.recomputeViews(rows)
   },
 
+  applyHoldMap(holdMap, options) {
+    const map = holdMap || {}
+    if (!(options && options.skipPersist)) {
+      const { year, month } = this.data
+      const monthKey = formatMonthKey(year, month)
+      const list = Object.keys(map).map((date) => ({ date, reason: map[date] }))
+      setMonthHolds(monthKey, list)
+    }
+    this.setData({ holdMap: map })
+    this.recomputeViews(this.data.monthBookings)
+  },
+
   recomputeViews(list) {
     const {
       filterTeacher,
@@ -307,7 +424,8 @@ Page({
       selectedDate,
       teacherColorMap,
       teacherAvatarUrlMap,
-      students
+      students,
+      holdMap
     } = this.data
 
     const afterStudent = filterByStudent(list, filterStudent)
@@ -347,6 +465,9 @@ Page({
 
     const dayBookings = (byDate[selectedDate] || []).slice().sort(byStartTime)
     const selectedLabel = formatSelectedLabel(selectedDate)
+    const selectedHoldReason = isHoldDate(holdMap, selectedDate)
+      ? (holdMap && holdMap[selectedDate]) || ''
+      : ''
 
     const todayStr = formatDate(new Date())
     const timelineGroups = Object.keys(byDate)
@@ -363,6 +484,7 @@ Page({
           weekdayLabel: WEEKDAY_CN[d.getDay()],
           isToday: date === todayStr,
           statusDotClass,
+          holdReason: isHoldDate(holdMap, date) ? (holdMap && holdMap[date]) || '' : '',
           items
         }
       })
@@ -375,6 +497,7 @@ Page({
       legend,
       dayBookings,
       selectedLabel,
+      selectedHoldReason,
       timelineGroups,
       summaryText: filtered.length ? `本月 ${filtered.length} 节` : '本月还没有课'
     })

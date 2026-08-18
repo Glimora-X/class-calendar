@@ -6,14 +6,17 @@
     <view
       wx:for="{{cells}}"
       wx:key="key"
-      class="cal__cell {{item.otherMonth ? 'is-other' : ''}} {{item.selected ? 'is-selected' : ''}} {{item.tone && !item.otherMonth ? 'has-mark tone-' + item.tone : ''}} {{item.isToday ? 'is-today' : ''}} {{item.summary ? 'has-summary' : ''}}"
+      class="cal__cell {{item.otherMonth ? 'is-other' : ''}} {{item.selected ? 'is-selected' : ''}} {{item.tone && !item.otherMonth ? 'has-mark tone-' + item.tone : ''}} {{item.isToday ? 'is-today' : ''}} {{item.summary ? 'has-summary' : ''}} {{item.isHold && !item.otherMonth ? 'is-hold' : ''}}"
       data-date="{{item.date}}"
       data-empty="{{item.empty}}"
       data-disabled="{{item.disabled}}"
       bindtap="onSelect"
     >
       <view wx:if="{{!item.empty}}" class="cal__inner">
-        <text class="cal__day">{{item.day}}</text>
+        <view class="cal__day-wrap">
+          <text class="cal__day">{{item.day}}</text>
+          <text wx:if="{{item.isHold && !item.otherMonth}}" class="cal__hold-mark">事</text>
+        </view>
         <text wx:if="{{item.summary}}" class="cal__summary">{{item.summary}}</text>
         <text wx:elif="{{item.holiday}}" class="cal__holiday">{{item.holiday}}</text>
         <view wx:elif="{{item.dots.length}}" class="cal__dots">

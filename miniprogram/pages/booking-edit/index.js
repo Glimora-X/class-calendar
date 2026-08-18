@@ -20,6 +20,12 @@ const {
   listBookings,
   batchCreateBookings
 } = require('../../services/booking')
+const { listDayHolds } = require('../../services/day-hold')
+const {
+  holdsToMap,
+  holdDatesInList,
+  formatHoldConfirmContent
+} = require('../../utils/day-hold')
 const {
   appendName,
   fetchNameList,
@@ -123,6 +129,8 @@ Page({
     subjectName: DEFAULT_SUBJECT_NAME,
     date: '',
     dateLabel: '',
+    holdTip: '',
+    originalDate: '',
     startTime: DEFAULT_TIME.startTime,
     endTime: DEFAULT_TIME.endTime,
     durationLabel: '',
@@ -221,6 +229,7 @@ Page({
     this.syncStatusPicker(BOOKING_STATUS.pending, false)
     this.loadNames()
     this.loadSubjects()
+    this.refreshHoldTip([date])
   },
 
   makeEmptyDraft(overrides) {
@@ -421,7 +430,8 @@ Page({
       this.setData(
         Object.assign({}, form, {
           dateLabel: formatDateLabel(form.date),
-          durationLabel: formatDurationLabel(form.startTime, form.endTime)
+          durationLabel: formatDurationLabel(form.startTime, form.endTime),
+          originalDate: form.date || ''
         })
       )
       this.syncStatusPicker(
@@ -431,11 +441,84 @@ Page({
         form.startTime
       )
       if (form.subjectId) setLastSubjectId(form.subjectId)
+      this.refreshHoldTip([form.date])
       return true
     } catch (err) {
       showApiError(err)
       return false
     }
+  },
+
+  /**
+   * @param {string[]} dates
+   * @returns {Promise<Record<string, string>>}
+   */
+  async fetchHoldMapForDates(dates) {
+    const unique = []
+    ;(dates || []).forEach((d) => {
+      const date = String(d || '').trim()
+      if (date && unique.indexOf(date) === -1) unique.push(date)
+    })
+    if (!unique.length) return {}
+    unique.sort()
+    try {
+      const { list } = await listDayHolds(
+        { start: unique[0], end: unique[unique.length - 1] },
+        { silent: true }
+      )
+      return holdsToMap(list || [])
+    } catch (e) {
+      return {}
+    }
+  },
+
+  async refreshHoldTip(dates) {
+    const list = dates && dates.length ? dates : [this.data.date]
+    const holdMap = await this.fetchHoldMapForDates(list)
+    const hits = holdDatesInList(list, holdMap)
+    if (!hits.length) {
+      this.setData({ holdTip: '' })
+      return
+    }
+    if (hits.length === 1) {
+      this.setData({
+        holdTip: `这天有其他安排：${holdMap[hits[0]] || ''}（最好别再约）`
+      })
+      return
+    }
+    this.setData({
+      holdTip: `有 ${hits.length} 天标了其他安排（最好别再约）`
+    })
+  },
+
+  /**
+   * @param {string[]} dates
+   * @param {{ originalDate?: string }} [options]
+   * @returns {Promise<boolean>}
+   */
+  async confirmHoldIfNeeded(dates, options) {
+    const originalDate = options && options.originalDate
+    const candidates = (dates || []).filter((d) => {
+      const date = String(d || '').trim()
+      if (!date) return false
+      if (originalDate != null && originalDate !== '' && date === originalDate) {
+        return false
+      }
+      return true
+    })
+    if (!candidates.length) return true
+    const holdMap = await this.fetchHoldMapForDates(candidates)
+    const hits = holdDatesInList(candidates, holdMap)
+    if (!hits.length) return true
+    return new Promise((resolve) => {
+      wx.showModal({
+        title: '这天有其他安排',
+        content: formatHoldConfirmContent(holdMap, hits),
+        confirmText: '仍要约',
+        cancelText: '取消',
+        success: (res) => resolve(!!res.confirm)
+      })
+    })
   },
 
   onFieldInput(e) {
@@ -473,6 +556,7 @@ Page({
     if (!this.data.statusManual) {
       this.syncStatusPicker(this.data.status, false, date, this.data.startTime)
     }
+    this.refreshHoldTip([date])
   },
 
   onStartTimeChange(e) {
@@ -748,7 +832,10 @@ Page({
 
   onDraftDateChange(e) {
     const index = Number(e.currentTarget.dataset.index)
-    this.updateDraft(index, { date: e.detail.value })
+    const date = e.detail.value
+    this.updateDraft(index, { date })
+    const dates = (this.data.drafts || []).map((d, i) => (i === index ? date : d.date))
+    this.refreshHoldTip(dates)
   },
 
   onDraftStartTimeChange(e) {
@@ -898,6 +985,10 @@ Page({
       return
     }
 
+    const dates = drafts.map((d) => d.date)
+    const okHold = await this.confirmHoldIfNeeded(dates)
+    if (!okHold) return
+
     const items = drafts.map((d) => ({
       studentName: d.studentName.trim(),
       teacherName: d.teacherName.trim(),
@@ -1007,6 +1098,11 @@ Page({
       wx.showToast({ title: '单价格式不正确', icon: 'none' })
       return
     }
+
+    const okHold = await this.confirmHoldIfNeeded([date], {
+      originalDate: this.data.originalDate || ''
+    })
+    if (!okHold) return
 
     const finalStatus = statusManual
       ? statusWritePayload(status)

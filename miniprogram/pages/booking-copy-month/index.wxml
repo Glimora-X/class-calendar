@@ -28,6 +28,7 @@
           <text class="row__title">{{item.studentName}} · {{item.subjectName}}</text>
           <text class="row__meta">{{item.sourceDate}} 复制为 {{item.date}} · {{item.startTime}}-{{item.endTime}}</text>
           <text class="row__meta">{{item.teacherName}}</text>
+          <text wx:if="{{item.holdReason}}" class="row__warn">这天有其他安排：{{item.holdReason}}</text>
         </view>
       </view>
       <view wx:if="{{!createRows.length}}" class="hint">这些课对不上本月的日期啦</view>

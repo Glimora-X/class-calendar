@@ -1,6 +1,8 @@
 const { addMonths, buildCopyMonthPreview } = require('../../utils/date-utils')
 const { monthRange, formatMonthKey } = require('../../utils/format')
 const { listBookings, batchCreateBookings } = require('../../services/booking')
+const { listDayHolds } = require('../../services/day-hold')
+const { annotateCopyRows, holdsToMap } = require('../../utils/day-hold')
 const { showApiError, showWriteError } = require('../../utils/errors')
 const { getRemindMinutesBefore } = require('../../utils/prefs')
 
@@ -42,26 +44,37 @@ Page({
     this.setData({ loading: true })
     try {
       const { start, end } = monthRange(sourceYear, sourceMonth)
-      const { list } = await listBookings({ start, end })
-      const sourceList = list || []
+      const targetRange = monthRange(targetYear, targetMonth)
+      const [bookingRes, holdRes] = await Promise.all([
+        listBookings({ start, end }),
+        listDayHolds(
+          { start: targetRange.start, end: targetRange.end },
+          { silent: true }
+        ).catch(() => ({ list: [] }))
+      ])
+      const sourceList = (bookingRes && bookingRes.list) || []
+      const holdMap = holdsToMap((holdRes && holdRes.list) || [])
       const { previewCreate, previewSkipped } = buildCopyMonthPreview(
         sourceList,
         targetYear,
         targetMonth
       )
-      const createRows = previewCreate.map((row, idx) => ({
-        key: row._id || `c-${idx}`,
-        checked: true,
-        sourceDate: row._sourceDate || '',
-        date: row.date,
-        studentName: row.studentName || '',
-        teacherName: row.teacherName || '',
-        subjectName: row.subjectName || '',
-        subjectId: row.subjectId || '',
-        startTime: row.startTime || '',
-        endTime: row.endTime || '',
-        note: row.note == null ? null : row.note
-      }))
+      const createRows = annotateCopyRows(
+        previewCreate.map((row, idx) => ({
+          key: row._id || `c-${idx}`,
+          checked: true,
+          sourceDate: row._sourceDate || '',
+          date: row.date,
+          studentName: row.studentName || '',
+          teacherName: row.teacherName || '',
+          subjectName: row.subjectName || '',
+          subjectId: row.subjectId || '',
+          startTime: row.startTime || '',
+          endTime: row.endTime || '',
+          note: row.note == null ? null : row.note
+        })),
+        holdMap
+      )
       const skippedRows = previewSkipped.map((row, idx) => ({
         key: row._id || `s-${idx}`,
         sourceDate: row.date || '',
@@ -76,7 +89,7 @@ Page({
       this.setData({
         createRows,
         skippedRows,
-        selectedCount: createRows.length,
+        selectedCount: createRows.filter((r) => r.checked).length,
         empty: !sourceList.length,
         loading: false
       })

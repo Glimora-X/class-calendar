@@ -4,10 +4,17 @@ const {
   formatMonthKey,
   formatTime,
   addMinutesToTime,
-  minutesBetweenTimes
+  minutesBetweenTimes,
+  monthRange
 } = require('../../utils/format')
 const { listSubjects } = require('../../services/subject')
 const { batchCreateBookings } = require('../../services/booking')
+const { listDayHolds } = require('../../services/day-hold')
+const {
+  holdsToMap,
+  isHoldDate,
+  partitionBatchDates
+} = require('../../utils/day-hold')
 const {
   fetchNameList,
   appendName,
@@ -46,8 +53,11 @@ Page({
     studentSuggestions: [],
     teacherSuggestions: [],
     teacherProfiles: [],
-    previewDates: [],
+    previewRows: [],
+    selectedPreviewCount: 0,
+    skippedHoldCount: 0,
     previewOpen: false,
+    holdMap: {},
     saving: false
   },
 
@@ -105,11 +115,38 @@ Page({
     }
   },
 
-  refreshPreview(year, month, weekdayIndex) {
+  async loadHoldMap(year, month) {
+    const y = year != null ? year : this.data.year
+    const m = month != null ? month : this.data.month
+    try {
+      const { start, end } = monthRange(y, m)
+      const { list } = await listDayHolds({ start, end }, { silent: true })
+      return holdsToMap(list || [])
+    } catch (e) {
+      return {}
+    }
+  },
+
+  async refreshPreview(year, month, weekdayIndex) {
     const y = year != null ? year : this.data.year
     const m = month != null ? month : this.data.month
     const w = weekdayIndex != null ? weekdayIndex : this.data.weekdayIndex
-    this.setData({ previewDates: datesByWeekday(y, m, w) })
+    const dates = datesByWeekday(y, m, w)
+    const holdMap = await this.loadHoldMap(y, m)
+    const previewRows = dates.map((date) => {
+      const hold = isHoldDate(holdMap, date)
+      return {
+        date,
+        holdReason: hold ? holdMap[date] || '' : '',
+        selected: !hold
+      }
+    })
+    this.setData({
+      holdMap,
+      previewRows,
+      selectedPreviewCount: previewRows.filter((r) => r.selected).length,
+      skippedHoldCount: previewRows.filter((r) => r.holdReason && !r.selected).length
+    })
   },
 
   onMonthPrev() {
@@ -178,8 +215,20 @@ Page({
   },
 
   onTogglePreview() {
-    this.refreshPreview()
     this.setData({ previewOpen: !this.data.previewOpen })
+  },
+
+  onTogglePreviewRow(e) {
+    const date = e.currentTarget.dataset.date
+    const previewRows = (this.data.previewRows || []).map((row) => {
+      if (row.date !== date) return row
+      return Object.assign({}, row, { selected: !row.selected })
+    })
+    this.setData({
+      previewRows,
+      selectedPreviewCount: previewRows.filter((r) => r.selected).length,
+      skippedHoldCount: previewRows.filter((r) => r.holdReason && !r.selected).length
+    })
   },
 
   async onSubmit() {
@@ -194,7 +243,9 @@ Page({
       startTime,
       endTime,
       note,
-      saving
+      saving,
+      previewRows,
+      holdMap
     } = this.data
     if (saving) return
     if (!studentName || !teacherName || !subjectId || !startTime || !endTime) {
@@ -212,17 +263,39 @@ Page({
       return
     }
 
+    const includedHoldDates = (previewRows || [])
+      .filter((r) => r.selected && r.holdReason)
+      .map((r) => r.date)
+    const { selected, skippedHolds } = partitionBatchDates(
+      dates,
+      holdMap,
+      includedHoldDates
+    )
+    // 再与预览勾选对齐：未选中的非占用日也不写
+    const selectedSet = {}
+    ;(previewRows || []).forEach((r) => {
+      if (r.selected) selectedSet[r.date] = true
+    })
+    const writeDates = selected.filter((d) => selectedSet[d])
+    if (!writeDates.length) {
+      wx.showToast({ title: '请至少选择一天', icon: 'none' })
+      return
+    }
+
+    const skipped = skippedHolds.length
     const confirm = await new Promise((resolve) => {
       wx.showModal({
         title: '确认创建',
-        content: `将在 ${year}年${month}月 每个星期${WEEKDAY_CN[weekdayIndex]} 记上 ${dates.length} 节，可以吗？`,
+        content: skipped
+          ? `将创建 ${writeDates.length} 节（已跳过有其他安排的 ${skipped} 天），可以吗？`
+          : `将在 ${year}年${month}月 记上 ${writeDates.length} 节，可以吗？`,
         success: (res) => resolve(!!res.confirm)
       })
     })
     if (!confirm) return
 
     const price = teacherDefaultPrice(this.data.teacherProfiles, teacherName.trim())
-    const items = dates.map((date) => ({
+    const items = writeDates.map((date) => ({
       studentName: studentName.trim(),
       teacherName: teacherName.trim(),
       subjectId,
@@ -249,10 +322,10 @@ Page({
         /* ignore */
       }
       const created = result.created || 0
-      const skipped = result.skipped || 0
+      const skippedDup = result.skipped || 0
       const failed = result.failed || 0
       wx.showToast({
-        title: `已创建 ${created} 节，跳过重复 ${skipped} 节${failed ? `，失败 ${failed}` : ''}`,
+        title: `已创建 ${created} 节，跳过重复 ${skippedDup} 节${failed ? `，失败 ${failed}` : ''}`,
         icon: 'none',
         duration: 2500
       })

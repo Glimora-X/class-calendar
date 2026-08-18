@@ -13,6 +13,8 @@ Component({
     marks: { type: Array, value: [] },
     /** { 'YYYY-MM-DD': '国庆' } */
     holidays: { type: Object, value: {} },
+    /** { 'YYYY-MM-DD': reason } 其他安排 */
+    holds: { type: Object, value: {} },
     /** [{ name, tone }] */
     legend: { type: Array, value: [] }
   },
@@ -21,7 +23,7 @@ Component({
     cells: []
   },
   observers: {
-    'year, month, selectedDate, marks, holidays': function () {
+    'year, month, selectedDate, marks, holidays, holds': function () {
       this.buildCells()
     }
   },
@@ -41,6 +43,7 @@ Component({
         markMap[m.date] = m
       })
       const holidayMap = this.data.holidays || {}
+      const holdMap = this.data.holds || {}
 
       const first = new Date(year, month - 1, 1)
       const startWeekday = first.getDay()
@@ -66,6 +69,7 @@ Component({
           summary: '',
           dots: [],
           holiday: '',
+          isHold: false,
           selected: false,
           isToday: false
         })
@@ -74,6 +78,7 @@ Component({
         const date = `${year}-${pad(month)}-${pad(d)}`
         const mark = markMap[date]
         const holiday = holidayMap[date] || ''
+        const isHold = Object.prototype.hasOwnProperty.call(holdMap, date)
         const count = mark ? Number(mark.count) || 0 : 0
         const summary = (mark && mark.summary) || ''
         let dots = []
@@ -97,6 +102,7 @@ Component({
           summary,
           dots,
           holiday,
+          isHold,
           selected: date === selectedDate,
           isToday: date === todayStr
         })
@@ -115,6 +121,7 @@ Component({
           summary: '',
           dots: [],
           holiday: '',
+          isHold: false,
           selected: false,
           isToday: false
         })

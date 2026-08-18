@@ -96,16 +96,61 @@
 .preview-list {
   margin-top: 16rpx;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 12rpx;
 }
 
-.preview-item {
-  background: #eef2f7;
+.preview-hold-hint {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 22rpx;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.preview-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  padding: 12rpx 16rpx;
   border-radius: 12rpx;
-  padding: 10rpx 16rpx;
-  font-size: 24rpx;
+  background: #f8fafc;
+  border: 1rpx solid transparent;
+}
+
+.preview-row.is-on {
+  background: #eef2f7;
+  border-color: #dbe3ee;
+}
+
+.preview-check {
+  width: 32rpx;
+  font-size: 26rpx;
+  color: #3b82f6;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.preview-row__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.preview-item {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  font-size: 26rpx;
   color: #1b2430;
+  font-weight: 600;
+}
+
+.preview-hold {
+  font-size: 22rpx;
+  color: #64748b;
 }
 
 .soft-btn {

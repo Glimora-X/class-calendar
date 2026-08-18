@@ -10,6 +10,10 @@
       <view class="tl__line"></view>
     </view>
     <view class="tl__cards">
+      <view wx:if="{{item.holdReason}}" class="tl__hold">
+        <text class="tl__hold-title">这天有其他安排</text>
+        <text class="tl__hold-reason">{{item.holdReason}}</text>
+      </view>
       <timeline-booking-card
         wx:for="{{item.items}}"
         wx:for-item="b"

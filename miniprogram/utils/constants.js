@@ -21,8 +21,12 @@ const DEFAULT_TIME = {
 
 const WEEKDAY_CN = ['日', '一', '二', '三', '四', '五', '六']
 
+/** 其他安排事由最长字数 */
+const HOLD_REASON_MAX = 20
+
 const CACHE_KEYS = {
   monthBookings: (monthKey) => `bookings:${monthKey}`,
+  monthHolds: (monthKey) => `holds:${monthKey}`,
   lastSubjectId: 'pref:lastSubjectId',
   nameLists: 'cache:nameLists'
 }
@@ -36,7 +40,8 @@ const CLOUD_FUNCTIONS = {
   nameList: 'nameList',
   subjectList: 'subjectList',
   subjectUpsert: 'subjectUpsert',
-  reminderTick: 'reminderTick'
+  reminderTick: 'reminderTick',
+  dayHold: 'dayHold'
 }
 
 /** 课前提醒提前分钟数（与云函数一致） */
@@ -50,6 +55,7 @@ module.exports = {
   DEFAULT_SUBJECT_NAME,
   DEFAULT_CLASS_DURATION_MINUTES,
   DAY_CELL_SUMMARY_THRESHOLD,
+  HOLD_REASON_MAX,
   DEFAULT_TIME,
   WEEKDAY_CN,
   CACHE_KEYS,

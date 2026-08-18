@@ -20,6 +20,7 @@
         selectedDate="{{selectedDate}}"
         marks="{{marks}}"
         holidays="{{holidays}}"
+        holds="{{holdMap}}"
         legend="{{legend}}"
         bind:select="onSelectDate"
       />
@@ -27,14 +28,56 @@
       <view class="section-head">
         <text class="section-title">{{selectedLabel}}</text>
         <view class="section-actions">
+          <view
+            wx:if="{{!selectedHoldReason}}"
+            class="section-btn"
+            bindtap="onTapMarkHold"
+          >
+            <view class="section-btn__ico section-btn__ico--hold">
+              <view class="ico-hold"></view>
+            </view>
+          </view>
           <view class="section-btn" bindtap="onTapBatch">
-            <text class="section-btn__icon">▦</text>
-            <text>批量新增</text>
+            <view class="section-btn__ico section-btn__ico--batch">
+              <view class="ico-batch"></view>
+            </view>
           </view>
           <view class="section-btn" bindtap="onTapCopyMonth">
-            <text class="section-btn__icon">⧉</text>
-            <text>复制上月</text>
+            <view class="section-btn__ico section-btn__ico--copy">
+              <view class="ico-copy"></view>
+            </view>
           </view>
+        </view>
+      </view>
+
+      <view wx:if="{{selectedHoldReason && !showHoldEditor}}" class="hold-banner">
+        <view class="hold-banner__main">
+          <text class="hold-banner__title">这天有其他安排</text>
+          <text class="hold-banner__reason">{{selectedHoldReason}}</text>
+          <text class="hold-banner__hint">最好别再约</text>
+        </view>
+        <view class="hold-banner__actions">
+          <text class="hold-banner__link" bindtap="onTapEditHold">改事由</text>
+          <text class="hold-banner__link hold-banner__link--muted" bindtap="onTapRemoveHold">取消标记</text>
+        </view>
+      </view>
+
+      <view wx:if="{{showHoldEditor}}" class="hold-editor">
+        <text class="hold-editor__label">事由（1-20字）</text>
+        <input
+          class="hold-editor__input"
+          value="{{holdReasonDraft}}"
+          maxlength="20"
+          focus="{{showHoldEditor}}"
+          placeholder="例如：出差、家里有事"
+          placeholder-class="ph"
+          bindinput="onHoldReasonInput"
+          confirm-type="done"
+          bindconfirm="onSaveHold"
+        />
+        <view class="hold-editor__actions">
+          <text class="hold-banner__link hold-banner__link--muted" bindtap="onCancelHoldEditor">取消</text>
+          <text class="hold-banner__link" bindtap="onSaveHold">保存</text>
         </view>
       </view>
 
@@ -58,6 +101,11 @@
           bind:tap="onTapBooking"
         />
       </view>
+      <empty-state
+        wx:elif="{{selectedHoldReason}}"
+        text="这天有事，最好别约"
+        hint="点底部 + 号仍可加课（会再确认）"
+      />
       <empty-state
         wx:else
         text="这天还空着"

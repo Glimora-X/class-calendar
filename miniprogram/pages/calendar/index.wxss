@@ -1,43 +1,238 @@
 .section-head {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20rpx;
-  padding: 0 4rpx;
-  gap: 16rpx;
-}
-
-.section-title {
-  font-size: 32rpx;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.section-actions {
-  display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+  padding: 0 4rpx;
   gap: 12rpx;
 }
 
-.section-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6rpx;
-  height: 52rpx;
-  padding: 0 16rpx;
-  border-radius: 12rpx;
-  border: 1rpx solid #e2e8f0;
-  background: #fff;
-  font-size: 22rpx;
-  color: #94a3b8;
-  font-weight: 400;
+.section-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 30rpx;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.section-btn__icon {
-  font-size: 20rpx;
-  color: #a8b3c4;
-  opacity: 1;
+.section-actions {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.section-btn {
+  width: 72rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  box-sizing: border-box;
+}
+
+.section-btn:active {
+  transform: scale(0.94);
+  opacity: 0.9;
+}
+
+.section-btn__ico {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.section-btn__ico--hold {
+  background: linear-gradient(145deg, #94a3b8, #64748b);
+  box-shadow: 0 4rpx 10rpx rgba(100, 116, 139, 0.3);
+}
+
+.section-btn__ico--batch {
+  background: linear-gradient(145deg, #60a5fa, #3b82f6);
+  box-shadow: 0 4rpx 10rpx rgba(59, 130, 246, 0.32);
+}
+
+.section-btn__ico--copy {
+  background: linear-gradient(145deg, #34d399, #10b981);
+  box-shadow: 0 4rpx 10rpx rgba(16, 185, 129, 0.28);
+}
+
+/* 其他安排：小日历 + 斜杠 */
+.ico-hold {
+  width: 22rpx;
+  height: 20rpx;
+  border: 2.5rpx solid #fff;
+  border-radius: 3rpx;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.ico-hold::before {
+  content: '';
+  position: absolute;
+  left: -1rpx;
+  right: -1rpx;
+  top: 4rpx;
+  height: 2.5rpx;
+  background: #fff;
+}
+
+.ico-hold::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -2rpx;
+  width: 2.5rpx;
+  height: 24rpx;
+  background: #fff;
+  border-radius: 2rpx;
+  transform: translateX(-50%) rotate(-42deg);
+  box-shadow: 0 0 0 2rpx rgba(100, 116, 139, 0.35);
+}
+
+/* 批量新增：四点宫格 */
+.ico-batch {
+  width: 20rpx;
+  height: 20rpx;
+  position: relative;
+}
+
+.ico-batch::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 7rpx;
+  height: 7rpx;
+  border-radius: 2rpx;
+  background: #fff;
+  box-shadow: 13rpx 0 0 #fff, 0 13rpx 0 #fff, 13rpx 13rpx 0 #fff;
+}
+
+/* 复制上月：双层卡片 */
+.ico-copy {
+  width: 18rpx;
+  height: 18rpx;
+  border: 2.5rpx solid #fff;
+  border-radius: 3rpx;
+  position: relative;
+  box-sizing: border-box;
+  margin-top: 2rpx;
+  margin-left: 2rpx;
+}
+
+.ico-copy::before {
+  content: '';
+  position: absolute;
+  left: -6rpx;
+  top: -6rpx;
+  width: 18rpx;
+  height: 18rpx;
+  border: 2.5rpx solid rgba(255, 255, 255, 0.75);
+  border-radius: 3rpx;
+  box-sizing: border-box;
+}
+
+.hold-banner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+  padding: 20rpx 24rpx;
+  border-radius: 20rpx;
+  background: rgba(100, 116, 139, 0.1);
+}
+
+.hold-banner__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.hold-banner__title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #334155;
+}
+
+.hold-banner__reason {
+  font-size: 26rpx;
+  color: #475569;
+}
+
+.hold-banner__hint {
+  font-size: 22rpx;
+  color: #94a3b8;
+}
+
+.hold-banner__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+
+.hold-banner__link {
+  font-size: 24rpx;
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.hold-banner__link--muted {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.hold-editor {
+  margin-bottom: 20rpx;
+  padding: 20rpx 24rpx;
+  border-radius: 20rpx;
+  background: #fff;
+  border: 1rpx solid #e2e8f0;
+}
+
+.hold-editor__label {
+  display: block;
+  font-size: 22rpx;
+  color: #94a3b8;
+  margin-bottom: 12rpx;
+}
+
+.hold-editor__input {
+  height: 72rpx;
+  padding: 0 16rpx;
+  border-radius: 12rpx;
+  background: #f8fafc;
+  font-size: 28rpx;
+  color: #1b2430;
+}
+
+.hold-editor__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 28rpx;
+  margin-top: 16rpx;
+}
+
+.ph {
+  color: #cbd5e1;
 }
 
 /* 学员切换：内容区呼出 */

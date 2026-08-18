@@ -54,6 +54,52 @@ function isMonthBookingsFresh(monthKey, ttlMs) {
 }
 
 /**
+ * @param {string} monthKey YYYY-MM
+ * @param {Array} list day hold rows
+ */
+function setMonthHolds(monthKey, list) {
+  try {
+    wx.setStorageSync(CACHE_KEYS.monthHolds(monthKey), {
+      list: list || [],
+      fetchedAt: Date.now()
+    })
+  } catch (e) {
+    console.warn('[cache] setMonthHolds failed', e)
+  }
+}
+
+/**
+ * @param {string} monthKey
+ * @returns {Array|null}
+ */
+function getMonthHolds(monthKey) {
+  try {
+    const data = wx.getStorageSync(CACHE_KEYS.monthHolds(monthKey))
+    if (Array.isArray(data)) return data
+    if (data && Array.isArray(data.list)) return data.list
+    return null
+  } catch (e) {
+    return null
+  }
+}
+
+/**
+ * @param {string} monthKey
+ * @param {number} [ttlMs]
+ * @returns {boolean}
+ */
+function isMonthHoldsFresh(monthKey, ttlMs) {
+  const ttl = ttlMs == null ? MONTH_CACHE_TTL_MS : ttlMs
+  try {
+    const data = wx.getStorageSync(CACHE_KEYS.monthHolds(monthKey))
+    if (!data || Array.isArray(data) || !data.fetchedAt) return false
+    return Date.now() - Number(data.fetchedAt) < ttl
+  } catch (e) {
+    return false
+  }
+}
+
+/**
  * @param {object} payload nameList 云函数返回
  */
 function setNameListsCache(payload) {
@@ -123,6 +169,7 @@ function clearAll() {
     keys.forEach((key) => {
       if (
         key.indexOf('bookings:') === 0 ||
+        key.indexOf('holds:') === 0 ||
         key.indexOf('remind:toast:') === 0 ||
         key === CACHE_KEYS.lastSubjectId ||
         key === CACHE_KEYS.nameLists
@@ -140,6 +187,9 @@ module.exports = {
   setMonthBookings,
   getMonthBookings,
   isMonthBookingsFresh,
+  setMonthHolds,
+  getMonthHolds,
+  isMonthHoldsFresh,
   setNameListsCache,
   getNameListsCache,
   clearNameListsCache,

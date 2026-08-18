@@ -36,6 +36,12 @@
   gap: 2rpx;
 }
 
+.cal__day-wrap {
+  position: relative;
+  width: 56rpx;
+  height: 56rpx;
+}
+
 .cal__day {
   width: 56rpx;
   height: 56rpx;
@@ -48,6 +54,33 @@
   color: #1b2430;
   line-height: 56rpx;
   text-align: center;
+}
+
+.cal__hold-mark {
+  position: absolute;
+  top: -4rpx;
+  right: -10rpx;
+  min-width: 24rpx;
+  height: 24rpx;
+  padding: 0 4rpx;
+  border-radius: 8rpx;
+  background: #64748b;
+  color: #fff;
+  font-size: 16rpx;
+  font-weight: 600;
+  line-height: 24rpx;
+  text-align: center;
+  z-index: 1;
+}
+
+.cal__cell.is-hold:not(.is-selected) .cal__day {
+  background: rgba(100, 116, 139, 0.12);
+  color: #475569;
+}
+
+.cal__cell.is-hold.is-selected .cal__hold-mark {
+  background: rgba(255, 255, 255, 0.92);
+  color: #475569;
 }
 
 .cal__cell.is-other .cal__day {

@@ -41,6 +41,7 @@ module.exports = {
 - `subjectList`
 - `subjectUpsert`
 - `reminderTick`（课前提醒；需配置模板 ID + 定时触发器）
+- `dayHold`（某日「其他安排」：list / upsert / remove）
 
 ## 4. 建集合与权限
 
@@ -51,6 +52,7 @@ module.exports = {
 | `bookings` | 仅创建者可读写 |
 | `subjects` | 仅创建者可读写 |
 | `name_lists` | 仅创建者可读写 |
+| `day_holds` | 仅创建者可读写 |
 
 ## 5. 索引
 
@@ -58,6 +60,10 @@ module.exports = {
 
 1. 组合索引：`_openid` 升序、`date` 升序、`startTime` 升序（月历查询）  
 2. 单字段：`remindAt` 升序（课前提醒扫描）
+
+`day_holds` 集合 → 索引管理：
+
+1. 组合索引：`_openid` 升序、`date` 升序（按月拉占用）
 
 ## 6. 课前提醒（订阅消息）
 
@@ -107,6 +113,7 @@ module.exports = {
 - 新建未来约课 → 授权订阅 → 可「立即试发」验证微信通知；或等课前 10 分钟由定时器发送  
 - 云库该条 `remindAt` 应为开课北京时间减 10 分钟对应的 UTC（例开课 12:55 → `04:45Z`，不是 `12:45Z`）  
 - `reminderTick` 云端测试可传：`{"action":"diagnose","_id":"记录ID"}` 或 `{"action":"send","_id":"记录ID","force":true}`  
+- 日历某日可标记「其他安排」；复制上月/批量默认跳过占用日；新增落在占用日会确认「仍要约」
 
 > **注意**：云函数写库不会自动带 `_openid`，本仓库各写库云函数已显式写入。若控制台里已有记录缺 `_openid`，列表按 `_openid` 过滤会查不到——需补字段或删后重存。
 

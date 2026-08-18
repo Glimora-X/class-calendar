@@ -4,6 +4,16 @@
   min-height: 100vh;
 }
 
+.hold-tip {
+  margin: 0 0 20rpx;
+  padding: 16rpx 20rpx;
+  border-radius: 16rpx;
+  background: rgba(100, 116, 139, 0.12);
+  font-size: 24rpx;
+  color: #475569;
+  line-height: 1.4;
+}
+
 page {
   background: #f5f6f8;
 }
