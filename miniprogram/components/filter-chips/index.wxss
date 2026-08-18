@@ -1,11 +1,12 @@
 .chips {
   width: 100%;
   white-space: nowrap;
-  margin-bottom: 28rpx;
+  margin-bottom: 16rpx;
 }
 
 .chips__inner {
   display: inline-flex;
+  align-items: center;
   gap: 16rpx;
   padding: 4rpx 2rpx 12rpx;
 }
@@ -13,6 +14,8 @@
 .chip {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  gap: 10rpx;
   height: 64rpx;
   padding: 0 28rpx;
   border-radius: 999rpx;
@@ -23,12 +26,39 @@
   letter-spacing: 0.04em;
   box-shadow: 0 8rpx 20rpx rgba(27, 36, 48, 0.05);
   border: 2rpx solid transparent;
+  box-sizing: border-box;
+  vertical-align: middle;
+  transition: box-shadow 140ms ease, background 140ms ease, color 140ms ease;
 }
 
 .chip.is-active {
   background: #3b82f6;
   color: #fff;
   box-shadow: 0 12rpx 28rpx rgba(59, 130, 246, 0.3);
+}
+
+.chip--student:not(.is-active) {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(245, 197, 66, 0.45);
+  color: #5b6472;
+}
+
+.chip--student.is-active {
+  background: #f5c542;
+  color: #1b2430;
+  box-shadow: 0 12rpx 28rpx rgba(245, 197, 66, 0.35);
+}
+
+.chip__dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #f5c542;
+  flex-shrink: 0;
+}
+
+.chip--student.is-active .chip__dot {
+  background: #1b2430;
 }
 
 /* 老师色：未选中描边/字色，选中铺满 */

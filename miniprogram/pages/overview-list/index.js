@@ -1,11 +1,13 @@
 const { WEEKDAY_CN } = require('../../utils/constants')
 const { listBookings } = require('../../services/booking')
+const { fetchNameList } = require('../../services/name-list')
 const { showApiError } = require('../../utils/errors')
 const {
   resolveBookingStatus,
   statusLabel,
   BOOKING_STATUS
 } = require('../../utils/booking-status')
+const { resolveBookingPrice } = require('../../utils/price')
 const {
   formatYuan,
   buildOverviewStats,
@@ -32,6 +34,7 @@ Page({
     end: '',
     periodLabel: '',
     teacherName: '',
+    studentName: '',
     statusFilter: '',
     title: '全部课程',
     chips: [],
@@ -48,6 +51,7 @@ Page({
     const periodLabel = decodeURIComponent((query && query.period) || '')
     const teacherName = decodeURIComponent((query && query.teacherName) || '')
     const statusFilter = decodeURIComponent((query && query.statusFilter) || '')
+    const studentName = decodeURIComponent((query && query.studentName) || '')
 
     const title = this.resolveTitle(mode, teacherName)
     wx.setNavigationBarTitle({ title })
@@ -58,6 +62,7 @@ Page({
       end,
       periodLabel,
       teacherName,
+      studentName,
       statusFilter,
       title,
       chips: this.buildChips(mode, statusFilter)
@@ -66,7 +71,7 @@ Page({
   },
 
   resolveTitle(mode, teacherName) {
-    if (mode === 'expense') return '消费明细'
+    if (mode === 'expense') return '支出明细'
     if (mode === 'teachers') return '全部老师'
     if (mode === 'teacher') return teacherName || '老师课程'
     return '全部课程'
@@ -97,8 +102,12 @@ Page({
     if (!start || !end) return
     this.setData({ loading: true })
     try {
-      const res = await listBookings({ start, end }, { title: '加载中' })
+      const [res, nameList] = await Promise.all([
+        listBookings({ start, end }, { title: '加载中' }),
+        fetchNameList({ silent: true }).catch(() => ({ teachers: [] }))
+      ])
       this._bookings = (res && res.list) || []
+      this._teachers = (nameList && nameList.teachers) || []
       this.applyFilter()
     } catch (err) {
       this.setData({ loading: false, empty: true })
@@ -107,11 +116,15 @@ Page({
   },
 
   applyFilter() {
-    const { mode, statusFilter, teacherName, periodLabel } = this.data
+    const { mode, statusFilter, teacherName, studentName, periodLabel } = this.data
     const bookings = this._bookings || []
+    const teachers = this._teachers || []
 
     if (mode === 'teachers') {
-      const stats = buildOverviewStats(bookings)
+      const scoped = studentName
+        ? bookings.filter((b) => String((b && b.studentName) || '').trim() === studentName)
+        : bookings
+      const stats = buildOverviewStats(scoped, Date.now(), { teachers })
       this.setData({
         teachers: stats.teachers,
         rows: [],
@@ -123,14 +136,14 @@ Page({
 
     const filtered = filterOverviewList(
       bookings,
-      { mode, statusFilter, teacherName },
+      { mode, statusFilter, teacherName, studentName, teachers },
       Date.now()
     )
 
     const rows = filtered.map((b) => {
       const status = resolveBookingStatus(b)
-      const price = Number(b.price)
-      const hasPrice = Number.isFinite(price) && price >= 0
+      const price = resolveBookingPrice(b, teachers)
+      const hasPrice = price != null
       const closed =
         status === BOOKING_STATUS.transferred || status === BOOKING_STATUS.refunded
       return {

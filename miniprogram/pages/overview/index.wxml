@@ -2,7 +2,13 @@
   <view class="ov-brand">
     <view class="ov-brand__left">
       <view class="ov-brand__stars">✦</view>
-      <text class="ov-brand__title">小课记录本</text>
+      <view class="ov-brand__title-row">
+        <text class="ov-brand__title">小课记录本</text>
+        <block wx:if="{{showStudentCycle}}">
+          <text class="ov-brand__sep">·</text>
+          <text class="ov-brand__student" bindtap="onStudentCycle">{{studentLabel}} ▾</text>
+        </block>
+      </view>
       <view class="ov-brand__underline"></view>
     </view>
     <image class="ov-brand__hero" src="/assets/overview/hero.png" mode="aspectFit" />
@@ -80,20 +86,26 @@
     <view class="ov-status">
       <view class="ov-status__item" data-filter="done" catchtap="onTapCourses">
         <view class="ov-status__badge ov-status__badge--done">✓</view>
-        <text class="ov-status__n">{{done}} 节</text>
-        <text class="ov-status__t">已上</text>
+        <view class="ov-status__texts">
+          <text class="ov-status__n">{{done}} 节</text>
+          <text class="ov-status__t">已上</text>
+        </view>
       </view>
       <view class="ov-status__divider"></view>
       <view class="ov-status__item" data-filter="pending" catchtap="onTapCourses">
         <view class="ov-status__badge ov-status__badge--pending">◷</view>
-        <text class="ov-status__n">{{pending}} 节</text>
-        <text class="ov-status__t">待上</text>
+        <view class="ov-status__texts">
+          <text class="ov-status__n">{{pending}} 节</text>
+          <text class="ov-status__t">待上</text>
+        </view>
       </view>
       <view class="ov-status__divider"></view>
       <view class="ov-status__item" data-filter="closed" catchtap="onTapCourses">
         <view class="ov-status__badge ov-status__badge--closed">↺</view>
-        <text class="ov-status__n">{{closed}} 节</text>
-        <text class="ov-status__t">退转</text>
+        <view class="ov-status__texts">
+          <text class="ov-status__n">{{closed}} 节</text>
+          <text class="ov-status__t">退转</text>
+        </view>
       </view>
     </view>
   </view>
@@ -113,7 +125,7 @@
           <text class="ov-expense-money">{{expenseLabel}}</text>
           <view class="ov-expense-underline"></view>
         </view>
-        <text class="ov-expense-sub">已支付 {{paidCount}} 节课程</text>
+        <text class="ov-expense-sub">已支付 {{paidCount}} 节</text>
       </view>
       <view class="ov-expense-avg">
         <text class="ov-expense-avg__n">{{avgLabel}}</text>
@@ -144,18 +156,18 @@
           <image wx:if="{{item.avatarUrl}}" class="ov-teacher__img" src="{{item.avatarUrl}}" mode="aspectFill" />
           <text wx:else>{{item.initial}}</text>
         </view>
-        <view class="ov-teacher__mid">
+        <view class="ov-teacher__info">
           <view class="ov-teacher__name-row">
             <text class="ov-teacher__name">{{item.name}}</text>
             <text class="ov-teacher__star tone-{{item.tone}}">★</text>
           </view>
           <text class="ov-teacher__lessons">{{item.lessonCount}} 节课</text>
-          <view class="ov-teacher__bar-row">
-            <view class="ov-teacher__bar">
-              <view class="ov-teacher__bar-fill tone-{{item.tone}}" style="width: {{item.barWidth}};"></view>
-            </view>
-            <text class="ov-teacher__pct">{{item.percentLabel}}</text>
+        </view>
+        <view class="ov-teacher__bar-row">
+          <view class="ov-teacher__bar">
+            <view class="ov-teacher__bar-fill tone-{{item.tone}}" style="width: {{item.barWidth}};"></view>
           </view>
+          <text class="ov-teacher__pct">{{item.percentLabel}}</text>
         </view>
         <view class="ov-teacher__right">
           <text class="ov-teacher__amount">{{item.amountLabel}}</text>
@@ -163,8 +175,8 @@
         </view>
       </view>
     </block>
-    <view wx:else class="ov-empty-inline">这段时间还没有老师费用</view>
+    <view wx:else class="ov-empty-inline">这段时间还没有老师费用呢</view>
   </view>
 
-  <view wx:if="{{empty && !loading}}" class="ov-hint">这段时间还没有约课</view>
+  <view wx:if="{{empty && !loading}}" class="ov-hint">这段时间还没有课</view>
 </view>

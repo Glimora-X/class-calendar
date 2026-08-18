@@ -56,5 +56,5 @@
     </view>
   </block>
 
-  <empty-state wx:if="{{empty && !loading}}" text="暂无记录" hint="换个时间范围试试" />
+  <empty-state wx:if="{{empty && !loading}}" text="这里空空的" hint="换个时间再看看？" />
 </view>

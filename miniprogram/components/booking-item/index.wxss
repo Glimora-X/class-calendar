@@ -110,29 +110,29 @@
   padding: 0 12rpx;
   border-radius: 999rpx;
   font-size: 20rpx;
-  font-weight: 700;
+  font-weight: 400;
   flex-shrink: 0;
 }
 
 .card__teacher.tone-primary,
 .card__teacher.tone-surface {
-  background: rgba(59, 130, 246, 0.14);
-  color: #2563eb;
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
 }
 
 .card__teacher.tone-mint {
-  background: rgba(52, 211, 153, 0.18);
-  color: #059669;
+  background: rgba(52, 211, 153, 0.12);
+  color: #34d399;
 }
 
 .card__teacher.tone-pro {
-  background: rgba(139, 92, 246, 0.16);
-  color: #7c3aed;
+  background: rgba(139, 92, 246, 0.1);
+  color: #a78bfa;
 }
 
 .card__teacher.tone-warning {
-  background: rgba(245, 158, 11, 0.18);
-  color: #d97706;
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
 }
 
 .card__note-icon {
@@ -158,30 +158,30 @@
   padding: 0 16rpx;
   border-radius: 12rpx;
   font-size: 20rpx;
-  font-weight: 600;
+  font-weight: 400;
   border: 1rpx solid transparent;
 }
 
 .card__status.status-pending {
-  color: #2563eb;
-  background: rgba(59, 130, 246, 0.1);
-  border-color: rgba(59, 130, 246, 0.25);
+  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.2);
 }
 
 .card__status.status-done {
-  color: #059669;
-  background: rgba(52, 211, 153, 0.12);
-  border-color: rgba(52, 211, 153, 0.3);
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.1);
+  border-color: rgba(52, 211, 153, 0.22);
 }
 
 .card__status.status-transferred {
-  color: #7c3aed;
-  background: rgba(139, 92, 246, 0.1);
-  border-color: rgba(139, 92, 246, 0.28);
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.08);
+  border-color: rgba(139, 92, 246, 0.2);
 }
 
 .card__status.status-refunded {
-  color: #667085;
-  background: rgba(148, 163, 184, 0.16);
-  border-color: rgba(148, 163, 184, 0.35);
+  color: #94a3b8;
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.28);
 }

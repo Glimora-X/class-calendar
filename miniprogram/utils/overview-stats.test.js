@@ -110,4 +110,50 @@ const wangList = filterOverviewList(
 )
 assert.strictEqual(wangList.length, 3)
 
+const studentScoped = filterOverviewList(
+  [
+    { studentName: '小雨', teacherName: '王老师', date: '2026-08-05', startTime: '10:00', status: BOOKING_STATUS.pending, statusManual: false, price: 100 },
+    { studentName: '小宇', teacherName: '王老师', date: '2026-08-05', startTime: '11:00', status: BOOKING_STATUS.pending, statusManual: false, price: 100 }
+  ],
+  { mode: 'courses', studentName: '小雨' },
+  now
+)
+assert.strictEqual(studentScoped.length, 1)
+assert.strictEqual(studentScoped[0].studentName, '小雨')
+
+// 约课无 price 时回落老师默认单价
+const fallbackBookings = [
+  {
+    teacherName: '王老师',
+    date: '2026-08-05',
+    startTime: '10:00',
+    status: BOOKING_STATUS.pending,
+    statusManual: false,
+    price: null
+  },
+  {
+    teacherName: '王老师',
+    date: '2026-08-06',
+    startTime: '10:00',
+    status: BOOKING_STATUS.pending,
+    statusManual: false
+  }
+]
+const fallbackStats = buildOverviewStats(fallbackBookings, now, {
+  teachers: [{ name: '王老师', pricePerLesson: 200 }]
+})
+assert.strictEqual(fallbackStats.paidCount, 2)
+assert.strictEqual(fallbackStats.expenseTotal, 400)
+assert.strictEqual(fallbackStats.teachers[0].amount, 400)
+
+const fallbackExpense = filterOverviewList(
+  fallbackBookings,
+  {
+    mode: 'expense',
+    teachers: [{ name: '王老师', pricePerLesson: 200 }]
+  },
+  now
+)
+assert.strictEqual(fallbackExpense.length, 2)
+
 console.log('overview-stats tests passed')

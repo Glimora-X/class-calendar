@@ -32,4 +32,36 @@ assert.strictEqual(priceAfterTeacherChange(null, 80, 90), 90)
 assert.strictEqual(priceAfterTeacherChange(80, 80, 90), 90)
 assert.strictEqual(priceAfterTeacherChange(100, 80, 90), 100)
 
+const {
+  teacherPriceMap,
+  resolveBookingPrice
+} = require('./price')
+
+const map = teacherPriceMap([
+  { name: '王老师', pricePerLesson: 200 },
+  { name: '李老师' }
+])
+assert.strictEqual(map['王老师'], 200)
+assert.strictEqual(map['李老师'], undefined)
+
+assert.strictEqual(
+  resolveBookingPrice({ teacherName: '王老师', price: null }, map),
+  200
+)
+assert.strictEqual(
+  resolveBookingPrice({ teacherName: '王老师', price: 180 }, map),
+  180
+)
+assert.strictEqual(
+  resolveBookingPrice({ teacherName: '李老师', price: null }, map),
+  null
+)
+assert.strictEqual(
+  resolveBookingPrice(
+    { teacherName: '王老师' },
+    [{ name: '王老师', pricePerLesson: 220 }]
+  ),
+  220
+)
+
 console.log('all tests passed')

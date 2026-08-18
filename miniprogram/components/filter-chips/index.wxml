@@ -3,9 +3,12 @@
     <view
       wx:for="{{items}}"
       wx:key="id"
-      class="chip {{item.active ? 'is-active' : ''}} {{item.tone ? 'tone-' + item.tone : ''}}"
+      class="chip {{item.active ? 'is-active' : ''}} {{item.tone ? 'tone-' + item.tone : ''}} {{item.variant === 'student' ? 'chip--student' : ''}}"
       data-id="{{item.id}}"
       bindtap="onTap"
-    >{{item.label}}</view>
+    >
+      <view wx:if="{{item.variant === 'student' && item.id !== 'all'}}" class="chip__dot"></view>
+      <text>{{item.label}}</text>
+    </view>
   </view>
 </scroll-view>

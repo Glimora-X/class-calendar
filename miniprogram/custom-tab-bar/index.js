@@ -27,7 +27,17 @@ Component({
       this.setData({ selected: index })
     },
     onFab() {
-      wx.navigateTo({ url: '/pages/booking-edit/index' })
+      let url = '/pages/booking-edit/index'
+      try {
+        const { getFilterStudent } = require('../utils/prefs')
+        const student = getFilterStudent()
+        if (student) {
+          url += `?studentName=${encodeURIComponent(student)}`
+        }
+      } catch (e) {
+        /* ignore */
+      }
+      wx.navigateTo({ url })
     }
   }
 })

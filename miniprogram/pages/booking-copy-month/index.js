@@ -126,8 +126,8 @@ Page({
     const picked = createRows.filter((r) => r.checked)
     const confirm = await new Promise((resolve) => {
       wx.showModal({
-        title: '确认复制',
-        content: `将向 ${targetYear}年${targetMonth}月 写入 ${picked.length} 节约课，重复项会自动跳过。`,
+        title: '确认创建',
+        content: `将向 ${targetYear}年${targetMonth}月 写入 ${picked.length} 节，重复的会自动跳过。`,
         success: (res) => resolve(!!res.confirm)
       })
     })

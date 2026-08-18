@@ -1,4 +1,6 @@
 <view class="empty">
+  <view class="empty__blob"></view>
+  <view class="empty__orb"></view>
   <text class="empty__text">{{text}}</text>
   <text wx:if="{{hint}}" class="empty__hint">{{hint}}</text>
 </view>

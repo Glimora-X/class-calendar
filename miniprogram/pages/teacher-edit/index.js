@@ -7,6 +7,11 @@ const { listSubjects } = require('../../services/subject')
 const { teacherInitial } = require('../../utils/booking-status')
 const { showApiError } = require('../../utils/errors')
 const { parsePriceInput, formatPriceInput } = require('../../utils/price')
+const {
+  TEACHER_AVATAR_PRESETS,
+  teacherPresetSrc,
+  resolveTeacherAvatarUrl
+} = require('../../utils/avatar-presets')
 
 const NOTE_MAX = 200
 
@@ -17,7 +22,9 @@ Page({
     name: '',
     initial: '?',
     avatarFileID: '',
+    avatarPreset: '',
     avatarUrl: '',
+    presets: TEACHER_AVATAR_PRESETS,
     subjectId: '',
     subjectName: '',
     priceText: '',
@@ -46,7 +53,7 @@ Page({
       if (isEdit) {
         const hit = (listRes.teachers || []).find((t) => t.name === fromName)
         if (!hit) {
-          wx.showToast({ title: '未找到该老师', icon: 'none' })
+          wx.showToast({ title: '没找到这位老师', icon: 'none' })
           return
         }
         await this.applyTeacher(hit)
@@ -61,6 +68,7 @@ Page({
       name: t.name || '',
       initial: teacherInitial(t.name),
       avatarFileID: t.avatarFileID || '',
+      avatarPreset: t.avatarPreset || '',
       subjectId: t.subjectId || '',
       subjectName: t.subjectName || '',
       priceText: formatPriceInput(t.pricePerLesson),
@@ -69,16 +77,32 @@ Page({
       color: t.color || '',
       avatarUrl: ''
     }
+    const urlMap = {}
     if (t.avatarFileID && wx.cloud && wx.cloud.getTempFileURL) {
       try {
         const r = await wx.cloud.getTempFileURL({ fileList: [t.avatarFileID] })
         const f = r.fileList && r.fileList[0]
-        if (f && f.tempFileURL) patch.avatarUrl = f.tempFileURL
+        if (f && f.fileID && f.tempFileURL) urlMap[f.fileID] = f.tempFileURL
       } catch (e) {
         /* ignore */
       }
     }
+    patch.avatarUrl = resolveTeacherAvatarUrl(t, urlMap)
     this.setData(patch)
+  },
+
+  onPickPreset(e) {
+    const id = (e.currentTarget.dataset && e.currentTarget.dataset.id) || ''
+    if (!id) return
+    this.setData({
+      avatarPreset: id,
+      avatarFileID: '',
+      avatarUrl: teacherPresetSrc(id)
+    })
+  },
+
+  onPickAlbum() {
+    this.onPickAvatar()
   },
 
   onNameInput(e) {
@@ -98,7 +122,7 @@ Page({
   onPickSubject() {
     const subjects = this.data.subjects || []
     if (!subjects.length) {
-      wx.showToast({ title: '暂无科目，请先在约课中新增', icon: 'none' })
+      wx.showToast({ title: '还没有科目，先去加一节课时顺便建一个吧', icon: 'none' })
       return
     }
     const names = subjects.map((s) => s.name)
@@ -154,7 +178,11 @@ Page({
       filePath: tempFilePath,
       success: (up) => {
         const fileID = up.fileID
-        this.setData({ avatarFileID: fileID, avatarUrl: tempFilePath })
+        this.setData({
+          avatarFileID: fileID,
+          avatarPreset: '',
+          avatarUrl: tempFilePath
+        })
         wx.hideLoading()
         wx.showToast({ title: '已选头像', icon: 'success' })
       },
@@ -187,6 +215,7 @@ Page({
         name,
         color: this.data.color || undefined,
         avatarFileID: this.data.avatarFileID || '',
+        avatarPreset: this.data.avatarPreset || '',
         subjectId: this.data.subjectId || '',
         subjectName: this.data.subjectName || '',
         note: this.data.note || '',
@@ -213,7 +242,7 @@ Page({
     if (!name) return
     wx.showModal({
       title: '删除老师？',
-      content: '仅从名单移除，不会删除已有约课记录。',
+      content: '只是从名单拿掉，已经记过的课还在。',
       confirmColor: '#ef4444',
       success: async (res) => {
         if (!res.confirm) return

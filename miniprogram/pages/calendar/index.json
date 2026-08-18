@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "约课",
+  "navigationBarTitleText": "小课记录本",
   "usingComponents": {
     "month-nav": "/components/month-nav/index",
     "filter-chips": "/components/filter-chips/index",

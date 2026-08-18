@@ -2,8 +2,8 @@
   <view wx:if="{{loading && !teachers.length}}" class="empty">加载中…</view>
 
   <view wx:elif="{{!teachers.length}}" class="empty">
-    <text class="empty__title">暂无老师</text>
-    <text class="empty__desc">新增后可维护头像、主科与备注</text>
+    <text class="empty__title">还没有老师</text>
+    <text class="empty__desc">加一位，就能记头像、主科和备注</text>
     <view class="soft-btn soft-btn--primary empty__btn" bindtap="onAdd">新增老师</view>
   </view>
 

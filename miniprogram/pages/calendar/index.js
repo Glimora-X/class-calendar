@@ -2,6 +2,14 @@ const WEEKDAY_CN = ['星期日', '星期一', '星期二', '星期三', '星期�
 
 const { DAY_CELL_SUMMARY_THRESHOLD } = require('../../utils/constants')
 const { buildMarks, buildLegend } = require('../../utils/calendar-marks')
+const {
+  filterByStudent,
+  resolveFilterStudent,
+  shouldShowStudentFilter,
+  nextFilterStudent,
+  studentFilterLabel
+} = require('../../utils/student-filter')
+const { getFilterStudent, setFilterStudent } = require('../../utils/prefs')
 const { addMonths } = require('../../utils/date-utils')
 const { formatMonthKey, monthRange, formatDate, pad } = require('../../utils/format')
 const {
@@ -25,6 +33,7 @@ const {
   hasShownInAppToast,
   markInAppToastShown
 } = require('../../utils/reminder')
+const { resolveTeacherAvatarUrl } = require('../../utils/avatar-presets')
 
 const COLOR_TO_TONE = {
   accent: 'primary',
@@ -42,7 +51,12 @@ Page({
     selectedDate: '',
     selectedLabel: '',
     filterTeacher: '',
+    filterStudent: '',
+    showStudentCycle: false,
+    studentLabel: '全部',
+    stageClass: '',
     chips: [],
+    students: [],
     marks: [],
     legend: [],
     holidays: {},
@@ -64,20 +78,27 @@ Page({
     } else {
       this.checkImminentReminders()
     }
-    this.loadTeacherColors()
+    this.loadNameMeta()
   },
 
   onLoad() {
     const now = new Date()
+    this.setData({ filterStudent: getFilterStudent() })
     this.setViewing(now.getFullYear(), now.getMonth() + 1, formatDate(now), {
       force: true
     })
-    this.loadTeacherColors()
+    this.loadNameMeta()
   },
 
-  async loadTeacherColors() {
+  async loadNameMeta() {
     try {
       const list = await fetchNameList({ silent: true, force: true })
+      const students = list.students || []
+      const filterStudent = resolveFilterStudent(getFilterStudent(), students)
+      if (filterStudent !== getFilterStudent()) {
+        setFilterStudent(filterStudent)
+      }
+
       const map = {}
       const fileByName = {}
       const fileIds = []
@@ -116,8 +137,21 @@ Page({
         const fid = fileByName[name]
         if (urlByFile[fid]) teacherAvatarUrlMap[name] = urlByFile[fid]
       })
+      ;(list.teachers || []).forEach((t) => {
+        if (!t || typeof t === 'string' || !t.name) return
+        if (teacherAvatarUrlMap[t.name]) return
+        const src = resolveTeacherAvatarUrl(t, urlByFile)
+        if (src) teacherAvatarUrlMap[t.name] = src
+      })
 
-      this.setData({ teacherColorMap: map, teacherAvatarUrlMap })
+      this.setData({
+        students,
+        filterStudent,
+        showStudentCycle: shouldShowStudentFilter(students),
+        studentLabel: studentFilterLabel(filterStudent),
+        teacherColorMap: map,
+        teacherAvatarUrlMap
+      })
       if (this.data.monthBookings && this.data.monthBookings.length) {
         this.recomputeViews(this.data.monthBookings)
       }
@@ -153,6 +187,29 @@ Page({
     this.setData({ mode: e.detail.mode })
   },
 
+  onStudentCycle() {
+    if (!shouldShowStudentFilter(this.data.students)) return
+    if (this._studentAnimLock) return
+    const filterStudent = nextFilterStudent(this.data.students, this.data.filterStudent)
+    this._studentAnimLock = true
+    if (this._stageTimer) clearTimeout(this._stageTimer)
+    if (this._stageClearTimer) clearTimeout(this._stageClearTimer)
+    this.setData({ stageClass: 'is-out' })
+    this._stageTimer = setTimeout(() => {
+      setFilterStudent(filterStudent)
+      this.setData({
+        filterStudent,
+        studentLabel: studentFilterLabel(filterStudent),
+        stageClass: 'is-in'
+      })
+      this.recomputeViews(this.data.monthBookings)
+      this._stageClearTimer = setTimeout(() => {
+        this.setData({ stageClass: '' })
+        this._studentAnimLock = false
+      }, 180)
+    }, 90)
+  },
+
   onFilterChange(e) {
     const id = e.detail.id
     const filterTeacher = id === 'all' ? '' : id
@@ -174,6 +231,19 @@ Page({
     wx.navigateTo({ url: '/pages/booking-copy-month/index' })
   },
 
+  bookingEditUrl(extra) {
+    const q = []
+    if (extra && extra.id) q.push(`id=${encodeURIComponent(extra.id)}`)
+    if (extra && extra.date) q.push(`date=${encodeURIComponent(extra.date)}`)
+    if (!(extra && extra.id)) {
+      const student = (extra && extra.studentName) || this.data.filterStudent
+      if (student) q.push(`studentName=${encodeURIComponent(student)}`)
+    }
+    return q.length
+      ? `/pages/booking-edit/index?${q.join('&')}`
+      : '/pages/booking-edit/index'
+  },
+
   checkImminentReminders() {
     const list = findImminentBookings(this.data.monthBookings || [])
     if (!list.length) return
@@ -189,7 +259,7 @@ Page({
       showCancel: !!b._id,
       success: (res) => {
         if (res.confirm && b._id) {
-          wx.navigateTo({ url: `/pages/booking-edit/index?id=${b._id}` })
+          wx.navigateTo({ url: this.bookingEditUrl({ id: b._id }) })
         }
       }
     })
@@ -231,13 +301,22 @@ Page({
   },
 
   recomputeViews(list) {
-    const { filterTeacher, selectedDate, teacherColorMap, teacherAvatarUrlMap } = this.data
-    const filtered = filterTeacher
-      ? list.filter((b) => b.teacherName === filterTeacher)
-      : list
+    const {
+      filterTeacher,
+      filterStudent,
+      selectedDate,
+      teacherColorMap,
+      teacherAvatarUrlMap,
+      students
+    } = this.data
 
-    const teachers = uniqueTeachers(list)
-    const totalByTeacher = countByTeacher(list)
+    const afterStudent = filterByStudent(list, filterStudent)
+    const filtered = filterTeacher
+      ? afterStudent.filter((b) => b.teacherName === filterTeacher)
+      : afterStudent
+
+    const teachers = uniqueTeachers(afterStudent)
+    const totalByTeacher = countByTeacher(afterStudent)
     const chips = [
       { id: 'all', label: '全部', active: !filterTeacher, tone: '' },
       ...teachers.map((name) => {
@@ -251,7 +330,6 @@ Page({
         }
       })
     ]
-
     const byDate = {}
     filtered.forEach((b) => {
       if (!byDate[b.date]) byDate[b.date] = []
@@ -291,21 +369,22 @@ Page({
 
     this.setData({
       chips,
+      showStudentCycle: shouldShowStudentFilter(students),
+      studentLabel: studentFilterLabel(filterStudent),
       marks,
       legend,
       dayBookings,
       selectedLabel,
       timelineGroups,
-      summaryText: filtered.length ? `本月 ${filtered.length} 节` : '本月暂无约课'
+      summaryText: filtered.length ? `本月 ${filtered.length} 节` : '本月还没有课'
     })
   },
 
   onTapBooking(e) {
     const id = (e.detail && e.detail.id) || ''
-    const url = id
-      ? `/pages/booking-edit/index?id=${id}`
-      : '/pages/booking-edit/index'
-    wx.navigateTo({ url })
+    wx.navigateTo({
+      url: id ? this.bookingEditUrl({ id }) : this.bookingEditUrl()
+    })
   },
 
   onTapTimelineItem(e) {
@@ -342,7 +421,7 @@ function decorateBooking(b, teacherColorMap, teacherAvatarUrlMap) {
   const fromTeacher = b.teacherName && map[b.teacherName]
   const fallback = ['surface', 'primary', 'mint'][(b.studentName || '').length % 3]
   const resolved = resolveBookingStatus(b)
-  const student = String(b.studentName || '').trim() || '学员'
+  const student = String(b.studentName || '').trim() || '学生'
   const subject = String(b.subjectName || '').trim() || '科目'
   return Object.assign({}, b, {
     cardTone: fromTeacher || b.cardTone || fallback,
@@ -355,7 +434,7 @@ function decorateBooking(b, teacherColorMap, teacherAvatarUrlMap) {
 }
 
 function formatSelectedLabel(dateStr) {
-  if (!dateStr) return '当日约课'
+  if (!dateStr) return '当天课程'
   const d = new Date(dateStr.replace(/-/g, '/'))
   return `${d.getMonth() + 1}月${d.getDate()}日 · ${WEEKDAY_CN[d.getDay()]}`
 }

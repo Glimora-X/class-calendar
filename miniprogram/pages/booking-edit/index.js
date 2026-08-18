@@ -9,6 +9,10 @@ const {
   getClassDurationMinutes,
   getRemindMinutesBefore
 } = require('../../utils/prefs')
+const {
+  shouldShowStudentFilter,
+  studentNameList
+} = require('../../utils/student-filter')
 const { listSubjects, upsertSubject } = require('../../services/subject')
 const {
   upsertBooking,
@@ -106,6 +110,7 @@ Page({
     /** 编辑态等 loadBooking 完成后再挂载表单，避免 input 受控不刷新 */
     formReady: false,
     studentName: '',
+    studentQuickPicks: [],
     teacherName: '',
     price: null,
     priceText: '',
@@ -131,7 +136,7 @@ Page({
     quickText: '',
     drafts: [],
     draftCount: 0,
-    saveLabel: '保存约课',
+    saveLabel: '保存课程',
     /** 新增态：当前展开编辑的草稿下标，-1 表示全部折叠 */
     expandedIndex: 0,
     /** 快捷解析区是否展开 */
@@ -152,7 +157,7 @@ Page({
     const isEdit = !!editId
 
     if (isEdit) {
-      wx.setNavigationBarTitle({ title: '编辑约课' })
+      wx.setNavigationBarTitle({ title: '编辑课程' })
       // 先不挂载表单：等科目列表 + 约课详情回填后再 formReady
       this.setData({
         isEdit: true,
@@ -174,6 +179,7 @@ Page({
     const startTime = formatTime(now)
     const endTime = addMinutesToTime(startTime, getClassDurationMinutes())
     const date = (query && query.date) || today
+    const prefillStudent = decodeURIComponent((query && query.studentName) || '').trim()
     this.setData({
       isEdit: false,
       formReady: true,
@@ -186,7 +192,8 @@ Page({
       noteLen: 0,
       parseExpanded: true,
       expandedIndex: 0,
-      showEditTip: true
+      showEditTip: true,
+      studentName: prefillStudent
     })
     this.syncDraftMeta(
       [
@@ -194,7 +201,8 @@ Page({
           this.makeEmptyDraft({
             date,
             startTime,
-            endTime
+            endTime,
+            studentName: prefillStudent
           })
         )
       ],
@@ -237,7 +245,7 @@ Page({
       drafts,
       draftCount: count,
       expandedIndex: exp,
-      saveLabel: count > 0 ? `保存 ${count} 节约课` : '保存约课'
+      saveLabel: count > 0 ? `保存 ${count} 节` : '保存课程'
     })
   },
 
@@ -276,14 +284,34 @@ Page({
       const teachers = profiles
         .map((t) => (typeof t === 'string' ? t : t.name))
         .filter(Boolean)
+      const names = studentNames(list.students)
+      const studentQuickPicks = shouldShowStudentFilter(list.students)
+        ? studentNameList(list.students).map((name) => ({
+            name,
+            initial: name.slice(0, 1)
+          }))
+        : []
       this.setData({
-        studentSuggestions: studentNames(list.students),
+        studentSuggestions: names,
+        studentQuickPicks,
         teacherSuggestions: teachers,
         teacherProfiles: profiles
       })
     } catch (e) {
       /* ignore */
     }
+  },
+
+  onQuickPickStudent(e) {
+    const name = (e.currentTarget.dataset && e.currentTarget.dataset.name) || ''
+    if (!name) return
+    if (this.data.isEdit) {
+      this.setData({ studentName: name })
+      return
+    }
+    const index = this.data.expandedIndex
+    if (index < 0) return
+    this.updateDraft(index, { studentName: name })
   },
 
   applyTeacherPrice(teacherName, currentPrice) {
@@ -351,7 +379,7 @@ Page({
       })
       patch.draftCount = patch.drafts.length
       patch.saveLabel =
-        patch.draftCount > 0 ? `保存 ${patch.draftCount} 节约课` : '保存约课'
+        patch.draftCount > 0 ? `保存 ${patch.draftCount} 节` : '保存课程'
     }
     this.setData(patch)
   },
@@ -633,7 +661,7 @@ Page({
     const index = Number(e.currentTarget.dataset.index)
     const drafts = (this.data.drafts || []).slice()
     if (drafts.length <= 1) {
-      wx.showToast({ title: '至少保留一条约课', icon: 'none' })
+      wx.showToast({ title: '至少留一节课哦', icon: 'none' })
       return
     }
     if (index < 0 || index >= drafts.length) return
@@ -769,7 +797,7 @@ Page({
     )
     if (!okItems.length) {
       const tip =
-        (failItems[0] && failItems[0].error) || '没识别出可用约课，请检查格式'
+        (failItems[0] && failItems[0].error) || '没认出课程信息，检查一下格式呗'
       wx.showToast({ title: tip, icon: 'none' })
       return
     }
@@ -815,7 +843,7 @@ Page({
 
   draftMissingLabel(draft) {
     if (!draft) return '内容'
-    if (!(draft.studentName || '').trim()) return '学员'
+    if (!(draft.studentName || '').trim()) return '学生'
     if (!(draft.teacherName || '').trim()) return '老师'
     if (!(draft.subjectId || '').trim()) return '科目'
     if (!(draft.subjectName || '').trim()) return '科目'
@@ -829,7 +857,7 @@ Page({
     const { drafts, saving } = this.data
     if (saving) return
     if (!drafts || drafts.length < 1) {
-      wx.showToast({ title: '请至少填写一条约课', icon: 'none' })
+      wx.showToast({ title: '先填好至少一节课吧', icon: 'none' })
       return
     }
 
@@ -839,7 +867,7 @@ Page({
       if (missing) incompletes.push({ index: i, missing })
     }
     if (incompletes.length === drafts.length) {
-      wx.showToast({ title: '请至少填写一条约课', icon: 'none' })
+      wx.showToast({ title: '先填好至少一节课吧', icon: 'none' })
       return
     }
     if (incompletes.length) {
@@ -957,7 +985,7 @@ Page({
     } = this.data
     if (saving) return
     if (!studentName || !teacherName || !subjectId || !date || !startTime || !endTime) {
-      wx.showToast({ title: '请完善必填项', icon: 'none' })
+      wx.showToast({ title: '还有没填完的哦', icon: 'none' })
       return
     }
     if (String(subjectId).indexOf('local-') === 0) {
@@ -1200,14 +1228,15 @@ Page({
     const { _id } = this.data
     if (!_id) return
     wx.showModal({
-      title: '删除约课',
-      content: '删除后不可恢复，确认删除？',
+      title: '删除课程',
+      content: '删了就回不来啦，确定吗？',
       confirmColor: '#ef4444',
+      confirmText: '删除',
       success: async (res) => {
         if (!res.confirm) return
         try {
           await deleteBooking(_id)
-          wx.showToast({ title: '已删除', icon: 'success' })
+          wx.showToast({ title: '已删掉', icon: 'success' })
           setTimeout(() => wx.navigateBack(), 400)
         } catch (err) {
           showApiError(err)

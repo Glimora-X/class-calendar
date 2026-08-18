@@ -24,7 +24,7 @@ Component({
         this.setData({ metaText: fromProp })
         return
       }
-      const student = String(studentName || '').trim() || '学员'
+      const student = String(studentName || '').trim() || '学生'
       const subject = String(subjectName || '').trim() || '科目'
       this.setData({ metaText: `${student} | ${subject}` })
     }

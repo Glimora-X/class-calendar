@@ -4,10 +4,10 @@
     <text class="head__sub">{{sourceLabel}}</text>
   </view>
 
-  <view wx:if="{{loading}}" class="hint">加载上月约课…</view>
+  <view wx:if="{{loading}}" class="hint">正在翻上月的课…</view>
 
   <block wx:elif="{{empty}}">
-    <empty-state text="上月没有约课可复制" hint="先在上月录入几节，再回来复制" />
+    <empty-state text="上月还没有课可复制" hint="先在上月记几节，再回来一键带走" />
   </block>
 
   <block wx:else>
@@ -30,7 +30,7 @@
           <text class="row__meta">{{item.teacherName}}</text>
         </view>
       </view>
-      <view wx:if="{{!createRows.length}}" class="hint">没有可映射到本月的记录</view>
+      <view wx:if="{{!createRows.length}}" class="hint">这些课对不上本月的日期啦</view>
     </view>
 
     <view wx:if="{{skippedRows.length}}" class="section surface-card soft-block">
@@ -50,7 +50,7 @@
       disabled="{{!selectedCount}}"
       bindtap="onConfirm"
     >
-      确认复制 {{selectedCount}} 条
+      确认创建 {{selectedCount}} 节
     </button>
   </block>
 </view>

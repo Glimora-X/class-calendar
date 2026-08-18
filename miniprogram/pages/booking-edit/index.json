@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "新增约课",
+  "navigationBarTitleText": "新增课程",
   "navigationBarBackgroundColor": "#EEF2F7",
   "usingComponents": {
     "name-suggest": "/components/name-suggest/index"

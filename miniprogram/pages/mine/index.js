@@ -84,15 +84,15 @@ Page({
 
   onClearBookings() {
     wx.showModal({
-      title: '清空全部约课？',
-      content: '将永久删除云端属于你的全部约课记录，科目与老师/学员名列表保留。此操作不可恢复。',
+      title: '清空全部课程？',
+      content: '云端课程会全部删掉，回不来哦。科目、老师和学生名单还在。',
       confirmColor: '#ef4444',
       confirmText: '继续',
       success: (res) => {
         if (!res.confirm) return
         wx.showModal({
-          title: '再次确认',
-          content: '确定清空全部约课？',
+          title: '再确认一下',
+          content: '真的清空全部课程吗？',
           confirmColor: '#ef4444',
           confirmText: '清空',
           success: async (res2) => {
@@ -102,7 +102,7 @@ Page({
               clearAll()
               const n = (result && result.deleted) || 0
               wx.showToast({
-                title: n ? `已删除 ${n} 条` : '已清空',
+                title: n ? `已删掉 ${n} 节` : '已清空',
                 icon: 'none',
                 duration: 2000
               })
@@ -121,11 +121,11 @@ Page({
   onLogout() {
     wx.showModal({
       title: '退出登录',
-      content: '将清除本地约课缓存，云端数据与上方设置项保留。再次打开日历会从云端重新同步。',
+      content: '只会清掉本机缓存，云端课程和设置都还在。下次打开会重新同步。',
       success: (res) => {
         if (!res.confirm) return
         clearAll()
-        wx.showToast({ title: '已清除本地缓存', icon: 'none', duration: 1200 })
+        wx.showToast({ title: '本机缓存已清掉', icon: 'none', duration: 1200 })
         setTimeout(() => {
           wx.reLaunch({ url: '/pages/calendar/index' })
         }, 400)
@@ -135,8 +135,8 @@ Page({
 
   onAbout() {
     wx.showModal({
-      title: '关于约课',
-      content: '个人主体约课小程序：月历约课、批量创建、课前提醒。',
+      title: '关于小课记录本',
+      content: '一本轻巧的家庭课表：记课、批量加课、课前提醒，打开就能看本月安排。',
       showCancel: false
     })
   }

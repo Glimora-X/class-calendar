@@ -19,6 +19,7 @@ const {
   getClassDurationMinutes,
   getRemindMinutesBefore
 } = require('../../utils/prefs')
+const { teacherDefaultPrice } = require('../../utils/price')
 
 const WEEKDAY_OPTIONS = WEEKDAY_CN.map((label, value) => ({
   value,
@@ -44,6 +45,7 @@ Page({
     note: '',
     studentSuggestions: [],
     teacherSuggestions: [],
+    teacherProfiles: [],
     previewDates: [],
     previewOpen: false,
     saving: false
@@ -89,12 +91,14 @@ Page({
   async loadNames() {
     try {
       const list = await fetchNameList({ silent: true })
-      const teachers = (list.teachers || [])
+      const profiles = list.teachers || []
+      const teachers = profiles
         .map((t) => (typeof t === 'string' ? t : t.name))
         .filter(Boolean)
       this.setData({
         studentSuggestions: studentNames(list.students),
-        teacherSuggestions: teachers
+        teacherSuggestions: teachers,
+        teacherProfiles: profiles
       })
     } catch (e) {
       /* ignore */
@@ -194,7 +198,7 @@ Page({
     } = this.data
     if (saving) return
     if (!studentName || !teacherName || !subjectId || !startTime || !endTime) {
-      wx.showToast({ title: '请完善必填项', icon: 'none' })
+      wx.showToast({ title: '还有没填完的哦', icon: 'none' })
       return
     }
     if (String(subjectId).indexOf('local-') === 0) {
@@ -210,13 +214,14 @@ Page({
 
     const confirm = await new Promise((resolve) => {
       wx.showModal({
-        title: '确认批量创建',
-        content: `将在 ${year}年${month}月 的每个星期${WEEKDAY_CN[weekdayIndex]}创建 ${dates.length} 节约课，确认？`,
+        title: '确认创建',
+        content: `将在 ${year}年${month}月 每个星期${WEEKDAY_CN[weekdayIndex]} 记上 ${dates.length} 节，可以吗？`,
         success: (res) => resolve(!!res.confirm)
       })
     })
     if (!confirm) return
 
+    const price = teacherDefaultPrice(this.data.teacherProfiles, teacherName.trim())
     const items = dates.map((date) => ({
       studentName: studentName.trim(),
       teacherName: teacherName.trim(),
@@ -225,7 +230,8 @@ Page({
       date,
       startTime,
       endTime,
-      note: note ? note.trim() : null
+      note: note ? note.trim() : null,
+      price
     }))
     const batchId = `batch_${formatMonthKey(year, month)}_${Date.now()}`
 

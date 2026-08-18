@@ -19,7 +19,7 @@
       <view class="parse-card__head" bindtap="onToggleParse">
         <view class="parse-card__titles">
           <text class="parse-card__title">快捷解析</text>
-          <text class="parse-card__desc">粘贴约课信息，自动生成多条草稿</text>
+          <text class="parse-card__desc">粘贴一段课表文字，自动拆成多节草稿</text>
         </view>
         <text class="parse-card__chev">{{parseExpanded ? '︿' : '﹀'}}</text>
       </view>
@@ -40,7 +40,7 @@
     </view>
 
     <view class="list-head">
-      <text class="list-head__title">约课列表（共 {{draftCount}} 条）</text>
+      <text class="list-head__title">课程列表（共 {{draftCount}} 节）</text>
     </view>
 
     <view
@@ -100,7 +100,7 @@
           </view>
           <view class="bk-summary__item">
             <text class="bk-summary__ico">学</text>
-            <text class="bk-summary__chip">{{item.studentName || '学员'}}</text>
+            <text class="bk-summary__chip">{{item.studentName || '学生'}}</text>
           </view>
           <view class="bk-summary__item">
             <text class="bk-summary__ico">师</text>
@@ -181,7 +181,7 @@
               layout="stack"
               iconTone="purple"
               iconText="学"
-              label="学员"
+              label="学生"
               placeholder="必填"
               value="{{item.studentName}}"
               suggestions="{{studentSuggestions}}"
@@ -202,6 +202,23 @@
               data-index="{{index}}"
               bind:input="onDraftTeacherSuggest"
             />
+          </view>
+        </view>
+
+        <view wx:if="{{studentQuickPicks.length}}" class="bk-quick-picks">
+          <text class="bk-quick-picks__label">这节课给谁？</text>
+          <view class="bk-quick-picks__row">
+            <view
+              wx:for="{{studentQuickPicks}}"
+              wx:for-item="pick"
+              wx:key="name"
+              class="bk-quick-pick {{item.studentName === pick.name ? 'is-active' : ''}}"
+              data-name="{{pick.name}}"
+              bindtap="onQuickPickStudent"
+            >
+              <view class="bk-quick-pick__avatar">{{pick.initial}}</view>
+              <text>{{pick.name}}</text>
+            </view>
           </view>
         </view>
 
@@ -264,7 +281,7 @@
               data-index="{{index}}"
               value="{{item.priceText}}"
               bindinput="onDraftPriceInput"
-              placeholder="可选，默认取老师单价"
+              placeholder="可不填，默认用老师单价"
               placeholder-class="ph"
             />
           </view>
@@ -280,7 +297,7 @@
               value="{{item.note}}"
               maxlength="{{noteMaxLen}}"
               bindinput="onDraftNoteInput"
-              placeholder="可选，填写备注信息..."
+              placeholder="想记点什么，随便写"
               placeholder-class="ph"
             />
           </view>
@@ -289,7 +306,7 @@
       </block>
     </view>
 
-    <view class="draft-add-dash" bindtap="onAddDraft">＋ 添加一条约课</view>
+    <view class="draft-add-dash" bindtap="onAddDraft">＋ 再加一节</view>
 
     <view wx:if="{{showEditTip}}" class="edit-tip">
       <view class="edit-tip__ico">i</view>
@@ -301,13 +318,13 @@
   </block>
 
   <view wx:if="{{isEdit && !formReady && !showSubscribeGate}}" class="draft-loading">
-    <text class="draft-loading__text">加载约课中…</text>
+    <text class="draft-loading__text">加载中…</text>
   </view>
 
   <!-- 编辑态：始终展开单卡 -->
   <block wx:if="{{isEdit && formReady && !showSubscribeGate}}">
     <view class="list-head">
-      <text class="list-head__title">编辑约课</text>
+      <text class="list-head__title">编辑课程</text>
     </view>
 
     <view class="bk-card bk-card--expanded">
@@ -335,7 +352,7 @@
             layout="stack"
             iconTone="purple"
             iconText="学"
-            label="学员"
+            label="学生"
             placeholder="必填"
             value="{{studentName}}"
             suggestions="{{studentSuggestions}}"
@@ -354,6 +371,23 @@
             suggestions="{{teacherSuggestions}}"
             bind:input="onTeacherSuggest"
           />
+        </view>
+      </view>
+
+      <view wx:if="{{studentQuickPicks.length}}" class="bk-quick-picks">
+        <text class="bk-quick-picks__label">这节课给谁？</text>
+        <view class="bk-quick-picks__row">
+          <view
+            wx:for="{{studentQuickPicks}}"
+            wx:for-item="pick"
+            wx:key="name"
+            class="bk-quick-pick {{studentName === pick.name ? 'is-active' : ''}}"
+            data-name="{{pick.name}}"
+            bindtap="onQuickPickStudent"
+          >
+            <view class="bk-quick-pick__avatar">{{pick.initial}}</view>
+            <text>{{pick.name}}</text>
+          </view>
         </view>
       </view>
 
@@ -414,7 +448,7 @@
             type="digit"
             value="{{priceText}}"
             bindinput="onPriceInput"
-            placeholder="可选，默认取老师单价"
+            placeholder="可不填，默认用老师单价"
             placeholder-class="ph"
           />
         </view>
@@ -430,7 +464,7 @@
             value="{{note}}"
             maxlength="{{noteMaxLen}}"
             bindinput="onFieldInput"
-            placeholder="可选，填写备注信息..."
+            placeholder="想记点什么，随便写"
             placeholder-class="ph"
           />
         </view>
@@ -444,7 +478,7 @@
   <view wx:if="{{formReady && !showSubscribeGate}}" class="footer-bar">
     <block wx:if="{{isEdit}}">
       <button class="footer-bar__danger" bindtap="onDelete">删除</button>
-      <button class="footer-bar__save" loading="{{saving}}" bindtap="onSave">保存约课</button>
+      <button class="footer-bar__save" loading="{{saving}}" bindtap="onSave">保存课程</button>
     </block>
     <button wx:else class="footer-bar__save footer-bar__save--full" loading="{{saving}}" bindtap="onSave">
       {{saveLabel}}

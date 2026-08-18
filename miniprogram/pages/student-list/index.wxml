@@ -2,9 +2,9 @@
   <view wx:if="{{loading && !students.length}}" class="empty">加载中…</view>
 
   <view wx:elif="{{!students.length}}" class="empty">
-    <text class="empty__title">暂无学员</text>
-    <text class="empty__desc">新增后可维护头像与备注</text>
-    <view class="soft-btn soft-btn--primary empty__btn" bindtap="onAdd">新增学员</view>
+    <text class="empty__title">还没有学生</text>
+    <text class="empty__desc">加一个，就能记头像和备注啦</text>
+    <view class="soft-btn soft-btn--primary empty__btn" bindtap="onAdd">新增学生</view>
   </view>
 
   <block wx:else>
@@ -32,5 +32,5 @@
   </block>
 
   <view wx:if="{{students.length}}" class="fab-space"></view>
-  <view wx:if="{{students.length}}" class="fab" bindtap="onAdd">＋ 新增学员</view>
+  <view wx:if="{{students.length}}" class="fab" bindtap="onAdd">＋ 新增学生</view>
 </view>

@@ -43,5 +43,5 @@
     wx:if="{{isEdit}}"
     class="danger-link"
     bindtap="onDelete"
-  >删除学员</view>
+  >删除学生</view>
 </view>

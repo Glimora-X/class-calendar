@@ -27,14 +27,47 @@
   height: 52rpx;
   padding: 0 16rpx;
   border-radius: 12rpx;
-  border: 1rpx solid #d8dee8;
+  border: 1rpx solid #e2e8f0;
   background: #fff;
   font-size: 22rpx;
-  color: #5b6573;
-  font-weight: 500;
+  color: #94a3b8;
+  font-weight: 400;
 }
 
 .section-btn__icon {
   font-size: 20rpx;
-  opacity: 0.7;
+  color: #a8b3c4;
+  opacity: 1;
+}
+
+/* 学员切换：内容区呼出 */
+.cal-stage {
+  transform-origin: center top;
+}
+
+.cal-stage.is-out {
+  opacity: 0.35;
+  transform: scale(0.97) translateY(8rpx);
+  transition: opacity 90ms ease-in, transform 90ms ease-in;
+}
+
+.cal-stage.is-in {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  animation: cal-pop-in 160ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes cal-pop-in {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.96) translateY(12rpx);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.02) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }

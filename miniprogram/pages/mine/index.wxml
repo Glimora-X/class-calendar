@@ -26,16 +26,16 @@
       </view>
     </picker>
   </view>
-  <view class="hint">时长用于新建/改开始时间时的结束时间；提醒用于微信通知与小程序内弹窗。</view>
+  <view class="hint">改开始时间时会按这里的时长自动带出结束时间；提醒会推微信通知，打开小程序时也会轻轻提一句。</view>
 
   <view class="section-label">功能</view>
   <view class="menu surface-card">
-    <view class="menu__item" bindtap="onTeachers">维护老师</view>
-    <view class="menu__item" bindtap="onStudents">维护学员</view>
-    <view class="menu__item" bindtap="onCopyMonth">复制上月课程</view>
-    <view class="menu__item" bindtap="onBatch">批量约课</view>
-    <view class="menu__item" bindtap="onAbout">关于约课</view>
-    <view class="menu__item menu__item--danger" bindtap="onClearBookings">清空全部约课</view>
+    <view class="menu__item" bindtap="onTeachers">老师列表</view>
+    <view class="menu__item" bindtap="onStudents">学生列表</view>
+    <view class="menu__item" bindtap="onCopyMonth">复制上月</view>
+    <view class="menu__item" bindtap="onBatch">批量新增</view>
+    <view class="menu__item" bindtap="onAbout">关于小课记录本</view>
+    <view class="menu__item menu__item--danger" bindtap="onClearBookings">清空全部课程</view>
     <view class="menu__item menu__item--danger menu__item--last" bindtap="onLogout">退出登录</view>
   </view>
   <view class="version">版本 {{version}}</view>

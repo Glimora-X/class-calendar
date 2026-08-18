@@ -699,3 +699,63 @@ page {
   opacity: 0.55;
   pointer-events: none;
 }
+
+/* —— 学员快捷点选 —— */
+.bk-quick-picks {
+  margin: -8rpx 0 28rpx;
+  padding: 0 4rpx;
+}
+
+.bk-quick-picks__label {
+  display: block;
+  font-size: 22rpx;
+  color: #9aa3b2;
+  margin-bottom: 12rpx;
+}
+
+.bk-quick-picks__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.bk-quick-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 8rpx 18rpx 8rpx 8rpx;
+  border-radius: 999rpx;
+  background: #fff;
+  border: 2rpx solid rgba(245, 197, 66, 0.4);
+  color: #5b6472;
+  font-size: 24rpx;
+  font-weight: 600;
+  transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+
+.bk-quick-pick.is-active {
+  background: #f5c542;
+  color: #1b2430;
+  border-color: transparent;
+  box-shadow: 0 8rpx 20rpx rgba(245, 197, 66, 0.3);
+  transform: scale(1.03);
+}
+
+.bk-quick-pick__avatar {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: rgba(79, 140, 255, 0.15);
+  color: #3b82f6;
+  font-size: 22rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bk-quick-pick.is-active .bk-quick-pick__avatar {
+  background: rgba(27, 36, 48, 0.12);
+  color: #1b2430;
+}
+

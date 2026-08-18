@@ -48,6 +48,40 @@ function teacherDefaultPrice(teachers, name) {
 }
 
 /**
+ * name → 默认单价
+ * @param {Array} teachers
+ * @returns {Object.<string, number>}
+ */
+function teacherPriceMap(teachers) {
+  const map = Object.create(null)
+  ;(teachers || []).forEach((t) => {
+    if (!t || typeof t === 'string' || !t.name) return
+    const p = parsePriceInput(t.pricePerLesson)
+    if (p != null) map[t.name] = p
+  })
+  return map
+}
+
+/**
+ * 有效单价：约课 price 优先，否则老师默认 pricePerLesson
+ * @param {{ price?: unknown, teacherName?: string }} booking
+ * @param {Array|Object.<string, number>} teachersOrMap
+ * @returns {number|null}
+ */
+function resolveBookingPrice(booking, teachersOrMap) {
+  const row = booking || {}
+  const own = parsePriceInput(row.price)
+  if (own != null) return own
+  const name = String(row.teacherName || '').trim()
+  if (!name) return null
+  if (teachersOrMap && !Array.isArray(teachersOrMap)) {
+    const v = teachersOrMap[name]
+    return v != null && Number.isFinite(Number(v)) ? Number(v) : null
+  }
+  return teacherDefaultPrice(teachersOrMap, name)
+}
+
+/**
  * 换老师时是否用新默认价覆盖当前价：
  * 当前为空，或仍等于旧老师默认价（视为未手改）
  * @param {number|null} current
@@ -65,5 +99,7 @@ module.exports = {
   parsePriceInput,
   formatPriceInput,
   teacherDefaultPrice,
+  teacherPriceMap,
+  resolveBookingPrice,
   priceAfterTeacherChange
 }

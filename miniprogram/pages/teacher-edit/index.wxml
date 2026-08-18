@@ -1,6 +1,6 @@
 <view class="page page--no-tab">
   <view class="surface-card form">
-    <view class="avatar-block" bindtap="onPickAvatar">
+    <view class="avatar-block">
       <image
         wx:if="{{avatarUrl}}"
         class="avatar-block__img"
@@ -8,7 +8,22 @@
         mode="aspectFill"
       />
       <view wx:else class="avatar-block__img avatar-block__img--text">{{initial}}</view>
-      <text class="avatar-block__hint">点击更换头像</text>
+      <text class="avatar-block__hint">挑一个默认头像，或从相册选</text>
+    </view>
+
+    <view class="avatar-presets">
+      <view
+        wx:for="{{presets}}"
+        wx:key="id"
+        class="avatar-presets__item {{avatarPreset === item.id ? 'is-active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onPickPreset"
+      >
+        <image class="avatar-presets__img" src="{{item.src}}" mode="aspectFill" />
+      </view>
+      <view class="avatar-presets__item avatar-presets__item--album" bindtap="onPickAlbum">
+        <text class="avatar-presets__album">相册</text>
+      </view>
     </view>
 
     <view class="soft-field">

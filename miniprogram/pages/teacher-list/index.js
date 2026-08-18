@@ -1,6 +1,7 @@
 const { fetchNameList } = require('../../services/name-list')
 const { teacherInitial } = require('../../utils/booking-status')
 const { showApiError } = require('../../utils/errors')
+const { resolveTeacherAvatarUrl } = require('../../utils/avatar-presets')
 
 Page({
   data: {
@@ -54,7 +55,7 @@ Page({
       const priceLabel = Number.isFinite(price) ? `${price}元/节` : ''
       return Object.assign({}, t, {
         initial: teacherInitial(t.name),
-        avatarUrl: (t.avatarFileID && urlMap[t.avatarFileID]) || '',
+        avatarUrl: resolveTeacherAvatarUrl(t, urlMap),
         note: t.note ? String(t.note).slice(0, 40) : '',
         priceLabel
       })

@@ -3,6 +3,15 @@ const { fetchNameList } = require('../../services/name-list')
 const { showApiError } = require('../../utils/errors')
 const { consumeBookingsDirty } = require('../../utils/sync-flags')
 const {
+  filterByStudent,
+  resolveFilterStudent,
+  shouldShowStudentFilter,
+  nextFilterStudent,
+  studentFilterLabel
+} = require('../../utils/student-filter')
+const { getFilterStudent, setFilterStudent } = require('../../utils/prefs')
+const { resolveTeacherAvatarUrl } = require('../../utils/avatar-presets')
+const {
   PRESET,
   resolvePeriod,
   previousPeriod,
@@ -26,6 +35,10 @@ Page({
       { id: PRESET.month, label: '本月', active: true },
       { id: PRESET.year, label: '本年', active: false }
     ],
+    filterStudent: '',
+    showStudentCycle: false,
+    studentLabel: '全部',
+    students: [],
     customOpen: false,
     customStart: '',
     customEnd: '',
@@ -57,9 +70,13 @@ Page({
       if (menu && menu.bottom) {
         navPadTop = menu.bottom + 8
       }
-      this.setData({ statusBarHeight, navPadTop })
+      this.setData({
+        statusBarHeight,
+        navPadTop,
+        filterStudent: getFilterStudent()
+      })
     } catch (e) {
-      /* keep defaults */
+      this.setData({ filterStudent: getFilterStudent() })
     }
   },
 
@@ -106,6 +123,18 @@ Page({
     this.applyPreset(id)
   },
 
+  onStudentCycle() {
+    if (!shouldShowStudentFilter(this.data.students)) return
+    const filterStudent = nextFilterStudent(this.data.students, this.data.filterStudent)
+    setFilterStudent(filterStudent)
+    this.setData({
+      filterStudent,
+      studentLabel: studentFilterLabel(filterStudent),
+      showStudentCycle: true
+    })
+    this.applyCachedStats()
+  },
+
   onOpenCustom() {
     this.setData({
       customOpen: !this.data.customOpen,
@@ -132,12 +161,18 @@ Page({
     this.applyPreset(PRESET.custom, { start, end })
   },
 
-  async loadAvatarMap() {
+  async loadTeacherMeta() {
     try {
       const list = await fetchNameList({ silent: true })
+      const teachers = list.teachers || []
+      const students = list.students || []
+      const filterStudent = resolveFilterStudent(getFilterStudent(), students)
+      if (filterStudent !== getFilterStudent()) {
+        setFilterStudent(filterStudent)
+      }
       const fileByName = {}
       const fileIds = []
-      ;(list.teachers || []).forEach((t) => {
+      teachers.forEach((t) => {
         if (!t || typeof t === 'string' || !t.name || !t.avatarFileID) return
         fileByName[t.name] = t.avatarFileID
         fileIds.push(t.avatarFileID)
@@ -153,15 +188,58 @@ Page({
           if (f.fileID && f.tempFileURL) urlByFile[f.fileID] = f.tempFileURL
         })
       }
-      const map = {}
+      const avatarMap = {}
       Object.keys(fileByName).forEach((name) => {
         const url = urlByFile[fileByName[name]]
-        if (url) map[name] = url
+        if (url) avatarMap[name] = url
       })
-      return map
+      teachers.forEach((t) => {
+        if (!t || typeof t === 'string' || !t.name) return
+        if (avatarMap[t.name]) return
+        const src = resolveTeacherAvatarUrl(t, urlByFile)
+        if (src) avatarMap[t.name] = src
+      })
+      return { teachers, students, filterStudent, avatarMap }
     } catch (e) {
-      return {}
+      return { teachers: [], students: [], filterStudent: '', avatarMap: {} }
     }
+  },
+
+  applyCachedStats() {
+    if (!this._bookings) return
+    const titles = periodTitles(this.data.preset)
+    const filtered = filterByStudent(this._bookings, this.data.filterStudent)
+    let previousTotal = null
+    if (this._previousList) {
+      previousTotal = filterByStudent(this._previousList, this.data.filterStudent).length
+    }
+    const stats = buildOverviewStats(filtered, Date.now(), {
+      previousTotal,
+      compareLabel: titles.compareLabel,
+      teachers: this._teachers || []
+    })
+    const teachersPreview = stats.teachersPreview.map((t) =>
+      Object.assign({}, t, {
+        avatarUrl: (this._avatarMap && this._avatarMap[t.name]) || ''
+      })
+    )
+    const trend = stats.trend
+    this.setData({
+      total: stats.total,
+      done: stats.done,
+      pending: stats.pending,
+      closed: stats.closed,
+      expenseLabel: stats.expenseLabel,
+      paidCount: stats.paidCount,
+      avgLabel: stats.avgLabel,
+      donutStyle: stats.donutStyle,
+      trendText: trend ? trend.text : '',
+      trendUp: !!(trend && trend.up),
+      trendFlat: !trend || !!trend.flat,
+      teachersPreview,
+      hasMoreTeachers: stats.hasMoreTeachers,
+      empty: stats.total === 0
+    })
   },
 
   async refresh(options) {
@@ -172,50 +250,41 @@ Page({
     this._loading = true
     this.setData({ loading: true })
     try {
-      const titles = periodTitles(preset)
       const prev = previousPeriod(start, end, preset)
       const tasks = [
         listBookings({ start, end }, { silent: !force, title: '加载中' }),
-        this.loadAvatarMap()
+        this.loadTeacherMeta()
       ]
       if (prev) {
         tasks.push(listBookings(prev, { silent: true }))
       }
       const results = await Promise.all(tasks)
       const list = (results[0] && results[0].list) || []
-      const avatarMap = results[1] || {}
-      let previousTotal = null
-      if (prev && results[2]) {
-        previousTotal = ((results[2] && results[2].list) || []).length
+      const meta = results[1] || {
+        teachers: [],
+        students: [],
+        filterStudent: '',
+        avatarMap: {}
       }
-      const stats = buildOverviewStats(list, Date.now(), {
-        previousTotal,
-        compareLabel: titles.compareLabel
-      })
-      const teachersPreview = stats.teachersPreview.map((t) =>
-        Object.assign({}, t, {
-          avatarUrl: avatarMap[t.name] || ''
-        })
-      )
+      let previousList = null
+      if (prev && results[2]) {
+        previousList = (results[2] && results[2].list) || []
+      }
       this._bookings = list
-      const trend = stats.trend
+      this._previousList = previousList
+      this._teachers = meta.teachers
+      this._avatarMap = meta.avatarMap
+
+      const filterStudent = meta.filterStudent
+      const students = meta.students || []
       this.setData({
-        total: stats.total,
-        done: stats.done,
-        pending: stats.pending,
-        closed: stats.closed,
-        expenseLabel: stats.expenseLabel,
-        paidCount: stats.paidCount,
-        avgLabel: stats.avgLabel,
-        donutStyle: stats.donutStyle,
-        trendText: trend ? trend.text : '',
-        trendUp: !!(trend && trend.up),
-        trendFlat: !trend || !!trend.flat,
-        teachersPreview,
-        hasMoreTeachers: stats.hasMoreTeachers,
-        empty: stats.total === 0,
+        students,
+        filterStudent,
+        showStudentCycle: shouldShowStudentFilter(students),
+        studentLabel: studentFilterLabel(filterStudent),
         loading: false
       })
+      this.applyCachedStats()
     } catch (err) {
       this.setData({ loading: false })
       showApiError(err)
@@ -236,6 +305,9 @@ Page({
       `end=${encodeURIComponent(this.data.end)}`,
       `period=${encodeURIComponent(this.data.periodLabel)}`
     ]
+    if (this.data.filterStudent) {
+      q.push(`studentName=${encodeURIComponent(this.data.filterStudent)}`)
+    }
     Object.keys(extra || {}).forEach((k) => {
       if (extra[k] == null || extra[k] === '') return
       q.push(`${k}=${encodeURIComponent(extra[k])}`)

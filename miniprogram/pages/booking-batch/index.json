@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "批量约课",
+  "navigationBarTitleText": "批量新增",
   "navigationBarBackgroundColor": "#EEF2F7",
   "usingComponents": {
     "subject-picker": "/components/subject-picker/index",

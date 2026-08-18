@@ -153,6 +153,7 @@ function normalizeTeacher(input, fallbackColor) {
   const subjectId = String(raw.subjectId || '').trim()
   const subjectName = String(raw.subjectName || '').trim()
   const avatarFileID = String(raw.avatarFileID || '').trim()
+  const avatarPreset = String(raw.avatarPreset || '').trim()
   const color = String(raw.color || fallbackColor || COLOR_PALETTE[0]).trim()
   const priceRaw = raw.pricePerLesson
   let pricePerLesson = null
@@ -162,6 +163,7 @@ function normalizeTeacher(input, fallbackColor) {
   }
   const out = { name, color }
   if (avatarFileID) out.avatarFileID = avatarFileID
+  if (avatarPreset) out.avatarPreset = avatarPreset
   if (subjectId) out.subjectId = subjectId
   if (subjectName) out.subjectName = subjectName
   if (note) out.note = note
@@ -202,6 +204,9 @@ async function handleUpdateTeacher(OPENID, record, docId, col, payload) {
     teachers[idx] = Object.assign({}, prev, next)
     const raw = payload.teacher || {}
     if (raw.avatarFileID === '') delete teachers[idx].avatarFileID
+    if (raw.avatarPreset === '') delete teachers[idx].avatarPreset
+    if (raw.avatarFileID) delete teachers[idx].avatarPreset
+    if (raw.avatarPreset && !raw.avatarFileID) delete teachers[idx].avatarFileID
     if (raw.subjectId === '') {
       delete teachers[idx].subjectId
       delete teachers[idx].subjectName

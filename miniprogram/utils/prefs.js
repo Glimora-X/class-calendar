@@ -1,5 +1,5 @@
 /**
- * 本地偏好：课程时长、提前提醒分钟
+ * 本地偏好：课程时长、提前提醒分钟、学员筛选
  */
 
 const {
@@ -8,6 +8,7 @@ const {
 } = require('./constants')
 
 const STORAGE_KEY = 'pref:appSettings'
+const FILTER_STUDENT_KEY = 'pref:filterStudent'
 
 const DURATION_OPTIONS = [15, 20, 25, 30, 40, 45, 50, 60, 90]
 const REMIND_OPTIONS = [5, 10, 15, 20, 30, 45, 60]
@@ -92,6 +93,28 @@ function remindOptionIndex(minutes) {
   return idx >= 0 ? idx : REMIND_OPTIONS.indexOf(REMIND_MINUTES_BEFORE)
 }
 
+function getFilterStudent() {
+  try {
+    const v = wx.getStorageSync(FILTER_STUDENT_KEY)
+    return v == null ? '' : String(v).trim()
+  } catch (e) {
+    return ''
+  }
+}
+
+/**
+ * @param {string} name 空字符串表示「全部」
+ */
+function setFilterStudent(name) {
+  const next = name == null ? '' : String(name).trim()
+  try {
+    wx.setStorageSync(FILTER_STUDENT_KEY, next)
+  } catch (e) {
+    console.warn('[prefs] setFilterStudent failed', e)
+  }
+  return next
+}
+
 module.exports = {
   DURATION_OPTIONS,
   REMIND_OPTIONS,
@@ -100,5 +123,7 @@ module.exports = {
   getRemindMinutesBefore,
   setSettings,
   durationOptionIndex,
-  remindOptionIndex
+  remindOptionIndex,
+  getFilterStudent,
+  setFilterStudent
 }

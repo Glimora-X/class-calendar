@@ -7,6 +7,7 @@ const {
   BOOKING_STATUS,
   resolveBookingStatus
 } = require('./booking-status')
+const { resolveBookingPrice, teacherPriceMap } = require('./price')
 
 const PRESET = {
   today: 'today',
@@ -262,10 +263,13 @@ function buildCompareTrend(current, previous, compareLabel) {
 /**
  * @param {Array} bookings
  * @param {Date|number} [now]
- * @param {{ previousTotal?: number, compareLabel?: string }} [opts]
+ * @param {{ previousTotal?: number, compareLabel?: string, teachers?: Array, priceMap?: Object }} [opts]
  */
 function buildOverviewStats(bookings, now, opts) {
   const options = opts || {}
+  const priceMap =
+    options.priceMap ||
+    (options.teachers ? teacherPriceMap(options.teachers) : Object.create(null))
   let total = 0
   let done = 0
   let pending = 0
@@ -289,8 +293,8 @@ function buildOverviewStats(bookings, now, opts) {
     byTeacher[name].lessonCount += 1
 
     if (isClosedStatus(status)) return
-    const price = Number(b.price)
-    if (!Number.isFinite(price) || price < 0) return
+    const price = resolveBookingPrice(b, priceMap)
+    if (price == null) return
     expenseTotal += price
     paidCount += 1
     byTeacher[name].amount += price
@@ -352,13 +356,17 @@ function buildOverviewStats(bookings, now, opts) {
 /**
  * 概览下钻列表过滤
  * @param {Array} bookings
- * @param {{ mode?: string, statusFilter?: string, teacherName?: string }} opts
+ * @param {{ mode?: string, statusFilter?: string, teacherName?: string, studentName?: string, teachers?: Array, priceMap?: Object }} opts
  * @param {Date|number} [now]
  */
 function filterOverviewList(bookings, opts, now) {
   const mode = (opts && opts.mode) || 'courses'
   const statusFilter = (opts && opts.statusFilter) || ''
   const teacherName = String((opts && opts.teacherName) || '').trim()
+  const studentName = String((opts && opts.studentName) || '').trim()
+  const priceMap =
+    (opts && opts.priceMap) ||
+    (opts && opts.teachers ? teacherPriceMap(opts.teachers) : Object.create(null))
   const list = []
 
   ;(bookings || []).forEach((b) => {
@@ -367,11 +375,11 @@ function filterOverviewList(bookings, opts, now) {
     const closed = isClosedStatus(status)
 
     if (teacherName && String(b.teacherName || '').trim() !== teacherName) return
+    if (studentName && String(b.studentName || '').trim() !== studentName) return
 
     if (mode === 'expense') {
       if (closed) return
-      const price = Number(b.price)
-      if (!Number.isFinite(price) || price < 0) return
+      if (resolveBookingPrice(b, priceMap) == null) return
       list.push(b)
       return
     }

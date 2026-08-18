@@ -25,7 +25,7 @@ Page({
   async onLoad(query) {
     const fromName = decodeURIComponent((query && query.name) || '')
     const isEdit = !!fromName
-    wx.setNavigationBarTitle({ title: isEdit ? '编辑学员' : '新增学员' })
+    wx.setNavigationBarTitle({ title: isEdit ? '编辑学生' : '新增学生' })
     this.setData({
       isEdit,
       fromName,
@@ -42,7 +42,7 @@ Page({
         return n === fromName
       })
       if (!hit) {
-        wx.showToast({ title: '未找到该学员', icon: 'none' })
+        wx.showToast({ title: '没找到这个学生', icon: 'none' })
         return
       }
       await this.applyStudent(typeof hit === 'string' ? { name: hit } : hit)
@@ -159,8 +159,8 @@ Page({
     const name = this.data.fromName
     if (!name) return
     wx.showModal({
-      title: '删除学员？',
-      content: '仅从名单移除，不会删除已有约课记录。',
+      title: '删除学生？',
+      content: '只是从名单拿掉，已经记过的课还在。',
       confirmColor: '#ef4444',
       success: async (res) => {
         if (!res.confirm) return

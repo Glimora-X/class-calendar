@@ -1,5 +1,7 @@
 .empty {
-  padding: 64rpx 40rpx;
+  position: relative;
+  overflow: hidden;
+  padding: 72rpx 40rpx 64rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -9,14 +11,49 @@
   box-shadow: 0 12rpx 40rpx rgba(27, 36, 48, 0.06);
 }
 
+.empty__blob {
+  width: 96rpx;
+  height: 96rpx;
+  margin-bottom: 8rpx;
+  border-radius: 40% 60% 55% 45%;
+  background: linear-gradient(145deg, #9ec5ff 0%, #f5c542 100%);
+  opacity: 0.85;
+  animation: empty-bob 2.4s ease-in-out infinite;
+}
+
+.empty__orb {
+  position: absolute;
+  top: 28rpx;
+  right: 48rpx;
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: 50%;
+  background: rgba(139, 92, 246, 0.22);
+  animation: empty-bob 2.8s ease-in-out 0.4s infinite;
+}
+
 .empty__text {
+  position: relative;
+  z-index: 1;
   font-size: 30rpx;
   font-weight: 600;
   color: #1b2430;
 }
 
 .empty__hint {
+  position: relative;
+  z-index: 1;
   font-size: 24rpx;
   color: #8b95a5;
   text-align: center;
+}
+
+@keyframes empty-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-8rpx) rotate(4deg);
+  }
 }

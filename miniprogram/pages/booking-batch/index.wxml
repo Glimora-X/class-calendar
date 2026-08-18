@@ -34,7 +34,7 @@
 
   <view class="section surface-card soft-block form">
     <name-suggest
-      label="学员"
+      label="学生"
       placeholder="必填"
       value="{{studentName}}"
       suggestions="{{studentSuggestions}}"
@@ -87,6 +87,6 @@
   </view>
 
   <button class="soft-btn soft-btn--primary save" loading="{{saving}}" bindtap="onSubmit">
-    预览确认并创建
+    预览并创建
   </button>
 </view>

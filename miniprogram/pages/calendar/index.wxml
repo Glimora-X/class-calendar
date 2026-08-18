@@ -3,74 +3,79 @@
     year="{{year}}"
     month="{{month}}"
     mode="{{mode}}"
+    showStudentCycle="{{showStudentCycle}}"
+    studentLabel="{{studentLabel}}"
     bind:change="onMonthChange"
     bind:modechange="onModeChange"
+    bind:studentcycle="onStudentCycle"
   />
 
   <filter-chips items="{{chips}}" bind:change="onFilterChange" />
 
-  <block wx:if="{{mode === 'calendar'}}">
-    <calendar-grid
-      year="{{year}}"
-      month="{{month}}"
-      selectedDate="{{selectedDate}}"
-      marks="{{marks}}"
-      holidays="{{holidays}}"
-      legend="{{legend}}"
-      bind:select="onSelectDate"
-    />
+  <view class="cal-stage {{stageClass}}">
+    <block wx:if="{{mode === 'calendar'}}">
+      <calendar-grid
+        year="{{year}}"
+        month="{{month}}"
+        selectedDate="{{selectedDate}}"
+        marks="{{marks}}"
+        holidays="{{holidays}}"
+        legend="{{legend}}"
+        bind:select="onSelectDate"
+      />
 
-    <view class="section-head">
-      <text class="section-title">{{selectedLabel}}</text>
-      <view class="section-actions">
-        <view class="section-btn" bindtap="onTapBatch">
-          <text class="section-btn__icon">▦</text>
-          <text>批量约课</text>
-        </view>
-        <view class="section-btn" bindtap="onTapCopyMonth">
-          <text class="section-btn__icon">⧉</text>
-          <text>复制上月</text>
+      <view class="section-head">
+        <text class="section-title">{{selectedLabel}}</text>
+        <view class="section-actions">
+          <view class="section-btn" bindtap="onTapBatch">
+            <text class="section-btn__icon">▦</text>
+            <text>批量新增</text>
+          </view>
+          <view class="section-btn" bindtap="onTapCopyMonth">
+            <text class="section-btn__icon">⧉</text>
+            <text>复制上月</text>
+          </view>
         </view>
       </view>
-    </view>
 
-    <view wx:if="{{dayBookings.length}}">
-      <booking-item
-        wx:for="{{dayBookings}}"
-        wx:key="_id"
-        bookingId="{{item._id}}"
-        studentName="{{item.studentName}}"
-        teacherName="{{item.teacherName}}"
-        subjectName="{{item.subjectName}}"
-        startTime="{{item.startTime}}"
-        endTime="{{item.endTime}}"
-        tone="{{item.cardTone}}"
-        teacherTone="{{item.cardTone}}"
-        statusLabel="{{item.statusLabel}}"
-        status="{{item.status}}"
-        teacherAvatarUrl="{{item.teacherAvatarUrl}}"
-        teacherInitial="{{item.teacherInitial}}"
-        note="{{item.note}}"
-        bind:tap="onTapBooking"
+      <view wx:if="{{dayBookings.length}}">
+        <booking-item
+          wx:for="{{dayBookings}}"
+          wx:key="_id"
+          bookingId="{{item._id}}"
+          studentName="{{item.studentName}}"
+          teacherName="{{item.teacherName}}"
+          subjectName="{{item.subjectName}}"
+          startTime="{{item.startTime}}"
+          endTime="{{item.endTime}}"
+          tone="{{item.cardTone}}"
+          teacherTone="{{item.cardTone}}"
+          statusLabel="{{item.statusLabel}}"
+          status="{{item.status}}"
+          teacherAvatarUrl="{{item.teacherAvatarUrl}}"
+          teacherInitial="{{item.teacherInitial}}"
+          note="{{item.note}}"
+          bind:tap="onTapBooking"
+        />
+      </view>
+      <empty-state
+        wx:else
+        text="这天还空着"
+        hint="点底部 + 号，加一节课吧"
       />
-    </view>
-    <empty-state
-      wx:else
-      text="这天还没有约课"
-      hint="点底部蓝色 + 号新增"
-    />
-  </block>
+    </block>
 
-  <block wx:else>
-    <timeline-list
-      wx:if="{{timelineGroups.length}}"
-      groups="{{timelineGroups}}"
-      bind:itemtap="onTapTimelineItem"
-    />
-    <empty-state
-      wx:else
-      text="本月还没有约课"
-      hint="点底部蓝色 + 号开始录入"
-    />
-  </block>
+    <block wx:else>
+      <timeline-list
+        wx:if="{{timelineGroups.length}}"
+        groups="{{timelineGroups}}"
+        bind:itemtap="onTapTimelineItem"
+      />
+      <empty-state
+        wx:else
+        text="本月还没有课"
+        hint="点底部 + 号，开始记第一节"
+      />
+    </block>
+  </view>
 </view>
