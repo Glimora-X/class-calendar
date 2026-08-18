@@ -49,6 +49,10 @@ const {
   teacherDefaultPrice,
   priceAfterTeacherChange
 } = require('../../utils/price')
+const {
+  pickBookingFromList,
+  bookingToEditForm
+} = require('../../utils/booking-form')
 
 const WEEKDAY_SHORT = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
 const NOTE_MAX_LEN = 100
@@ -158,20 +162,26 @@ Page({
 
     if (isEdit) {
       wx.setNavigationBarTitle({ title: '编辑课程' })
-      // 先不挂载表单：等科目列表 + 约课详情回填后再 formReady
+      // 先不挂载表单，也不写入「今天/默认时段」，避免缺字段时新建默认值残留
       this.setData({
         isEdit: true,
         formReady: false,
         _id: editId,
-        date: today
+        date: '',
+        startTime: '',
+        endTime: '',
+        subjectName: '',
+        statusDisplay: ''
       })
-      this.syncStatusPicker(BOOKING_STATUS.pending, false)
-      this.loadNames()
-      this.loadSubjects()
+      Promise.all([this.loadNames(), this.loadSubjects()])
         .then(() => this.loadBooking(editId))
-        .catch(() => {})
-        .then(() => {
-          this.setData({ formReady: true })
+        .catch(() => false)
+        .then((ok) => {
+          if (ok) {
+            this.setData({ formReady: true })
+            return
+          }
+          setTimeout(() => wx.navigateBack(), 800)
         })
       return
     }
@@ -399,31 +409,32 @@ Page({
   async loadBooking(id) {
     try {
       const { list } = await listBookings({ _id: id })
-      const row = (list || [])[0]
+      const row = pickBookingFromList(list, id)
       if (!row) {
         wx.showToast({ title: '记录不存在', icon: 'none' })
-        return
+        return false
       }
-      this.setData({
-        _id: row._id,
-        studentName: row.studentName || '',
-        teacherName: row.teacherName || '',
-        subjectId: row.subjectId || '',
-        subjectName: row.subjectName || DEFAULT_SUBJECT_NAME,
-        date: row.date,
-        dateLabel: formatDateLabel(row.date),
-        startTime: row.startTime,
-        endTime: row.endTime,
-        durationLabel: formatDurationLabel(row.startTime, row.endTime),
-        note: row.note || '',
-        noteLen: Math.min(String(row.note || '').length, NOTE_MAX_LEN),
-        price: parsePriceInput(row.price),
-        priceText: formatPriceInput(row.price)
+      const form = bookingToEditForm(row, {
+        subjects: this.data.subjects,
+        teachers: this.data.teacherProfiles
       })
-      this.syncStatusPicker(row.status, !!row.statusManual, row.date, row.startTime)
-      if (row.subjectId) setLastSubjectId(row.subjectId)
+      this.setData(
+        Object.assign({}, form, {
+          dateLabel: formatDateLabel(form.date),
+          durationLabel: formatDurationLabel(form.startTime, form.endTime)
+        })
+      )
+      this.syncStatusPicker(
+        row.status,
+        !!row.statusManual,
+        form.date,
+        form.startTime
+      )
+      if (form.subjectId) setLastSubjectId(form.subjectId)
+      return true
     } catch (err) {
       showApiError(err)
+      return false
     }
   },
 
