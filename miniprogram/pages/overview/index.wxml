@@ -107,6 +107,14 @@
           <text class="ov-status__t">退转</text>
         </view>
       </view>
+      <view class="ov-status__divider"></view>
+      <view class="ov-status__item" data-filter="missed" catchtap="onTapCourses">
+        <view class="ov-status__badge ov-status__badge--missed">!</view>
+        <view class="ov-status__texts">
+          <text class="ov-status__n">{{missed}} 节</text>
+          <text class="ov-status__t">缺课</text>
+        </view>
+      </view>
     </view>
   </view>
 

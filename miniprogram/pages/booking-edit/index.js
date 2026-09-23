@@ -1162,7 +1162,7 @@ Page({
           subscribeTmplId: tmplId
         })
       } else {
-        const reason = !tmplId ? '未配置订阅模板' : '已转/已退无需提醒'
+        const reason = !tmplId ? '未配置订阅模板' : '已转/已退/缺课无需提醒'
         console.warn('[save] skip subscribe gate:', reason)
         wx.showToast({ title: '已保存', icon: 'success', duration: 1200 })
         setTimeout(() => wx.navigateBack(), 1300)

@@ -63,9 +63,20 @@ assert.strictEqual(statusLabel(BOOKING_STATUS.pending), '待上')
 assert.strictEqual(statusLabel(BOOKING_STATUS.done), '已上')
 assert.strictEqual(statusLabel(BOOKING_STATUS.transferred), '已转')
 assert.strictEqual(statusLabel(BOOKING_STATUS.refunded), '已退')
+assert.strictEqual(statusLabel(BOOKING_STATUS.missed), '缺课')
 
 assert.strictEqual(isManualStatus(BOOKING_STATUS.transferred), true)
+assert.strictEqual(isManualStatus(BOOKING_STATUS.missed), true)
 assert.strictEqual(isManualStatus(BOOKING_STATUS.pending), false)
+
+// 手动缺课：不随时间变回已上
+assert.strictEqual(
+  resolveBookingStatus(
+    { ...base, status: BOOKING_STATUS.missed, statusManual: true },
+    new Date('2026-08-01T12:00:00+08:00')
+  ),
+  BOOKING_STATUS.missed
+)
 
 const pendingV = statusVisual(BOOKING_STATUS.pending)
 assert.strictEqual(pendingV.statusClass, 'st-pending')

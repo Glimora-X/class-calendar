@@ -30,7 +30,7 @@ function startAtMs(booking) {
 function isPending(booking, nowMs) {
   if (
     booking.statusManual &&
-    (booking.status === 'transferred' || booking.status === 'refunded')
+    (booking.status === 'transferred' || booking.status === 'refunded' || booking.status === 'missed')
   ) {
     return false
   }

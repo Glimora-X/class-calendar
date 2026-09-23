@@ -1,19 +1,22 @@
 /**
- * 约课状态：自动待上/已上，手动已转/已退
+ * 约课状态：自动待上/已上，手动已转/已退/缺课
+ * 缺课：课没上，费用仍计入支出
  */
 
 const BOOKING_STATUS = {
   pending: 'pending',
   done: 'done',
   transferred: 'transferred',
-  refunded: 'refunded'
+  refunded: 'refunded',
+  missed: 'missed'
 }
 
 const STATUS_LABELS = {
   [BOOKING_STATUS.pending]: '待上',
   [BOOKING_STATUS.done]: '已上',
   [BOOKING_STATUS.transferred]: '已转',
-  [BOOKING_STATUS.refunded]: '已退'
+  [BOOKING_STATUS.refunded]: '已退',
+  [BOOKING_STATUS.missed]: '缺课'
 }
 
 const STATUS_VISUAL = {
@@ -56,6 +59,16 @@ const STATUS_VISUAL = {
     metaText: '#98A2B3',
     timeColor: '#7B8490',
     dotColor: '#9AA1AA'
+  },
+  [BOOKING_STATUS.missed]: {
+    statusClass: 'st-missed',
+    cardBg: '#FFF8EF',
+    badgeBg: '#F59E0B',
+    badgeText: '#FFFFFF',
+    mainText: '#7A4E12',
+    metaText: '#A07A45',
+    timeColor: '#D97706',
+    dotColor: '#F59E0B'
   }
 }
 
@@ -63,7 +76,8 @@ const STATUS_OPTIONS = [
   { value: BOOKING_STATUS.pending, label: '待上（按时间自动）' },
   { value: BOOKING_STATUS.done, label: '已上（按时间自动）' },
   { value: BOOKING_STATUS.transferred, label: '已转' },
-  { value: BOOKING_STATUS.refunded, label: '已退' }
+  { value: BOOKING_STATUS.refunded, label: '已退' },
+  { value: BOOKING_STATUS.missed, label: '缺课（费用已花）' }
 ]
 
 /**
@@ -71,7 +85,11 @@ const STATUS_OPTIONS = [
  * @returns {boolean}
  */
 function isManualStatus(status) {
-  return status === BOOKING_STATUS.transferred || status === BOOKING_STATUS.refunded
+  return (
+    status === BOOKING_STATUS.transferred ||
+    status === BOOKING_STATUS.refunded ||
+    status === BOOKING_STATUS.missed
+  )
 }
 
 /**
@@ -125,7 +143,7 @@ function resolveBookingStatus(booking, now) {
 /**
  * 编辑页选中某状态后，写入字段
  * 待上/已上 → 解除手动锁定，交回时间自动
- * 已转/已退 → 手动锁定
+ * 已转/已退/缺课 → 手动锁定
  * @param {string} selected
  * @returns {{ status: string, statusManual: boolean }}
  */

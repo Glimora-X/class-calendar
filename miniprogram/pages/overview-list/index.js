@@ -92,7 +92,8 @@ Page({
       { id: '', label: '全部', active: !statusFilter },
       { id: 'done', label: '已上', active: statusFilter === 'done' },
       { id: 'pending', label: '待上', active: statusFilter === 'pending' },
-      { id: 'closed', label: '退转', active: statusFilter === 'closed' }
+      { id: 'closed', label: '退转', active: statusFilter === 'closed' },
+      { id: 'missed', label: '缺课', active: statusFilter === 'missed' }
     ]
   },
 
@@ -177,7 +178,9 @@ Page({
             ? 'is-done'
             : status === BOOKING_STATUS.pending
               ? 'is-pending'
-              : 'is-closed',
+              : status === BOOKING_STATUS.missed
+                ? 'is-missed'
+                : 'is-closed',
         amountLabel: hasPrice && !closed ? formatYuan(price) : '',
         periodHint: periodLabel
       }

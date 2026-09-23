@@ -211,16 +211,19 @@ function isClosedStatus(status) {
  * @param {number} done
  * @param {number} pending
  * @param {number} closed
+ * @param {number} [missed]
  * @returns {string} conic-gradient CSS
  */
-function buildDonutStyle(done, pending, closed) {
-  const total = done + pending + closed
+function buildDonutStyle(done, pending, closed, missed) {
+  const missedN = missed || 0
+  const total = done + pending + closed + missedN
   if (total <= 0) {
     return 'background: conic-gradient(#E5E7EB 0deg 360deg);'
   }
   const dDeg = (done / total) * 360
   const pDeg = (pending / total) * 360
   const cDeg = (closed / total) * 360
+  const mDeg = (missedN / total) * 360
   let cursor = 0
   const parts = []
   if (done > 0) {
@@ -233,8 +236,10 @@ function buildDonutStyle(done, pending, closed) {
   }
   if (closed > 0) {
     parts.push(`#C5CAD3 ${cursor}deg ${cursor + cDeg}deg`)
-  } else if (parts.length && cursor < 360) {
-    /* keep full circle covered */
+    cursor += cDeg
+  }
+  if (missedN > 0) {
+    parts.push(`#F59E0B ${cursor}deg ${cursor + mDeg}deg`)
   }
   if (!parts.length) {
     return 'background: conic-gradient(#E5E7EB 0deg 360deg);'
@@ -274,6 +279,7 @@ function buildOverviewStats(bookings, now, opts) {
   let done = 0
   let pending = 0
   let closed = 0
+  let missed = 0
   let expenseTotal = 0
   let paidCount = 0
   const byTeacher = Object.create(null)
@@ -284,6 +290,7 @@ function buildOverviewStats(bookings, now, opts) {
     const status = resolveBookingStatus(b, now)
     if (status === BOOKING_STATUS.done) done += 1
     else if (status === BOOKING_STATUS.pending) pending += 1
+    else if (status === BOOKING_STATUS.missed) missed += 1
     else closed += 1
 
     const name = String(b.teacherName || '').trim() || '未命名老师'
@@ -340,12 +347,13 @@ function buildOverviewStats(bookings, now, opts) {
     done,
     pending,
     closed,
+    missed,
     expenseTotal: expenseRounded,
     expenseLabel: formatYuan(expenseRounded),
     paidCount,
     avgPerLesson: avg,
     avgLabel: avg == null ? '¥ 0' : formatYuan(avg),
-    donutStyle: buildDonutStyle(done, pending, closed),
+    donutStyle: buildDonutStyle(done, pending, closed, missed),
     trend,
     teachers,
     teachersPreview: teachers.slice(0, 3),
@@ -388,6 +396,7 @@ function filterOverviewList(bookings, opts, now) {
       if (statusFilter === 'done' && status !== BOOKING_STATUS.done) return
       if (statusFilter === 'pending' && status !== BOOKING_STATUS.pending) return
       if (statusFilter === 'closed' && !closed) return
+      if (statusFilter === 'missed' && status !== BOOKING_STATUS.missed) return
       list.push(b)
     }
   })

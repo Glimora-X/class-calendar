@@ -66,7 +66,7 @@ function validate(fields) {
 }
 
 function shouldRemind(fields) {
-  if (fields.statusManual && (fields.status === 'transferred' || fields.status === 'refunded')) {
+  if (fields.statusManual && (fields.status === 'transferred' || fields.status === 'refunded' || fields.status === 'missed')) {
     return false
   }
   return true

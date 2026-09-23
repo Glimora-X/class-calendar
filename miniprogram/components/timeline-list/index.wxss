@@ -62,6 +62,7 @@
 .tl__dot--done { border-color: #52a878; }
 .tl__dot--transferred { border-color: #8b5cf6; }
 .tl__dot--refunded { border-color: #9aa1aa; }
+.tl__dot--missed { border-color: #f59e0b; }
 
 .tl__line {
   flex: 1;

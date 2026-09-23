@@ -96,6 +96,36 @@ assert.strictEqual(stats.teachers[1].amount, 200)
 const expenseList = filterOverviewList(bookings, { mode: 'expense' }, now)
 assert.strictEqual(expenseList.length, 3)
 
+// 缺课：不算已上，费用仍计入支出，不进退转
+const withMissed = bookings.concat([
+  {
+    teacherName: '王老师',
+    date: '2026-08-03',
+    startTime: '16:00',
+    status: BOOKING_STATUS.missed,
+    statusManual: true,
+    price: 200
+  }
+])
+const missedStats = buildOverviewStats(withMissed, now)
+assert.strictEqual(missedStats.done, 2)
+assert.strictEqual(missedStats.closed, 2)
+assert.strictEqual(missedStats.missed, 1)
+assert.strictEqual(missedStats.paidCount, 4)
+assert.strictEqual(missedStats.expenseTotal, 800)
+assert.strictEqual(
+  filterOverviewList(withMissed, { mode: 'expense' }, now).length,
+  4
+)
+assert.strictEqual(
+  filterOverviewList(withMissed, { mode: 'courses', statusFilter: 'closed' }, now).length,
+  2
+)
+assert.strictEqual(
+  filterOverviewList(withMissed, { mode: 'courses', statusFilter: 'missed' }, now).length,
+  1
+)
+
 const closedList = filterOverviewList(
   bookings,
   { mode: 'courses', statusFilter: 'closed' },

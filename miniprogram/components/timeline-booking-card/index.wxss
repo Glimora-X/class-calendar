@@ -127,6 +127,13 @@
 .tbc--refunded .tbc__time { color: #7b8490; }
 .tbc--refunded .tbc__ribbon { background: #9aa1aa; }
 
+.tbc--missed {
+  background: #fff8ef;
+  color: #7a4e12;
+}
+.tbc--missed .tbc__time { color: #d97706; }
+.tbc--missed .tbc__ribbon { background: #f59e0b; }
+
 .tbc--selecting {
   padding-left: 72rpx;
 }

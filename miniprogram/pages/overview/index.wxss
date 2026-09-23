@@ -477,6 +477,10 @@
   background: #9aa1aa;
 }
 
+.ov-status__badge--missed {
+  background: #f59e0b;
+}
+
 .ov-status__texts {
   display: flex;
   flex-direction: column;
