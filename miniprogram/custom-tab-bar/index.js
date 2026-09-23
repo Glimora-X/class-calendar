@@ -27,17 +27,22 @@ Component({
       this.setData({ selected: index })
     },
     onFab() {
-      let url = '/pages/booking-edit/index'
+      const { buildBookingEditUrl, resolveCreateBookingDate } = require('../utils/booking-edit-nav')
+      let date = ''
+      let studentName = ''
       try {
-        const { getFilterStudent } = require('../utils/prefs')
-        const student = getFilterStudent()
-        if (student) {
-          url += `?studentName=${encodeURIComponent(student)}`
-        }
+        const pages = getCurrentPages()
+        date = resolveCreateBookingDate(pages[pages.length - 1])
       } catch (e) {
         /* ignore */
       }
-      wx.navigateTo({ url })
+      try {
+        const { getFilterStudent } = require('../utils/prefs')
+        studentName = getFilterStudent()
+      } catch (e) {
+        /* ignore */
+      }
+      wx.navigateTo({ url: buildBookingEditUrl({ date, studentName }) })
     }
   }
 })

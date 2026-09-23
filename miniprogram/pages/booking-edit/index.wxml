@@ -335,6 +335,9 @@
           <text class="bk-card__subject-name">{{subjectName || '未选科目'}}</text>
           <text class="bk-card__subject-hint">切换</text>
         </view>
+        <view class="bk-card__tools">
+          <view class="bk-delete-text" bindtap="onDelete">删除</view>
+        </view>
       </view>
 
       <picker mode="date" value="{{date}}" bindchange="onDateChange">
@@ -479,7 +482,7 @@
 
   <view wx:if="{{formReady && !showSubscribeGate}}" class="footer-bar">
     <block wx:if="{{isEdit}}">
-      <button class="footer-bar__danger" bindtap="onDelete">删除</button>
+      <view class="footer-bar__danger" bindtap="onDelete">删除</view>
       <button class="footer-bar__save" loading="{{saving}}" bindtap="onSave">保存课程</button>
     </block>
     <button wx:else class="footer-bar__save footer-bar__save--full" loading="{{saving}}" bindtap="onSave">

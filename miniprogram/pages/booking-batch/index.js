@@ -3,6 +3,7 @@ const { datesByWeekday } = require('../../utils/date-utils')
 const {
   formatMonthKey,
   formatTime,
+  formatDate,
   addMinutesToTime,
   minutesBetweenTimes,
   monthRange
@@ -12,7 +13,7 @@ const { batchCreateBookings } = require('../../services/booking')
 const { listDayHolds } = require('../../services/day-hold')
 const {
   holdsToMap,
-  isHoldDate,
+  annotateBatchPreviewRows,
   partitionBatchDates
 } = require('../../utils/day-hold')
 const {
@@ -55,7 +56,7 @@ Page({
     teacherProfiles: [],
     previewRows: [],
     selectedPreviewCount: 0,
-    skippedHoldCount: 0,
+    skippedDefaultCount: 0,
     previewOpen: false,
     holdMap: {},
     saving: false
@@ -133,19 +134,12 @@ Page({
     const w = weekdayIndex != null ? weekdayIndex : this.data.weekdayIndex
     const dates = datesByWeekday(y, m, w)
     const holdMap = await this.loadHoldMap(y, m)
-    const previewRows = dates.map((date) => {
-      const hold = isHoldDate(holdMap, date)
-      return {
-        date,
-        holdReason: hold ? holdMap[date] || '' : '',
-        selected: !hold
-      }
-    })
+    const previewRows = annotateBatchPreviewRows(dates, holdMap, formatDate(new Date()))
     this.setData({
       holdMap,
       previewRows,
       selectedPreviewCount: previewRows.filter((r) => r.selected).length,
-      skippedHoldCount: previewRows.filter((r) => r.holdReason && !r.selected).length
+      skippedDefaultCount: previewRows.filter((r) => !r.selected).length
     })
   },
 
@@ -227,7 +221,7 @@ Page({
     this.setData({
       previewRows,
       selectedPreviewCount: previewRows.filter((r) => r.selected).length,
-      skippedHoldCount: previewRows.filter((r) => r.holdReason && !r.selected).length
+      skippedDefaultCount: previewRows.filter((r) => !r.selected).length
     })
   },
 
@@ -266,7 +260,7 @@ Page({
     const includedHoldDates = (previewRows || [])
       .filter((r) => r.selected && r.holdReason)
       .map((r) => r.date)
-    const { selected, skippedHolds } = partitionBatchDates(
+    const { selected } = partitionBatchDates(
       dates,
       holdMap,
       includedHoldDates
@@ -282,12 +276,12 @@ Page({
       return
     }
 
-    const skipped = skippedHolds.length
+    const skippedUnchecked = (previewRows || []).filter((r) => !r.selected).length
     const confirm = await new Promise((resolve) => {
       wx.showModal({
         title: '确认创建',
-        content: skipped
-          ? `将创建 ${writeDates.length} 节（已跳过有其他安排的 ${skipped} 天），可以吗？`
+        content: skippedUnchecked
+          ? `将创建 ${writeDates.length} 节（已跳过 ${skippedUnchecked} 天），可以吗？`
           : `将在 ${year}年${month}月 记上 ${writeDates.length} 节，可以吗？`,
         success: (res) => resolve(!!res.confirm)
       })

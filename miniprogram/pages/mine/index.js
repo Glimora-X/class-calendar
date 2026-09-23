@@ -70,6 +70,10 @@ Page({
     wx.navigateTo({ url: '/pages/booking-batch/index' })
   },
 
+  onBatchDelete() {
+    wx.navigateTo({ url: '/pages/booking-batch-delete/index' })
+  },
+
   onTeachers() {
     wx.navigateTo({ url: '/pages/teacher-list/index' })
   },

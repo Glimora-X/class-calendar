@@ -1,4 +1,4 @@
-<view class="page page--no-tab ov-list">
+<view class="page page--no-tab ov-list {{selecting ? 'is-selecting' : ''}}">
   <view wx:if="{{periodLabel}}" class="ov-list__period">{{periodLabel}}</view>
 
   <view wx:if="{{chips.length}}" class="ov-list__chips">
@@ -9,6 +9,19 @@
       data-id="{{item.id}}"
       bindtap="onChip"
     >{{item.label}}</view>
+  </view>
+
+  <view wx:if="{{canManage}}" class="ov-list__toolbar">
+    <text class="ov-list__hint">
+      {{selecting ? (selectedCount ? '已选 ' + selectedCount + ' 节' : '点课程勾选') : '点管理可勾选删除'}}
+    </text>
+    <view wx:if="{{!selecting}}" class="ov-list__actions">
+      <view class="ov-list__btn" bindtap="onEnterSelect">管理</view>
+    </view>
+    <view wx:else class="ov-list__actions">
+      <view class="ov-list__btn" bindtap="onSelectAllRows">全选</view>
+      <view class="ov-list__btn ov-list__btn--muted" bindtap="onCancelSelect">取消</view>
+    </view>
   </view>
 
   <block wx:if="{{mode === 'teachers'}}">
@@ -34,10 +47,11 @@
     <view
       wx:for="{{rows}}"
       wx:key="_id"
-      class="ov-list__row surface-card"
+      class="ov-list__row surface-card {{selecting ? 'is-selecting' : ''}} {{selectedMap[item._id] ? 'is-picked' : ''}}"
       data-id="{{item._id}}"
       bindtap="onTapRow"
     >
+      <view wx:if="{{selecting}}" class="ov-list__check {{selectedMap[item._id] ? 'is-on' : ''}}">{{selectedMap[item._id] ? '✓' : ''}}</view>
       <view class="ov-list__main">
         <view class="ov-list__line1">
           <text class="ov-list__date">{{item.dateLabel}} {{item.weekday}}</text>
@@ -57,4 +71,11 @@
   </block>
 
   <empty-state wx:if="{{empty && !loading}}" text="这里空空的" hint="换个时间再看看？" />
+
+  <view wx:if="{{selecting}}" class="ov-delbar">
+    <view
+      class="ov-delbar__btn {{selectedCount ? '' : 'is-disabled'}}"
+      bindtap="onConfirmBatchDelete"
+    >删除 {{selectedCount}} 节</view>
+  </view>
 </view>

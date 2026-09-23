@@ -20,7 +20,7 @@ const {
   setMonthHolds,
   isMonthHoldsFresh
 } = require('../../utils/cache')
-const { listBookings } = require('../../services/booking')
+const { listBookings, batchDeleteBookings } = require('../../services/booking')
 const { fetchNameList } = require('../../services/name-list')
 const {
   listDayHolds,
@@ -47,6 +47,18 @@ const {
   markInAppToastShown
 } = require('../../utils/reminder')
 const { resolveTeacherAvatarUrl } = require('../../utils/avatar-presets')
+const { buildBookingEditUrl } = require('../../utils/booking-edit-nav')
+const {
+  normalizeDeleteIds,
+  toggleSelectedId,
+  selectedIdList
+} = require('../../utils/booking-batch-delete')
+const {
+  measureTimelinePoster,
+  fitPosterCanvasSize,
+  drawTimelinePoster,
+  collectPosterImageUrls
+} = require('../../utils/timeline-poster')
 
 const COLOR_TO_TONE = {
   accent: 'primary',
@@ -82,7 +94,10 @@ Page({
     monthBookings: [],
     teacherColorMap: {},
     teacherAvatarUrlMap: {},
-    loading: false
+    loading: false,
+    selecting: false,
+    selectedMap: {},
+    selectedCount: 0
   },
 
   onShow() {
@@ -191,7 +206,10 @@ Page({
       timelineGroups: [],
       summaryText: '',
       showHoldEditor: false,
-      holdReasonDraft: ''
+      holdReasonDraft: '',
+      selecting: false,
+      selectedMap: {},
+      selectedCount: 0
     })
     const force = !(options && options.force === false)
     this.refreshMonth({ force })
@@ -203,7 +221,12 @@ Page({
   },
 
   onModeChange(e) {
-    this.setData({ mode: e.detail.mode })
+    this.setData({
+      mode: e.detail.mode,
+      selecting: false,
+      selectedMap: {},
+      selectedCount: 0
+    })
   },
 
   onStudentCycle() {
@@ -219,7 +242,10 @@ Page({
       this.setData({
         filterStudent,
         studentLabel: studentFilterLabel(filterStudent),
-        stageClass: 'is-in'
+        stageClass: 'is-in',
+        selecting: false,
+        selectedMap: {},
+        selectedCount: 0
       })
       this.recomputeViews(this.data.monthBookings)
       this._stageClearTimer = setTimeout(() => {
@@ -232,7 +258,12 @@ Page({
   onFilterChange(e) {
     const id = e.detail.id
     const filterTeacher = id === 'all' ? '' : id
-    this.setData({ filterTeacher })
+    this.setData({
+      filterTeacher,
+      selecting: false,
+      selectedMap: {},
+      selectedCount: 0
+    })
     this.recomputeViews(this.data.monthBookings)
   },
 
@@ -311,21 +342,57 @@ Page({
     wx.navigateTo({ url: '/pages/booking-batch/index' })
   },
 
+  onTapBatchDelete() {
+    const { year, month } = this.data
+    wx.navigateTo({
+      url: `/pages/booking-batch-delete/index?year=${year}&month=${month}`
+    })
+  },
+
   onTapCopyMonth() {
     wx.navigateTo({ url: '/pages/booking-copy-month/index' })
   },
 
+  exitSelectMode() {
+    this.setData({
+      selecting: false,
+      selectedMap: {},
+      selectedCount: 0
+    })
+  },
+
+  onEnterSelect() {
+    this.setData({
+      selecting: true,
+      selectedMap: {},
+      selectedCount: 0
+    })
+  },
+
+  onCancelSelect() {
+    this.exitSelectMode()
+  },
+
+  onSelectAllTimeline() {
+    const map = {}
+    ;(this.data.timelineGroups || []).forEach((g) => {
+      ;(g.items || []).forEach((b) => {
+        if (b && b._id) map[b._id] = true
+      })
+    })
+    this.setData({
+      selectedMap: map,
+      selectedCount: selectedIdList(map).length
+    })
+  },
+
   bookingEditUrl(extra) {
-    const q = []
-    if (extra && extra.id) q.push(`id=${encodeURIComponent(extra.id)}`)
-    if (extra && extra.date) q.push(`date=${encodeURIComponent(extra.date)}`)
-    if (!(extra && extra.id)) {
-      const student = (extra && extra.studentName) || this.data.filterStudent
-      if (student) q.push(`studentName=${encodeURIComponent(student)}`)
+    const q = Object.assign({}, extra || {})
+    if (!q.id) {
+      if (!q.date) q.date = this.data.selectedDate
+      if (q.studentName == null) q.studentName = this.data.filterStudent
     }
-    return q.length
-      ? `/pages/booking-edit/index?${q.join('&')}`
-      : '/pages/booking-edit/index'
+    return buildBookingEditUrl(q)
   },
 
   checkImminentReminders() {
@@ -511,7 +578,179 @@ Page({
   },
 
   onTapTimelineItem(e) {
+    if (this.data.selecting) {
+      const id = (e.detail && e.detail.id) || ''
+      const selectedMap = toggleSelectedId(this.data.selectedMap, id)
+      this.setData({
+        selectedMap,
+        selectedCount: selectedIdList(selectedMap).length
+      })
+      return
+    }
     this.onTapBooking(e)
+  },
+
+  async onConfirmBatchDelete() {
+    const ids = normalizeDeleteIds(selectedIdList(this.data.selectedMap))
+    if (!ids.length) {
+      wx.showToast({ title: '请先勾选课程', icon: 'none' })
+      return
+    }
+    const confirm = await new Promise((resolve) => {
+      wx.showModal({
+        title: '确认删除',
+        content: `将删除 ${ids.length} 节课，占用日标记不会动。删了回不来。`,
+        confirmColor: '#ef4444',
+        confirmText: '删除',
+        success: (res) => resolve(!!res.confirm)
+      })
+    })
+    if (!confirm) return
+    try {
+      const result = await batchDeleteBookings(ids)
+      this.exitSelectMode()
+      await this.refreshMonth({ force: true })
+      const n = (result && result.deleted) || 0
+      wx.showToast({
+        title: n ? `已删掉 ${n} 节` : '没有删掉课程',
+        icon: 'none'
+      })
+    } catch (err) {
+      showWriteError(err)
+    }
+  },
+
+  onSaveTimelinePoster() {
+    if (this._posterBusy) return
+    const groups = this.data.timelineGroups || []
+    if (!groups.length) {
+      wx.showToast({ title: '本月还没有课', icon: 'none' })
+      return
+    }
+    this._posterBusy = true
+    wx.showLoading({ title: '生成长图…', mask: true })
+    this.exportTimelinePoster(groups)
+      .then(() => {
+        wx.hideLoading()
+        wx.showToast({ title: '已保存到相册', icon: 'success' })
+      })
+      .catch((err) => {
+        wx.hideLoading()
+        const msg = String((err && err.errMsg) || err || '')
+        if (err === 'AUTH_DENY' || /auth deny|authorize/i.test(msg)) {
+          wx.showModal({
+            title: '需要相册权限',
+            content: '保存长图需要写入相册，请在设置里打开。',
+            confirmText: '去设置',
+            success: (r) => {
+              if (r.confirm) wx.openSetting()
+            }
+          })
+          return
+        }
+        wx.showToast({ title: '保存失败，请重试', icon: 'none' })
+      })
+      .then(() => {
+        this._posterBusy = false
+      })
+  },
+
+  exportTimelinePoster(groups) {
+    const layout = measureTimelinePoster(groups, {
+      year: this.data.year,
+      month: this.data.month,
+      studentLabel: this.data.studentLabel,
+      summaryText: this.data.summaryText
+    })
+    const sys = wx.getSystemInfoSync ? wx.getSystemInfoSync() : {}
+    const size = fitPosterCanvasSize(layout.height, sys.pixelRatio || 2)
+    return this.ensurePosterCanvas(size)
+      .then((canvas) => this.drawPosterOnCanvas(canvas, layout, size, groups))
+      .then((canvas) => this.canvasToTempFile(canvas))
+      .then((filePath) => this.savePosterFile(filePath))
+  },
+
+  ensurePosterCanvas(size) {
+    return new Promise((resolve, reject) => {
+      wx.createSelectorQuery()
+        .select('#tlPosterCanvas')
+        .fields({ node: true, size: true })
+        .exec((res) => {
+          const canvas = res && res[0] && res[0].node
+          if (!canvas) {
+            reject(new Error('NO_CANVAS'))
+            return
+          }
+          canvas.width = size.pixelWidth
+          canvas.height = size.pixelHeight
+          resolve(canvas)
+        })
+    })
+  },
+
+  drawPosterOnCanvas(canvas, layout, size, groups) {
+    const ctx = canvas.getContext('2d')
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.scale(size.dpr, size.dpr)
+    const urls = collectPosterImageUrls(groups)
+    return Promise.all(urls.map((url) => loadCanvasImage(canvas, url))).then(
+      (images) => {
+        const map = {}
+        urls.forEach((url, i) => {
+          if (images[i]) map[url] = images[i]
+        })
+        drawTimelinePoster(ctx, layout, map)
+        return canvas
+      }
+    )
+  },
+
+  canvasToTempFile(canvas) {
+    return new Promise((resolve, reject) => {
+      wx.canvasToTempFilePath({
+        canvas,
+        fileType: 'png',
+        success: (r) => resolve(r.tempFilePath),
+        fail: reject
+      })
+    })
+  },
+
+  savePosterFile(filePath) {
+    return new Promise((resolve, reject) => {
+      wx.saveImageToPhotosAlbum({
+        filePath,
+        success: resolve,
+        fail: (err) => {
+          const msg = String((err && err.errMsg) || '')
+          if (/auth deny|authorize/i.test(msg)) {
+            wx.getSetting({
+              success: (s) => {
+                const granted = s.authSetting && s.authSetting['scope.writePhotosAlbum']
+                if (granted === false) {
+                  reject('AUTH_DENY')
+                  return
+                }
+                wx.authorize({
+                  scope: 'scope.writePhotosAlbum',
+                  success: () => {
+                    wx.saveImageToPhotosAlbum({
+                      filePath,
+                      success: resolve,
+                      fail: () => reject('AUTH_DENY')
+                    })
+                  },
+                  fail: () => reject('AUTH_DENY')
+                })
+              },
+              fail: () => reject(err)
+            })
+            return
+          }
+          reject(err)
+        }
+      })
+    })
   }
 })
 
@@ -560,4 +799,17 @@ function formatSelectedLabel(dateStr) {
   if (!dateStr) return '当天课程'
   const d = new Date(dateStr.replace(/-/g, '/'))
   return `${d.getMonth() + 1}月${d.getDate()}日 · ${WEEKDAY_CN[d.getDay()]}`
+}
+
+function loadCanvasImage(canvas, url) {
+  return new Promise((resolve) => {
+    if (!url || !canvas || !canvas.createImage) {
+      resolve(null)
+      return
+    }
+    const img = canvas.createImage()
+    img.onload = () => resolve(img)
+    img.onerror = () => resolve(null)
+    img.src = url
+  })
 }

@@ -1,4 +1,4 @@
-<view class="page">
+<view class="page {{selecting && mode !== 'calendar' ? 'is-selecting' : ''}}">
   <month-nav
     year="{{year}}"
     month="{{month}}"
@@ -40,6 +40,11 @@
           <view class="section-btn" bindtap="onTapBatch">
             <view class="section-btn__ico section-btn__ico--batch">
               <view class="ico-batch"></view>
+            </view>
+          </view>
+          <view class="section-btn" bindtap="onTapBatchDelete">
+            <view class="section-btn__ico section-btn__ico--del">
+              <view class="ico-del"></view>
             </view>
           </view>
           <view class="section-btn" bindtap="onTapCopyMonth">
@@ -114,9 +119,24 @@
     </block>
 
     <block wx:else>
+      <view wx:if="{{timelineGroups.length}}" class="tl-toolbar">
+        <text class="tl-toolbar__hint">
+          {{selecting ? (selectedCount ? '已选 ' + selectedCount + ' 节' : '点课程勾选') : summaryText}}
+        </text>
+        <view wx:if="{{!selecting}}" class="tl-toolbar__actions">
+          <view class="tl-toolbar__save" bindtap="onEnterSelect">管理</view>
+          <view class="tl-toolbar__save" bindtap="onSaveTimelinePoster">保存长图</view>
+        </view>
+        <view wx:else class="tl-toolbar__actions">
+          <view class="tl-toolbar__save" bindtap="onSelectAllTimeline">全选</view>
+          <view class="tl-toolbar__save tl-toolbar__save--muted" bindtap="onCancelSelect">取消</view>
+        </view>
+      </view>
       <timeline-list
         wx:if="{{timelineGroups.length}}"
         groups="{{timelineGroups}}"
+        selecting="{{selecting}}"
+        selected-map="{{selectedMap}}"
         bind:itemtap="onTapTimelineItem"
       />
       <empty-state
@@ -126,4 +146,11 @@
       />
     </block>
   </view>
+  <view wx:if="{{selecting && mode !== 'calendar'}}" class="tl-delbar">
+    <view
+      class="tl-delbar__btn {{selectedCount ? '' : 'is-disabled'}}"
+      bindtap="onConfirmBatchDelete"
+    >删除 {{selectedCount}} 节</view>
+  </view>
+  <canvas type="2d" id="tlPosterCanvas" class="tl-poster-canvas"></canvas>
 </view>

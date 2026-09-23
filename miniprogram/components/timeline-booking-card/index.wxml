@@ -1,4 +1,8 @@
-<view class="tbc tbc--{{status || 'pending'}}" bindtap="onTap">
+<view
+  class="tbc tbc--{{status || 'pending'}} {{selecting ? 'tbc--selecting' : ''}} {{selected ? 'tbc--picked' : ''}}"
+  bindtap="onTap"
+>
+  <view wx:if="{{selecting}}" class="tbc__check {{selected ? 'is-on' : ''}}">{{selected ? '✓' : ''}}</view>
   <view class="tbc__ribbon">{{statusLabel}}</view>
   <view class="tbc__row tbc__row--top">
     <text class="tbc__time">{{startTime}} — {{endTime}}</text>

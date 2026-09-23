@@ -1,7 +1,7 @@
 const { WEEKDAY_CN } = require('../../utils/constants')
-const { listBookings } = require('../../services/booking')
+const { listBookings, batchDeleteBookings } = require('../../services/booking')
 const { fetchNameList } = require('../../services/name-list')
-const { showApiError } = require('../../utils/errors')
+const { showApiError, showWriteError } = require('../../utils/errors')
 const {
   resolveBookingStatus,
   statusLabel,
@@ -13,6 +13,11 @@ const {
   buildOverviewStats,
   filterOverviewList
 } = require('../../utils/overview-stats')
+const {
+  normalizeDeleteIds,
+  toggleSelectedId,
+  selectedIdList
+} = require('../../utils/booking-batch-delete')
 
 function weekdayOf(dateStr) {
   const parts = String(dateStr || '').split('-').map(Number)
@@ -41,7 +46,11 @@ Page({
     rows: [],
     teachers: [],
     loading: false,
-    empty: false
+    empty: false,
+    canManage: false,
+    selecting: false,
+    selectedMap: {},
+    selectedCount: 0
   },
 
   onLoad(query) {
@@ -92,7 +101,10 @@ Page({
     const statusFilter = id == null ? '' : String(id)
     this.setData({
       statusFilter,
-      chips: this.buildChips('courses', statusFilter)
+      chips: this.buildChips('courses', statusFilter),
+      selecting: false,
+      selectedMap: {},
+      selectedCount: 0
     })
     this.applyFilter()
   },
@@ -129,7 +141,11 @@ Page({
         teachers: stats.teachers,
         rows: [],
         loading: false,
-        empty: stats.teachers.length === 0
+        empty: stats.teachers.length === 0,
+        canManage: false,
+        selecting: false,
+        selectedMap: {},
+        selectedCount: 0
       })
       return
     }
@@ -171,14 +187,97 @@ Page({
       rows,
       teachers: [],
       loading: false,
-      empty: rows.length === 0
+      empty: rows.length === 0,
+      canManage: rows.length > 0,
+      selectedMap: this.data.selecting ? this.pruneSelected(rows) : {},
+      selectedCount: this.data.selecting
+        ? selectedIdList(this.pruneSelected(rows)).length
+        : 0
+    })
+  },
+
+  pruneSelected(rows) {
+    const next = {}
+    const prev = this.data.selectedMap || {}
+    ;(rows || []).forEach((r) => {
+      if (r && r._id && prev[r._id]) next[r._id] = true
+    })
+    return next
+  },
+
+  onEnterSelect() {
+    this.setData({
+      selecting: true,
+      selectedMap: {},
+      selectedCount: 0
+    })
+  },
+
+  onCancelSelect() {
+    this.setData({
+      selecting: false,
+      selectedMap: {},
+      selectedCount: 0
+    })
+  },
+
+  onSelectAllRows() {
+    const map = {}
+    ;(this.data.rows || []).forEach((r) => {
+      if (r && r._id) map[r._id] = true
+    })
+    this.setData({
+      selectedMap: map,
+      selectedCount: selectedIdList(map).length
     })
   },
 
   onTapRow(e) {
     const id = e.currentTarget.dataset.id
     if (!id) return
+    if (this.data.selecting) {
+      const selectedMap = toggleSelectedId(this.data.selectedMap, id)
+      this.setData({
+        selectedMap,
+        selectedCount: selectedIdList(selectedMap).length
+      })
+      return
+    }
     wx.navigateTo({ url: `/pages/booking-edit/index?id=${id}` })
+  },
+
+  async onConfirmBatchDelete() {
+    const ids = normalizeDeleteIds(selectedIdList(this.data.selectedMap))
+    if (!ids.length) {
+      wx.showToast({ title: '请先勾选课程', icon: 'none' })
+      return
+    }
+    const confirm = await new Promise((resolve) => {
+      wx.showModal({
+        title: '确认删除',
+        content: `将删除 ${ids.length} 节课，占用日标记不会动。删了回不来。`,
+        confirmColor: '#ef4444',
+        confirmText: '删除',
+        success: (res) => resolve(!!res.confirm)
+      })
+    })
+    if (!confirm) return
+    try {
+      const result = await batchDeleteBookings(ids)
+      this.setData({
+        selecting: false,
+        selectedMap: {},
+        selectedCount: 0
+      })
+      await this.refresh()
+      const n = (result && result.deleted) || 0
+      wx.showToast({
+        title: n ? `已删掉 ${n} 节` : '没有删掉课程',
+        icon: 'none'
+      })
+    } catch (err) {
+      showWriteError(err)
+    }
   },
 
   onTapTeacher(e) {

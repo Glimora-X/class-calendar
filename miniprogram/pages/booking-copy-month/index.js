@@ -1,5 +1,5 @@
 const { addMonths, buildCopyMonthPreview } = require('../../utils/date-utils')
-const { monthRange, formatMonthKey } = require('../../utils/format')
+const { monthRange, formatMonthKey, formatDate } = require('../../utils/format')
 const { listBookings, batchCreateBookings } = require('../../services/booking')
 const { listDayHolds } = require('../../services/day-hold')
 const { annotateCopyRows, holdsToMap } = require('../../utils/day-hold')
@@ -73,7 +73,8 @@ Page({
           endTime: row.endTime || '',
           note: row.note == null ? null : row.note
         })),
-        holdMap
+        holdMap,
+        formatDate(new Date())
       )
       const skippedRows = previewSkipped.map((row, idx) => ({
         key: row._id || `s-${idx}`,

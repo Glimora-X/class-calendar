@@ -1,0 +1,62 @@
+<view class="page page--no-tab">
+  <view class="section surface-card soft-block form">
+    <view class="soft-field soft-field--tappable">
+      <text class="soft-field__label">月份</text>
+      <text class="soft-field__value">{{monthLabel}}</text>
+      <view class="month-actions">
+        <text class="month-btn" bindtap="onMonthPrev">‹</text>
+        <text class="month-btn" bindtap="onMonthNext">›</text>
+      </view>
+    </view>
+
+    <picker
+      mode="selector"
+      range="{{weekdayOptions}}"
+      range-key="label"
+      value="{{weekdayPickerIndex}}"
+      bindchange="onWeekdayChange"
+    >
+      <view class="soft-field soft-field--tappable soft-field--last">
+        <text class="soft-field__label">周几</text>
+        <text class="soft-field__value">{{weekdayLabel}}</text>
+        <text class="soft-field__chev">›</text>
+      </view>
+    </picker>
+  </view>
+
+  <view class="section surface-card soft-block">
+    <view class="preview-head">
+      <text class="section__title">将删除 {{selectedCount}} 节</text>
+    </view>
+    <text class="preview-hold-hint">默认全选，点一行可取消。占用日标记不会动。</text>
+    <view wx:if="{{previewRows.length}}" class="preview-list">
+      <view
+        wx:for="{{previewRows}}"
+        wx:key="_id"
+        class="preview-row {{item.selected ? 'is-on' : ''}}"
+        data-id="{{item._id}}"
+        bindtap="onTogglePreviewRow"
+      >
+        <text class="preview-check">{{item.selected ? '✓' : ''}}</text>
+        <view class="preview-row__main">
+          <text class="preview-item">{{item.date}} {{item.timeLabel}}</text>
+          <text class="preview-hold">{{item.title}}{{item.subjectName ? ' · ' + item.subjectName : ''}}</text>
+        </view>
+      </view>
+    </view>
+    <empty-state
+      wx:elif="{{!loading}}"
+      text="这天没有课"
+      hint="换个月或换个星期再看看"
+    />
+  </view>
+
+  <button
+    class="soft-btn soft-btn--danger save"
+    loading="{{saving}}"
+    disabled="{{!selectedCount}}"
+    bindtap="onSubmit"
+  >
+    删除 {{selectedCount}} 节
+  </button>
+</view>

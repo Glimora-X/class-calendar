@@ -55,6 +55,21 @@ function batchCreateBookings(payload) {
 }
 
 /**
+ * @param {string[]} ids
+ * @returns {Promise<{ deleted: number, skipped?: number, failed?: number }>}
+ */
+function batchDeleteBookings(ids) {
+  return callFunction(
+    CLOUD_FUNCTIONS.bookingBatchDelete,
+    { ids },
+    { title: '删除中' }
+  ).then((res) => {
+    markBookingsDirty()
+    return res
+  })
+}
+
+/**
  * 清空当前用户云端全部约课
  * @returns {Promise<{ deleted: number }>}
  */
@@ -74,5 +89,6 @@ module.exports = {
   upsertBooking,
   deleteBooking,
   batchCreateBookings,
+  batchDeleteBookings,
   clearAllBookings
 }

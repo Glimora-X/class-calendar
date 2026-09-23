@@ -12,7 +12,9 @@ Component({
     studentName: { type: String, value: '' },
     subjectName: { type: String, value: '' },
     /** 可选；有则优先，否则用学员|科目拼接 */
-    metaLine: { type: String, value: '' }
+    metaLine: { type: String, value: '' },
+    selecting: { type: Boolean, value: false },
+    selected: { type: Boolean, value: false }
   },
   data: {
     metaText: ''

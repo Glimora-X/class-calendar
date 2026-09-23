@@ -70,6 +70,11 @@
   box-shadow: 0 4rpx 10rpx rgba(16, 185, 129, 0.28);
 }
 
+.section-btn__ico--del {
+  background: linear-gradient(145deg, #fb7185, #ef4444);
+  box-shadow: 0 4rpx 10rpx rgba(239, 68, 68, 0.28);
+}
+
 /* 其他安排：小日历 + 斜杠 */
 .ico-hold {
   width: 22rpx;
@@ -144,6 +149,40 @@
   border: 2.5rpx solid rgba(255, 255, 255, 0.75);
   border-radius: 3rpx;
   box-sizing: border-box;
+}
+
+.ico-del {
+  width: 16rpx;
+  height: 18rpx;
+  border: 2.5rpx solid #fff;
+  border-top: none;
+  border-radius: 0 0 3rpx 3rpx;
+  position: relative;
+  box-sizing: border-box;
+  margin-top: 6rpx;
+}
+
+.ico-del::before {
+  content: '';
+  position: absolute;
+  left: -4rpx;
+  top: -5rpx;
+  width: 20rpx;
+  height: 3rpx;
+  background: #fff;
+  border-radius: 2rpx;
+}
+
+.ico-del::after {
+  content: '';
+  position: absolute;
+  left: 2rpx;
+  top: 3rpx;
+  width: 2.5rpx;
+  height: 8rpx;
+  background: #fff;
+  border-radius: 2rpx;
+  box-shadow: 6rpx 0 0 #fff;
 }
 
 .hold-banner {
@@ -265,4 +304,86 @@
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+}
+
+.tl-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin: 0 4rpx 16rpx;
+}
+
+.tl-toolbar__hint {
+  flex: 1;
+  min-width: 0;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #8b95a5;
+}
+
+.tl-toolbar__actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.tl-toolbar__save {
+  flex-shrink: 0;
+  height: 56rpx;
+  line-height: 56rpx;
+  padding: 0 22rpx;
+  border-radius: 999rpx;
+  background: #fff;
+  color: #3b82f6;
+  font-size: 24rpx;
+  font-weight: 600;
+  box-shadow: 0 8rpx 20rpx rgba(27, 36, 48, 0.06);
+}
+
+.tl-toolbar__save--muted {
+  color: #8b95a5;
+}
+
+.tl-toolbar__save:active {
+  opacity: 0.85;
+}
+
+.tl-delbar {
+  position: fixed;
+  left: 32rpx;
+  right: 32rpx;
+  bottom: calc(var(--tab-bar-height) + env(safe-area-inset-bottom) + 8rpx);
+  z-index: 20;
+}
+
+.tl-delbar__btn {
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  border-radius: 999rpx;
+  background: #ef4444;
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 700;
+  box-shadow: 0 16rpx 36rpx rgba(239, 68, 68, 0.32);
+}
+
+.tl-delbar__btn.is-disabled {
+  background: #c5ccd6;
+  box-shadow: none;
+}
+
+.page.is-selecting {
+  padding-bottom: calc(var(--tab-bar-height) + env(safe-area-inset-bottom) + 160rpx);
+}
+
+.tl-poster-canvas {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 375px;
+  height: 667px;
+  pointer-events: none;
 }

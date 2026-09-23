@@ -44,22 +44,57 @@ function isHoldDate(holdMap, date) {
 }
 
 /**
- * 复制上月：占用日默认不勾选，附 holdReason
+ * @param {string} date YYYY-MM-DD
+ * @param {string} todayStr YYYY-MM-DD
+ */
+function isPastDate(date, todayStr) {
+  const d = String(date || '')
+  const today = String(todayStr || '')
+  if (!d || !today) return false
+  return d < today
+}
+
+/**
+ * 复制上月：占用日、已过日期默认不勾选
  * @param {Array<object>|null|undefined} createRows
  * @param {Record<string, string>|null|undefined} holdMap
+ * @param {string} [todayStr]
  */
-function annotateCopyRows(createRows, holdMap) {
+function annotateCopyRows(createRows, holdMap, todayStr) {
   const map = holdMap || {}
   return (createRows || []).map((row) => {
     const date = row && row.date ? String(row.date) : ''
-    const holdReason = isHoldDate(map, date) ? map[date] || '' : ''
-    if (!holdReason && !isHoldDate(map, date)) {
-      return Object.assign({}, row, { holdReason: '' })
+    const hold = isHoldDate(map, date)
+    const past = isPastDate(date, todayStr)
+    if (!hold && !past) {
+      return Object.assign({}, row, { holdReason: '', past: false })
     }
     return Object.assign({}, row, {
       checked: false,
-      holdReason: map[date] || ''
+      holdReason: hold ? map[date] || '' : '',
+      past
     })
+  })
+}
+
+/**
+ * 批量按星期预览：占用日、已过日期默认不勾选（可勾回）
+ * @param {string[]} dates
+ * @param {Record<string, string>|null|undefined} holdMap
+ * @param {string} [todayStr]
+ */
+function annotateBatchPreviewRows(dates, holdMap, todayStr) {
+  const map = holdMap || {}
+  return (dates || []).map((date) => {
+    const d = String(date || '')
+    const hold = isHoldDate(map, d)
+    const past = isPastDate(d, todayStr)
+    return {
+      date: d,
+      holdReason: hold ? map[d] || '' : '',
+      past,
+      selected: !hold && !past
+    }
   })
 }
 
@@ -126,7 +161,9 @@ module.exports = {
   normalizeReason,
   holdsToMap,
   isHoldDate,
+  isPastDate,
   annotateCopyRows,
+  annotateBatchPreviewRows,
   partitionBatchDates,
   holdDatesInList,
   formatHoldConfirmContent

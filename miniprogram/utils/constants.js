@@ -36,6 +36,7 @@ const CLOUD_FUNCTIONS = {
   bookingUpsert: 'bookingUpsert',
   bookingDelete: 'bookingDelete',
   bookingBatchCreate: 'bookingBatchCreate',
+  bookingBatchDelete: 'bookingBatchDelete',
   bookingClearAll: 'bookingClearAll',
   nameList: 'nameList',
   subjectList: 'subjectList',

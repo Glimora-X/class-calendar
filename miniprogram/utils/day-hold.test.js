@@ -4,7 +4,9 @@ const {
   normalizeReason,
   holdsToMap,
   isHoldDate,
+  isPastDate,
   annotateCopyRows,
+  annotateBatchPreviewRows,
   partitionBatchDates,
   holdDatesInList,
   formatHoldConfirmContent
@@ -88,5 +90,51 @@ assert.strictEqual(
 assert.ok(
   formatHoldConfirmContent(holdMap, ['2026-08-25', '2026-08-28']).indexOf('2026-08-25 出差') >= 0
 )
+
+assert.strictEqual(isPastDate('2026-08-19', '2026-08-20'), true)
+assert.strictEqual(isPastDate('2026-08-20', '2026-08-20'), false)
+assert.strictEqual(isPastDate('2026-08-21', '2026-08-20'), false)
+assert.strictEqual(isPastDate('', '2026-08-20'), false)
+
+{
+  const today = '2026-08-20'
+  const preview = annotateBatchPreviewRows(
+    ['2026-08-17', '2026-08-20', '2026-08-24', '2026-08-25'],
+    holdMap,
+    today
+  )
+  assert.strictEqual(preview[0].date, '2026-08-17')
+  assert.strictEqual(preview[0].selected, false)
+  assert.strictEqual(preview[0].past, true)
+  assert.strictEqual(preview[0].holdReason, '')
+
+  assert.strictEqual(preview[1].date, '2026-08-20')
+  assert.strictEqual(preview[1].selected, true)
+  assert.strictEqual(preview[1].past, false)
+
+  assert.strictEqual(preview[2].date, '2026-08-24')
+  assert.strictEqual(preview[2].selected, true)
+  assert.strictEqual(preview[2].past, false)
+
+  assert.strictEqual(preview[3].date, '2026-08-25')
+  assert.strictEqual(preview[3].selected, false)
+  assert.strictEqual(preview[3].past, false)
+  assert.strictEqual(preview[3].holdReason, '出差')
+}
+
+{
+  const copyPast = annotateCopyRows(
+    [
+      { key: 'a', date: '2026-08-19', checked: true, studentName: '小雨' },
+      { key: 'b', date: '2026-08-21', checked: true, studentName: '小宇' }
+    ],
+    {},
+    '2026-08-20'
+  )
+  assert.strictEqual(copyPast[0].checked, false)
+  assert.strictEqual(copyPast[0].past, true)
+  assert.strictEqual(copyPast[1].checked, true)
+  assert.strictEqual(copyPast[1].past, false)
+}
 
 console.log('day-hold.test.js OK')

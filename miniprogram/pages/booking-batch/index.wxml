@@ -81,8 +81,8 @@
       <text class="section__title">将生成 {{selectedPreviewCount}} 天</text>
       <text class="preview-toggle">{{previewOpen ? '收起' : '预览'}}</text>
     </view>
-    <text wx:if="{{skippedHoldCount}}" class="preview-hold-hint">
-      已默认跳过有其他安排的 {{skippedHoldCount}} 天，点日期可勾回
+    <text wx:if="{{skippedDefaultCount}}" class="preview-hold-hint">
+      已默认跳过 {{skippedDefaultCount}} 天（已过或有其他安排），点日期可勾回
     </text>
     <view wx:if="{{previewOpen}}" class="preview-list">
       <view
@@ -98,6 +98,7 @@
           <text wx:if="{{item.holdReason}}" class="preview-hold">
             其他安排：{{item.holdReason}}
           </text>
+          <text wx:elif="{{item.past}}" class="preview-hold">已过的日期</text>
         </view>
       </view>
     </view>

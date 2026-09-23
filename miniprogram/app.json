@@ -5,6 +5,7 @@
     "pages/overview-list/index",
     "pages/booking-edit/index",
     "pages/booking-batch/index",
+    "pages/booking-batch-delete/index",
     "pages/booking-copy-month/index",
     "pages/mine/index",
     "pages/teacher-list/index",
@@ -48,5 +49,10 @@
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json",
-  "lazyCodeLoading": "requiredComponents"
+  "lazyCodeLoading": "requiredComponents",
+  "permission": {
+    "scope.writePhotosAlbum": {
+      "desc": "用于把本月时间线保存为长图到相册"
+    }
+  }
 }

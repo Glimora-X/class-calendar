@@ -1,0 +1,164 @@
+.section {
+  margin-bottom: 24rpx;
+}
+
+.soft-block {
+  padding: 28rpx;
+}
+
+.section__title {
+  font-size: 26rpx;
+  color: #8b95a5;
+  font-weight: 600;
+}
+
+.form {
+  padding: 8rpx 8rpx 8rpx 28rpx;
+}
+
+.soft-field {
+  display: flex;
+  align-items: center;
+  min-height: 100rpx;
+  padding-right: 20rpx;
+  border-bottom: 1rpx solid #e6ebf2;
+}
+
+.soft-field--last {
+  border-bottom: none;
+}
+
+.soft-field--tappable:active {
+  background: rgba(59, 130, 246, 0.04);
+}
+
+.soft-field__label {
+  width: 120rpx;
+  flex-shrink: 0;
+  color: #8b95a5;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.soft-field__value {
+  flex: 1;
+  font-size: 30rpx;
+  color: #1b2430;
+  font-weight: 600;
+}
+
+.soft-field__chev {
+  color: #c5ccd6;
+  font-size: 36rpx;
+  padding: 0 8rpx;
+}
+
+.month-actions {
+  display: flex;
+  gap: 12rpx;
+}
+
+.month-btn {
+  width: 56rpx;
+  height: 56rpx;
+  line-height: 52rpx;
+  text-align: center;
+  border-radius: 50%;
+  background: #eef2f7;
+  color: #1b2430;
+  font-size: 36rpx;
+  font-weight: 600;
+}
+
+.preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.preview-list {
+  margin-top: 16rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.preview-hold-hint {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 22rpx;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.preview-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  padding: 12rpx 16rpx;
+  border-radius: 12rpx;
+  background: #f8fafc;
+  border: 1rpx solid transparent;
+}
+
+.preview-row.is-on {
+  background: #eef2f7;
+  border-color: #dbe3ee;
+}
+
+.preview-check {
+  width: 32rpx;
+  font-size: 26rpx;
+  color: #3b82f6;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.preview-row__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.preview-item {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  font-size: 26rpx;
+  color: #1b2430;
+  font-weight: 600;
+}
+
+.preview-hold {
+  font-size: 22rpx;
+  color: #64748b;
+}
+
+.soft-btn {
+  border-radius: 999rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-top: 8rpx;
+}
+
+.soft-btn::after {
+  border: none;
+}
+
+.soft-btn--danger {
+  background: #ef4444;
+  color: #fff;
+  box-shadow: 0 16rpx 36rpx rgba(239, 68, 68, 0.32);
+}
+
+.soft-btn[disabled] {
+  background: #c5ccd6;
+  color: #fff;
+  box-shadow: none;
+}
+
+.save {
+  margin-top: 16rpx;
+}

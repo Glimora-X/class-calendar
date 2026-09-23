@@ -29,6 +29,8 @@
         student-name="{{b.studentName}}"
         subject-name="{{b.subjectName}}"
         meta-line="{{b.metaLine}}"
+        selecting="{{selecting}}"
+        selected="{{selecting && selectedMap[b._id]}}"
         bind:tap="onTapItem"
       />
     </view>

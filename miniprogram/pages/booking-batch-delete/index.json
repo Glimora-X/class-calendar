@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "批量删除",
+  "navigationBarBackgroundColor": "#EEF2F7",
+  "usingComponents": {
+    "empty-state": "/components/empty-state/index"
+  }
+}

@@ -34,6 +34,7 @@
     <view class="menu__item" bindtap="onStudents">学生列表</view>
     <view class="menu__item" bindtap="onCopyMonth">复制上月</view>
     <view class="menu__item" bindtap="onBatch">批量新增</view>
+    <view class="menu__item" bindtap="onBatchDelete">批量删除</view>
     <view class="menu__item" bindtap="onAbout">关于小课记录本</view>
     <view class="menu__item menu__item--danger" bindtap="onClearBookings">清空全部课程</view>
     <view class="menu__item menu__item--danger menu__item--last" bindtap="onLogout">退出登录</view>

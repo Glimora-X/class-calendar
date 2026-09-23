@@ -73,7 +73,7 @@
   z-index: 1;
 }
 
-.cal__cell.is-hold:not(.is-selected) .cal__day {
+.cal__cell.is-hold:not(.is-selected):not(.has-mark) .cal__day {
   background: rgba(100, 116, 139, 0.12);
   color: #475569;
 }
