@@ -47,6 +47,10 @@ assert.deepStrictEqual(normalizeDeleteIds(['a', '', 'a', ' b ', null]), ['a', 'b
   )
   assert.strictEqual(filterBookingsByWeekday(list, 2).length, 1)
   assert.strictEqual(filterBookingsByWeekday(null, 1).length, 0)
+  assert.deepStrictEqual(
+    filterBookingsByWeekday(list, -1).map((b) => b._id),
+    ['1', '2', '3', '4']
+  )
 }
 
 console.log('booking-batch-delete tests passed')

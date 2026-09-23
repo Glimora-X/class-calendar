@@ -46,7 +46,7 @@
     </view>
     <empty-state
       wx:elif="{{!loading}}"
-      text="这天没有课"
+      text="没有可删的课"
       hint="换个月或换个星期再看看"
     />
   </view>

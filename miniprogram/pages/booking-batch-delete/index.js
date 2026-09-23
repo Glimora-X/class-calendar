@@ -8,10 +8,12 @@ const {
   filterBookingsByWeekday
 } = require('../../utils/booking-batch-delete')
 
-const WEEKDAY_OPTIONS = WEEKDAY_CN.map((label, value) => ({
-  value,
-  label: `星期${label}`
-}))
+const WEEKDAY_OPTIONS = [{ value: -1, label: '全部' }].concat(
+  WEEKDAY_CN.map((label, value) => ({
+    value,
+    label: `星期${label}`
+  }))
+)
 
 function byDateThenTime(a, b) {
   const da = String((a && a.date) || '')
@@ -27,10 +29,10 @@ Page({
     year: 0,
     month: 0,
     monthLabel: '',
-    weekdayPickerIndex: 1,
-    weekdayIndex: 1,
+    weekdayPickerIndex: 0,
+    weekdayIndex: -1,
     weekdayOptions: WEEKDAY_OPTIONS,
-    weekdayLabel: '星期一',
+    weekdayLabel: '全部',
     previewRows: [],
     selectedCount: 0,
     loading: false,
@@ -100,7 +102,7 @@ Page({
 
   onWeekdayChange(e) {
     const idx = Number(e.detail.value)
-    const selected = WEEKDAY_OPTIONS[idx] || WEEKDAY_OPTIONS[1]
+    const selected = WEEKDAY_OPTIONS[idx] || WEEKDAY_OPTIONS[0]
     this.setData({
       weekdayPickerIndex: idx,
       weekdayIndex: selected.value,

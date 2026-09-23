@@ -53,12 +53,14 @@ function weekdayOfDate(dateStr) {
 
 /**
  * @param {Array<{ date?: string }>} list
- * @param {number} weekday 0=周日
+ * @param {number} weekday 0=周日；-1=全部（不过滤）
  */
 function filterBookingsByWeekday(list, weekday) {
+  const rows = list || []
   const w = Number(weekday)
   if (!Number.isFinite(w)) return []
-  return (list || []).filter((b) => weekdayOfDate(b && b.date) === w)
+  if (w === -1) return rows.slice()
+  return rows.filter((b) => weekdayOfDate(b && b.date) === w)
 }
 
 module.exports = {
