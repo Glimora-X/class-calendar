@@ -1,36 +1,14 @@
 <view class="tab-shell">
   <view class="tab-bar">
     <view
-      class="tab-item {{selected === 0 ? 'is-active' : ''}}"
-      data-index="0"
+      wx:for="{{list}}"
+      wx:key="pagePath"
+      class="tab-item {{selected === index ? 'is-active' : ''}}"
+      data-index="{{index}}"
       bindtap="switchTab"
     >
-      <view class="tab-icon tab-icon--calendar"></view>
-      <text class="tab-text">日历</text>
-    </view>
-
-    <view
-      class="tab-item {{selected === 1 ? 'is-active' : ''}}"
-      data-index="1"
-      bindtap="switchTab"
-    >
-      <view class="tab-icon tab-icon--overview"></view>
-      <text class="tab-text">概览</text>
-    </view>
-
-    <view class="tab-fab-slot">
-      <view class="tab-fab" bindtap="onFab">
-        <text class="tab-fab__plus">+</text>
-      </view>
-    </view>
-
-    <view
-      class="tab-item {{selected === 2 ? 'is-active' : ''}}"
-      data-index="2"
-      bindtap="switchTab"
-    >
-      <view class="tab-icon tab-icon--mine"></view>
-      <text class="tab-text">我的</text>
+      <view class="tab-icon tab-icon--{{item.icon}}"></view>
+      <text class="tab-text">{{item.text}}</text>
     </view>
   </view>
 </view>

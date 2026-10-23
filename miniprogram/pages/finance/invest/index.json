@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "理财",
+  "usingComponents": {
+    "empty-state": "/components/empty-state/index"
+  }
+}

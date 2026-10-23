@@ -85,7 +85,7 @@ async function sendSubscribe(row) {
       await cloud.openapi.subscribeMessage.send({
         touser: row._openid,
         templateId: TEMPLATE_ID,
-        page: `pages/booking-edit/index?id=${row._id}`,
+        page: `pages/booking/edit/index?id=${row._id}`,
         data,
         miniprogramState: state
       })

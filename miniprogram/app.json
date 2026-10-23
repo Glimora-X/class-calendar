@@ -1,17 +1,19 @@
 {
   "pages": [
-    "pages/calendar/index",
-    "pages/overview/index",
-    "pages/overview-list/index",
-    "pages/booking-edit/index",
-    "pages/booking-batch/index",
-    "pages/booking-batch-delete/index",
-    "pages/booking-copy-month/index",
-    "pages/mine/index",
-    "pages/teacher-list/index",
-    "pages/teacher-edit/index",
-    "pages/student-list/index",
-    "pages/student-edit/index"
+    "pages/booking/calendar/index",
+    "pages/finance/assets/index",
+    "pages/finance/invest/index",
+    "pages/booking/mine/index",
+    "pages/booking/overview/index",
+    "pages/booking/overview-list/index",
+    "pages/booking/edit/index",
+    "pages/booking/batch/index",
+    "pages/booking/batch-delete/index",
+    "pages/booking/copy-month/index",
+    "pages/booking/teacher-list/index",
+    "pages/booking/teacher-edit/index",
+    "pages/booking/student-list/index",
+    "pages/booking/student-edit/index"
   ],
   "window": {
     "navigationBarTitleText": "小课记录本",
@@ -28,19 +30,25 @@
     "borderStyle": "white",
     "list": [
       {
-        "pagePath": "pages/calendar/index",
-        "text": "日历",
+        "pagePath": "pages/booking/calendar/index",
+        "text": "约课",
         "iconPath": "assets/tab-calendar.png",
         "selectedIconPath": "assets/tab-calendar-active.png"
       },
       {
-        "pagePath": "pages/overview/index",
-        "text": "概览",
+        "pagePath": "pages/finance/assets/index",
+        "text": "资产",
         "iconPath": "assets/tab-overview.png",
         "selectedIconPath": "assets/tab-overview-active.png"
       },
       {
-        "pagePath": "pages/mine/index",
+        "pagePath": "pages/finance/invest/index",
+        "text": "理财",
+        "iconPath": "assets/tab-overview.png",
+        "selectedIconPath": "assets/tab-overview-active.png"
+      },
+      {
+        "pagePath": "pages/booking/mine/index",
         "text": "我的",
         "iconPath": "assets/tab-mine.png",
         "selectedIconPath": "assets/tab-mine-active.png"

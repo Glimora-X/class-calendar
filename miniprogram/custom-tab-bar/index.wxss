@@ -22,7 +22,8 @@
 }
 
 .tab-item {
-  width: 96rpx;
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -35,8 +36,10 @@
 }
 
 .tab-text {
+  max-width: 100%;
   font-size: 20rpx;
   color: #8b95a5;
+  white-space: nowrap;
 }
 
 .tab-item.is-active .tab-text {
@@ -60,68 +63,56 @@
   border-radius: 8rpx;
 }
 
-.tab-icon--overview {
-  border-radius: 8rpx;
-  background: linear-gradient(
-    135deg,
-    transparent 0 42%,
-    currentColor 42% 58%,
-    transparent 58%
-  );
-  border-color: #8b95a5;
+.tab-icon--assets {
+  border-radius: 6rpx;
   position: relative;
 }
 
-.tab-icon--overview::before,
-.tab-icon--overview::after {
+.tab-icon--assets::before {
   content: '';
   position: absolute;
-  left: 8rpx;
-  right: 8rpx;
+  left: 6rpx;
+  right: 6rpx;
+  top: 10rpx;
   height: 4rpx;
   background: #8b95a5;
   border-radius: 2rpx;
 }
 
-.tab-icon--overview::before {
-  top: 10rpx;
+.tab-item.is-active .tab-icon--assets::before {
+  background: #3b82f6;
 }
 
-.tab-icon--overview::after {
-  bottom: 10rpx;
+.tab-icon--invest {
+  border-radius: 8rpx;
+  position: relative;
 }
 
-.tab-item.is-active .tab-icon--overview::before,
-.tab-item.is-active .tab-icon--overview::after {
+.tab-icon--invest::before,
+.tab-icon--invest::after {
+  content: '';
+  position: absolute;
+  bottom: 8rpx;
+  width: 6rpx;
+  border-radius: 2rpx;
+  background: #8b95a5;
+}
+
+.tab-icon--invest::before {
+  left: 8rpx;
+  height: 10rpx;
+}
+
+.tab-icon--invest::after {
+  right: 8rpx;
+  height: 18rpx;
+}
+
+.tab-item.is-active .tab-icon--invest::before,
+.tab-item.is-active .tab-icon--invest::after {
   background: #3b82f6;
 }
 
 .tab-icon--mine {
   border-radius: 50%;
-}
-
-.tab-fab-slot {
-  width: 112rpx;
-  display: flex;
-  justify-content: center;
-}
-
-.tab-fab {
-  width: 108rpx;
-  height: 108rpx;
-  margin-top: -58rpx;
-  border-radius: 50%;
-  background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
-  box-shadow: 0 16rpx 40rpx rgba(59, 130, 246, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.tab-fab__plus {
-  color: #fff;
-  font-size: 64rpx;
-  font-weight: 300;
-  line-height: 1;
-  margin-top: -4rpx;
 }

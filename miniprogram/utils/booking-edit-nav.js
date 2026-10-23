@@ -2,8 +2,8 @@
  * 新增/编辑课程页跳转
  */
 
-const BOOKING_EDIT_PATH = '/pages/booking-edit/index'
-const CALENDAR_ROUTE = 'pages/calendar/index'
+const BOOKING_EDIT_PATH = '/pages/booking/edit/index'
+const CALENDAR_ROUTE = 'pages/booking/calendar/index'
 
 /**
  * @param {{ id?: string, date?: string, studentName?: string }} [query]

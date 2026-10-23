@@ -8,32 +8,32 @@ const {
   resolveCreateBookingDate
 } = require('./booking-edit-nav')
 
-assert.strictEqual(buildBookingEditUrl(), '/pages/booking-edit/index')
-assert.strictEqual(buildBookingEditUrl({}), '/pages/booking-edit/index')
+assert.strictEqual(buildBookingEditUrl(), '/pages/booking/edit/index')
+assert.strictEqual(buildBookingEditUrl({}), '/pages/booking/edit/index')
 
 assert.strictEqual(
   buildBookingEditUrl({ date: '2026-08-20' }),
-  '/pages/booking-edit/index?date=2026-08-20'
+  '/pages/booking/edit/index?date=2026-08-20'
 )
 
 assert.strictEqual(
   buildBookingEditUrl({ date: '2026-08-20', studentName: '小雨' }),
-  '/pages/booking-edit/index?date=2026-08-20&studentName=%E5%B0%8F%E9%9B%A8'
+  '/pages/booking/edit/index?date=2026-08-20&studentName=%E5%B0%8F%E9%9B%A8'
 )
 
 assert.strictEqual(
   buildBookingEditUrl({ id: 'bk1', date: '2026-08-20' }),
-  '/pages/booking-edit/index?id=bk1&date=2026-08-20'
+  '/pages/booking/edit/index?id=bk1&date=2026-08-20'
 )
 
 assert.strictEqual(
   buildBookingEditUrl({ id: 'bk1', studentName: '小雨' }),
-  '/pages/booking-edit/index?id=bk1'
+  '/pages/booking/edit/index?id=bk1'
 )
 
 assert.strictEqual(
   resolveCreateBookingDate({
-    route: 'pages/calendar/index',
+    route: 'pages/booking/calendar/index',
     data: { selectedDate: '2026-08-20' }
   }),
   '2026-08-20'
@@ -41,7 +41,7 @@ assert.strictEqual(
 
 assert.strictEqual(
   resolveCreateBookingDate({
-    __route__: 'pages/calendar/index',
+    __route__: 'pages/booking/calendar/index',
     data: { selectedDate: '2026-08-15' }
   }),
   '2026-08-15'
@@ -49,7 +49,7 @@ assert.strictEqual(
 
 assert.strictEqual(
   resolveCreateBookingDate({
-    route: 'pages/overview/index',
+    route: 'pages/booking/overview/index',
     data: { selectedDate: '2026-08-20' }
   }),
   ''
@@ -57,7 +57,7 @@ assert.strictEqual(
 
 assert.strictEqual(
   resolveCreateBookingDate({
-    route: 'pages/mine/index',
+    route: 'pages/booking/mine/index',
     data: {}
   }),
   ''
@@ -66,7 +66,7 @@ assert.strictEqual(
 assert.strictEqual(resolveCreateBookingDate(null), '')
 assert.strictEqual(
   resolveCreateBookingDate({
-    route: 'pages/calendar/index',
+    route: 'pages/booking/calendar/index',
     data: { selectedDate: '' }
   }),
   ''

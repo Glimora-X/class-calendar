@@ -1,0 +1,3 @@
+<view class="page">
+  <empty-state text="这里先空着" />
+</view>
