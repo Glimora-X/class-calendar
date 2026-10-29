@@ -59,6 +59,7 @@ const {
   pickBookingFromList,
   bookingToEditForm
 } = require('../../../utils/booking-form')
+const { resolveNameSuggestValue } = require('../../../utils/name-suggest-event')
 
 const WEEKDAY_SHORT = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
 const NOTE_MAX_LEN = 100
@@ -533,11 +534,14 @@ Page({
   },
 
   onStudentSuggest(e) {
-    this.setData({ studentName: e.detail.value })
+    const studentName = resolveNameSuggestValue(e && e.detail)
+    if (studentName == null) return
+    this.setData({ studentName })
   },
 
   onTeacherSuggest(e) {
-    const teacherName = e.detail.value
+    const teacherName = resolveNameSuggestValue(e && e.detail)
+    if (teacherName == null) return
     const patch = this.applyTeacherPrice(teacherName, parsePriceInput(this.data.priceText))
     this.setData(patch)
   },
@@ -552,10 +556,40 @@ Page({
 
   onDateChange(e) {
     const date = e.detail.value
-    this.syncEditDisplay({ date })
-    if (!this.data.statusManual) {
-      this.syncStatusPicker(this.data.status, false, date, this.data.startTime)
+    const {
+      startTime,
+      endTime,
+      note,
+      studentName,
+      teacherName,
+      status,
+      statusManual
+    } = this.data
+    const noteStr = note != null ? String(note) : ''
+    // 同一轮 setData 重推姓名，避免 PC 微信局部更新把 name-suggest 冲空
+    const patch = {
+      date,
+      dateLabel: formatDateLabel(date),
+      durationLabel: formatDurationLabel(startTime, endTime),
+      noteLen: Math.min(noteStr.length, NOTE_MAX_LEN),
+      studentName,
+      teacherName
     }
+    if (!statusManual) {
+      const resolved = resolveBookingStatus(
+        { date, startTime, status, statusManual: false },
+        new Date()
+      )
+      const idx = Math.max(
+        0,
+        STATUS_OPTIONS.findIndex((o) => o.value === resolved)
+      )
+      patch.status = resolved
+      patch.statusManual = false
+      patch.statusIndex = idx
+      patch.statusDisplay = STATUS_OPTIONS[idx].label
+    }
+    this.setData(patch)
     this.refreshHoldTip([date])
   },
 
@@ -567,14 +601,41 @@ Page({
       ? duration
       : getClassDurationMinutes()
     const endTime = addMinutesToTime(startTime, minutes)
-    this.syncEditDisplay({ startTime, endTime })
-    if (!this.data.statusManual) {
-      this.syncStatusPicker(this.data.status, false, this.data.date, startTime)
+    const { date, note, studentName, teacherName, status, statusManual } = this.data
+    const noteStr = note != null ? String(note) : ''
+    const patch = {
+      startTime,
+      endTime,
+      dateLabel: formatDateLabel(date),
+      durationLabel: formatDurationLabel(startTime, endTime),
+      noteLen: Math.min(noteStr.length, NOTE_MAX_LEN),
+      studentName,
+      teacherName
     }
+    if (!statusManual) {
+      const resolved = resolveBookingStatus(
+        { date, startTime, status, statusManual: false },
+        new Date()
+      )
+      const idx = Math.max(
+        0,
+        STATUS_OPTIONS.findIndex((o) => o.value === resolved)
+      )
+      patch.status = resolved
+      patch.statusManual = false
+      patch.statusIndex = idx
+      patch.statusDisplay = STATUS_OPTIONS[idx].label
+    }
+    this.setData(patch)
   },
 
   onEndTimeChange(e) {
-    this.syncEditDisplay({ endTime: e.detail.value })
+    const endTime = e.detail.value
+    this.syncEditDisplay({
+      endTime,
+      studentName: this.data.studentName,
+      teacherName: this.data.teacherName
+    })
   },
 
   onStatusChange(e) {
@@ -801,7 +862,9 @@ Page({
 
   onDraftStudentSuggest(e) {
     const index = Number(e.currentTarget.dataset.index)
-    this.updateDraft(index, { studentName: e.detail.value })
+    const studentName = resolveNameSuggestValue(e && e.detail)
+    if (studentName == null) return
+    this.updateDraft(index, { studentName })
   },
 
   onDraftTeacherSuggest(e) {
@@ -809,7 +872,8 @@ Page({
     const drafts = this.data.drafts || []
     const draft = drafts[index]
     if (!draft) return
-    const teacherName = e.detail.value
+    const teacherName = resolveNameSuggestValue(e && e.detail)
+    if (teacherName == null) return
     const profiles = this.data.teacherProfiles || []
     const oldDefault = teacherDefaultPrice(profiles, draft.teacherName)
     const newDefault = teacherDefaultPrice(profiles, teacherName)

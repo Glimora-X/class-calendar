@@ -187,7 +187,7 @@
               value="{{item.studentName}}"
               suggestions="{{studentSuggestions}}"
               data-index="{{index}}"
-              bind:input="onDraftStudentSuggest"
+              bind:namechange="onDraftStudentSuggest"
             />
           </view>
           <view class="bk-split__line"></view>
@@ -201,7 +201,7 @@
               value="{{item.teacherName}}"
               suggestions="{{teacherSuggestions}}"
               data-index="{{index}}"
-              bind:input="onDraftTeacherSuggest"
+              bind:namechange="onDraftTeacherSuggest"
             />
           </view>
         </view>
@@ -361,7 +361,7 @@
             placeholder="必填"
             value="{{studentName}}"
             suggestions="{{studentSuggestions}}"
-            bind:input="onStudentSuggest"
+            bind:namechange="onStudentSuggest"
           />
         </view>
         <view class="bk-split__line"></view>
@@ -374,7 +374,7 @@
             placeholder="必填"
             value="{{teacherName}}"
             suggestions="{{teacherSuggestions}}"
-            bind:input="onTeacherSuggest"
+            bind:namechange="onTeacherSuggest"
           />
         </view>
       </view>

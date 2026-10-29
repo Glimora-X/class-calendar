@@ -20,10 +20,6 @@ Page({
     tagOptions: [],
     risks: RISK_LEVELS,
     currencies: CURRENCIES,
-    platformIndex: 0,
-    typeIndex: 0,
-    riskIndex: 1,
-    currencyIndex: 0,
     selectedTags: {}
   },
 
@@ -41,7 +37,6 @@ Page({
         form.minDays = 14
         form.risk = 'PR2'
         this.setData({ form })
-        this.syncPickers()
       }
     })
   },
@@ -77,6 +72,14 @@ Page({
         ;(h.tags || []).forEach((t) => {
           selectedTags[t] = true
         })
+        // 表单只保留备注：旧「近期总结」并入备注，避免编辑后丢失
+        const notesParts = [h.notes, h.summary]
+          .map((x) => String(x || '').trim())
+          .filter(Boolean)
+        const notes =
+          notesParts.length === 2 && notesParts[0] === notesParts[1]
+            ? notesParts[0]
+            : notesParts.join('\n')
         this.setData({
           form: {
             name: h.name,
@@ -92,25 +95,13 @@ Page({
             expectedAnnual:
               h.expectedAnnual == null ? '' : String(h.expectedAnnual),
             minDays: String(h.minDays == null ? 14 : h.minDays),
-            summary: h.summary || '',
-            notes: h.notes || '',
+            notes,
             tags: h.tags || []
           },
           selectedTags
         })
-        this.syncPickers()
       })
       .catch(showApiError)
-  },
-
-  syncPickers() {
-    const { form, platforms, types, risks, currencies } = this.data
-    this.setData({
-      platformIndex: Math.max(0, platforms.indexOf(form.platform)),
-      typeIndex: Math.max(0, types.indexOf(form.type)),
-      riskIndex: Math.max(0, risks.indexOf(form.risk)),
-      currencyIndex: Math.max(0, currencies.indexOf(form.currency))
-    })
   },
 
   onField(e) {
@@ -130,33 +121,17 @@ Page({
   onEndDate(e) {
     this.setData({ 'form.endDate': e.detail.value })
   },
-  onPlatform(e) {
-    const i = Number(e.detail.value)
-    this.setData({
-      platformIndex: i,
-      'form.platform': this.data.platforms[i] || ''
-    })
+  onPickPlatform(e) {
+    this.setData({ 'form.platform': e.currentTarget.dataset.v || '' })
   },
-  onType(e) {
-    const i = Number(e.detail.value)
-    this.setData({
-      typeIndex: i,
-      'form.type': this.data.types[i] || ''
-    })
+  onPickType(e) {
+    this.setData({ 'form.type': e.currentTarget.dataset.v || '' })
   },
-  onRisk(e) {
-    const i = Number(e.detail.value)
-    this.setData({
-      riskIndex: i,
-      'form.risk': this.data.risks[i]
-    })
+  onPickRisk(e) {
+    this.setData({ 'form.risk': e.currentTarget.dataset.v || 'PR2' })
   },
-  onCurrency(e) {
-    const i = Number(e.detail.value)
-    this.setData({
-      currencyIndex: i,
-      'form.currency': this.data.currencies[i]
-    })
+  onPickCurrency(e) {
+    this.setData({ 'form.currency': e.currentTarget.dataset.v || 'CNY' })
   },
 
   onToggleTag(e) {
@@ -187,7 +162,7 @@ Page({
       endDate: f.endDate,
       expectedAnnual: f.expectedAnnual === '' ? null : Number(f.expectedAnnual),
       minDays: Number(f.minDays) || 0,
-      summary: f.summary,
+      summary: '',
       notes: f.notes,
       tags
     }

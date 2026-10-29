@@ -38,14 +38,14 @@
       placeholder="必填"
       value="{{studentName}}"
       suggestions="{{studentSuggestions}}"
-      bind:input="onStudentInput"
+      bind:namechange="onStudentInput"
     />
     <name-suggest
       label="老师"
       placeholder="必填"
       value="{{teacherName}}"
       suggestions="{{teacherSuggestions}}"
-      bind:input="onTeacherInput"
+      bind:namechange="onTeacherInput"
     />
 
     <picker mode="time" value="{{startTime}}" bindchange="onStartTimeChange">

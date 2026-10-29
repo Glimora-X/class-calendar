@@ -28,6 +28,7 @@ const {
   getRemindMinutesBefore
 } = require('../../../utils/prefs')
 const { teacherDefaultPrice } = require('../../../utils/price')
+const { resolveNameSuggestValue } = require('../../../utils/name-suggest-event')
 
 const WEEKDAY_OPTIONS = WEEKDAY_CN.map((label, value) => ({
   value,
@@ -175,11 +176,15 @@ Page({
   },
 
   onStudentInput(e) {
-    this.setData({ studentName: e.detail.value })
+    const studentName = resolveNameSuggestValue(e && e.detail)
+    if (studentName == null) return
+    this.setData({ studentName })
   },
 
   onTeacherInput(e) {
-    this.setData({ teacherName: e.detail.value })
+    const teacherName = resolveNameSuggestValue(e && e.detail)
+    if (teacherName == null) return
+    this.setData({ teacherName })
   },
 
   onStartTimeChange(e) {

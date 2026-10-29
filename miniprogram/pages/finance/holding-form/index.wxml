@@ -1,117 +1,250 @@
 <view class="page page--no-tab form">
-  <view wx:if="{{!editingId}}" class="late-card">
-    <view class="lt">迟录入辅助</view>
-    <view class="ld">填「截至日+累计收益」→ 自动写起息日本金余额 + 截至日余额</view>
-    <view class="fr">
-      <view class="fg">
-        <view class="fl"><text class="lab">截至日</text></view>
-        <picker mode="date" value="{{lateDate}}" bindchange="onLateDate">
-          <view class="fi">{{lateDate || '选择日期'}}</view>
-        </picker>
+  <view class="form-body">
+    <view class="fg">
+      <view class="fl">
+        <text class="lab">产品名称</text>
+        <text class="hint hint--req">必填</text>
       </view>
-      <view class="fg">
-        <view class="fl"><text class="lab">累计收益</text></view>
-        <input class="fi" type="digit" placeholder="如：526.30" value="{{lateReturn}}" bindinput="onLateReturn" />
-      </view>
+      <input
+        class="fi"
+        placeholder="如：招银理财·稳健添利"
+        placeholder-class="fi-ph"
+        value="{{form.name}}"
+        data-k="name"
+        bindinput="onField"
+      />
     </view>
-  </view>
 
-  <view class="form-sec">
-    <view class="st">产品档案</view>
     <view class="fg">
-      <view class="fl"><text class="lab">产品名称</text><text class="req">*必填</text></view>
-      <input class="fi" placeholder="产品名称" value="{{form.name}}" data-k="name" bindinput="onField" />
+      <view class="fl">
+        <text class="lab">产品编号</text>
+        <text class="hint hint--req">必填 · 全局唯一</text>
+      </view>
+      <input
+        class="fi"
+        placeholder="输入产品编号"
+        placeholder-class="fi-ph"
+        value="{{form.code}}"
+        data-k="code"
+        bindinput="onField"
+      />
     </view>
+
     <view class="fg">
-      <view class="fl"><text class="lab">产品编号</text><text class="req">*必填</text></view>
-      <input class="fi" placeholder="全局唯一" value="{{form.code}}" data-k="code" bindinput="onField" />
-    </view>
-    <view class="fr">
-      <view class="fg">
-        <view class="fl"><text class="lab">发行机构</text></view>
-        <input class="fi" value="{{form.institution}}" data-k="institution" bindinput="onField" />
+      <view class="fl">
+        <text class="lab">购买平台</text>
+        <text class="hint hint--req">必填</text>
       </view>
-      <view class="fg">
-        <view class="fl"><text class="lab">购买平台</text><text class="req">*</text></view>
-        <picker mode="selector" range="{{platforms}}" value="{{platformIndex}}" bindchange="onPlatform">
-          <view class="fi">{{form.platform || '请选择'}}</view>
-        </picker>
-      </view>
-    </view>
-    <view class="fr">
-      <view class="fg">
-        <view class="fl"><text class="lab">所属类型</text></view>
-        <picker mode="selector" range="{{types}}" value="{{typeIndex}}" bindchange="onType">
-          <view class="fi">{{form.type || '请选择'}}</view>
-        </picker>
-      </view>
-      <view class="fg">
-        <view class="fl"><text class="lab">风险等级</text></view>
-        <picker mode="selector" range="{{risks}}" value="{{riskIndex}}" bindchange="onRisk">
-          <view class="fi">{{form.risk}}</view>
-        </picker>
+      <view class="chip-grid">
+        <view
+          wx:for="{{platforms}}"
+          wx:key="*this"
+          class="chip {{form.platform === item ? 'is-on' : ''}}"
+          data-v="{{item}}"
+          bindtap="onPickPlatform"
+        >{{item}}</view>
       </view>
     </view>
-    <view class="fr">
-      <view class="fg">
-        <view class="fl"><text class="lab">本金（元）</text><text class="req">*</text></view>
-        <input class="fi" type="digit" value="{{form.principal}}" data-k="principal" bindinput="onField" />
+
+    <view class="fg">
+      <view class="fl">
+        <text class="lab">所属类型</text>
+        <text class="hint">便于筛选归类</text>
       </view>
-      <view class="fg">
-        <view class="fl"><text class="lab">币种</text></view>
-        <picker mode="selector" range="{{currencies}}" value="{{currencyIndex}}" bindchange="onCurrency">
-          <view class="fi">{{form.currency}}</view>
-        </picker>
+      <view class="chip-grid">
+        <view
+          wx:for="{{types}}"
+          wx:key="*this"
+          class="chip {{form.type === item ? 'is-on' : ''}}"
+          data-v="{{item}}"
+          bindtap="onPickType"
+        >{{item}}</view>
       </view>
     </view>
+
     <view class="fr">
       <view class="fg">
-        <view class="fl"><text class="lab">起息日</text><text class="req">*</text></view>
+        <view class="fl">
+          <text class="lab">本金（元）</text>
+          <text class="hint hint--req">必填</text>
+        </view>
+        <input
+          class="fi"
+          type="digit"
+          placeholder="0"
+          placeholder-class="fi-ph"
+          value="{{form.principal}}"
+          data-k="principal"
+          bindinput="onField"
+        />
+      </view>
+      <view class="fg">
+        <view class="fl">
+          <text class="lab">预期年化%</text>
+          <text class="hint">达标参考</text>
+        </view>
+        <input
+          class="fi"
+          type="digit"
+          placeholder="如 3.2"
+          placeholder-class="fi-ph"
+          value="{{form.expectedAnnual}}"
+          data-k="expectedAnnual"
+          bindinput="onField"
+        />
+      </view>
+    </view>
+
+    <view class="fr">
+      <view class="fg">
+        <view class="fl">
+          <text class="lab">起息日</text>
+          <text class="hint hint--req">必填</text>
+        </view>
         <picker mode="date" value="{{form.startDate}}" bindchange="onStartDate">
-          <view class="fi">{{form.startDate || '选择日期'}}</view>
+          <view class="fi fi--tap {{form.startDate ? '' : 'is-empty'}}">
+            <text>{{form.startDate || '选择日期'}}</text>
+            <view class="cal"></view>
+          </view>
         </picker>
       </view>
       <view class="fg">
-        <view class="fl"><text class="lab">到期日</text></view>
+        <view class="fl">
+          <text class="lab">到期日</text>
+          <text class="hint">可选</text>
+        </view>
         <picker mode="date" value="{{form.endDate}}" bindchange="onEndDate">
-          <view class="fi">{{form.endDate || '可选'}}</view>
+          <view class="fi fi--tap {{form.endDate ? '' : 'is-empty'}}">
+            <text>{{form.endDate || '选择日期'}}</text>
+            <view class="cal"></view>
+          </view>
         </picker>
       </view>
     </view>
+
     <view class="fr">
       <view class="fg">
-        <view class="fl"><text class="lab">预期年化%</text></view>
-        <input class="fi" type="digit" value="{{form.expectedAnnual}}" data-k="expectedAnnual" bindinput="onField" />
+        <view class="fl">
+          <text class="lab">最低持有天数</text>
+        </view>
+        <input
+          class="fi"
+          type="number"
+          placeholder="14"
+          placeholder-class="fi-ph"
+          value="{{form.minDays}}"
+          data-k="minDays"
+          bindinput="onField"
+        />
       </view>
       <view class="fg">
-        <view class="fl"><text class="lab">最低持有天数</text></view>
-        <input class="fi" type="number" value="{{form.minDays}}" data-k="minDays" bindinput="onField" />
+        <view class="fl">
+          <text class="lab">发行机构</text>
+        </view>
+        <input
+          class="fi"
+          placeholder="如：招商银行"
+          placeholder-class="fi-ph"
+          value="{{form.institution}}"
+          data-k="institution"
+          bindinput="onField"
+        />
       </view>
     </view>
+
     <view class="fg">
-      <view class="fl"><text class="lab">近期总结</text></view>
-      <textarea class="fi ta" value="{{form.summary}}" data-k="summary" bindinput="onField" />
+      <view class="fl">
+        <text class="lab">风险等级</text>
+      </view>
+      <view class="chip-grid chip-grid--5">
+        <view
+          wx:for="{{risks}}"
+          wx:key="*this"
+          class="chip chip--eq {{form.risk === item ? 'is-on' : ''}}"
+          data-v="{{item}}"
+          bindtap="onPickRisk"
+        >{{item}}</view>
+      </view>
     </view>
+
     <view class="fg">
-      <view class="fl"><text class="lab">备注</text></view>
-      <textarea class="fi ta" value="{{form.notes}}" data-k="notes" bindinput="onField" />
+      <view class="fl">
+        <text class="lab">币种</text>
+      </view>
+      <view class="chip-grid chip-grid--3">
+        <view
+          wx:for="{{currencies}}"
+          wx:key="*this"
+          class="chip chip--eq {{form.currency === item ? 'is-on' : ''}}"
+          data-v="{{item}}"
+          bindtap="onPickCurrency"
+        >{{item}}</view>
+      </view>
     </view>
+
     <view class="fg">
-      <view class="fl"><text class="lab">标签</text></view>
-      <view class="tag-row">
+      <view class="fl">
+        <text class="lab">备注</text>
+      </view>
+      <textarea
+        class="fi ta"
+        placeholder="赎回规则、近期判断、额外说明等"
+        placeholder-class="fi-ph"
+        value="{{form.notes}}"
+        data-k="notes"
+        bindinput="onField"
+        auto-height
+      />
+    </view>
+
+    <view class="fg">
+      <view class="fl">
+        <text class="lab">标签</text>
+        <text class="hint">可多选</text>
+      </view>
+      <view class="chip-grid">
         <view
           wx:for="{{tagOptions}}"
           wx:key="*this"
-          class="fp {{selectedTags[item] ? 'active' : ''}}"
+          class="chip {{selectedTags[item] ? 'is-on' : ''}}"
           data-tag="{{item}}"
           bindtap="onToggleTag"
         >{{item}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{!editingId}}" class="late">
+      <view class="fr fr--flush">
+        <view class="fg">
+          <view class="fl">
+            <text class="lab">截至日</text>
+          </view>
+          <picker mode="date" value="{{lateDate}}" bindchange="onLateDate">
+            <view class="fi fi--tap fi--late {{lateDate ? '' : 'is-empty'}}">
+              <text>{{lateDate || '选择日期'}}</text>
+              <view class="cal"></view>
+            </view>
+          </picker>
+        </view>
+        <view class="fg">
+          <view class="fl">
+            <text class="lab">累计收益</text>
+          </view>
+          <input
+            class="fi fi--late"
+            type="digit"
+            placeholder="如 526.30"
+            placeholder-class="fi-ph"
+            value="{{lateReturn}}"
+            bindinput="onLateReturn"
+          />
+        </view>
       </view>
     </view>
   </view>
 
   <view class="fa">
     <button class="btn btn-s" bindtap="onCancel">取消</button>
-    <button class="btn btn-p" bindtap="onSave">保存</button>
+    <button class="btn btn-p" bindtap="onSave">{{editingId ? '保存修改' : '添加产品'}}</button>
   </view>
 </view>

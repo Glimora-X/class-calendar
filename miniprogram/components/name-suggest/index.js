@@ -71,7 +71,8 @@ Component({
           }
           const name = list[idx]
           if (!name) return
-          this.triggerEvent('input', { value: name })
+          // 勿用原生事件名 input：PC 微信 picker setData 后会误发空 input
+          this.triggerEvent('namechange', { value: name })
           this.triggerEvent('select', { value: name })
         }
       })
@@ -102,7 +103,7 @@ Component({
         wx.showToast({ title: `请输入${this.data.label || '名称'}`, icon: 'none' })
         return
       }
-      this.triggerEvent('input', { value: name })
+      this.triggerEvent('namechange', { value: name })
       this.triggerEvent('select', { value: name })
       this.setData({ showManual: false, manualFocus: false, draftName: '' })
     },
@@ -113,7 +114,7 @@ Component({
 
     onInput(e) {
       const value = e.detail.value
-      this.triggerEvent('input', { value })
+      this.triggerEvent('namechange', { value })
       this.refreshFilter(value, this.data.suggestions)
       const filtered = this.data.filtered
       this.setData({
@@ -141,7 +142,7 @@ Component({
     onPickTouch(e) {
       const name = e.currentTarget.dataset.name
       if (!name) return
-      this.triggerEvent('input', { value: name })
+      this.triggerEvent('namechange', { value: name })
       this.triggerEvent('select', { value: name })
       this.setData({ open: false })
     },
