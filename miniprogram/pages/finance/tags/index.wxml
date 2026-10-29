@@ -1,0 +1,13 @@
+<view class="page page--no-tab tags">
+  <view class="card">
+    <view class="head">
+      <text>标签列表</text>
+      <text class="add" bindtap="onAdd">+ 新增</text>
+    </view>
+    <view wx:for="{{tags}}" wx:key="*this" class="row">
+      <input class="fi" value="{{item}}" data-i="{{index}}" bindblur="onUpdate" />
+      <text class="del" data-i="{{index}}" bindtap="onRemove">×</text>
+    </view>
+    <view wx:if="{{!tags.length}}" class="empty">暂无标签</view>
+  </view>
+</view>

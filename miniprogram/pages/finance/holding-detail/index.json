@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "产品详情",
+  "usingComponents": {
+    "advice-badge": "/components/finance/advice-badge/index"
+  }
+}

@@ -1,0 +1,135 @@
+.daily {
+  background: #f0f0f3;
+  padding: 16rpx;
+  padding-bottom: 220rpx;
+}
+.card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 24rpx 32rpx;
+  margin-bottom: 16rpx;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+.lab {
+  font-size: 24rpx;
+  color: #495057;
+}
+.chips {
+  display: flex;
+  gap: 12rpx;
+}
+.chip {
+  font-size: 22rpx;
+  padding: 8rpx 24rpx;
+  border-radius: 12rpx;
+  background: #f1f3f5;
+  color: #495057;
+}
+.chip.active {
+  background: #1c7ed6;
+  color: #fff;
+}
+.fi {
+  border: 1rpx solid #e9ecef;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  font-size: 26rpx;
+}
+.daily-item {
+  background: #fff;
+  margin-bottom: 8rpx;
+  border-radius: 20rpx;
+  padding: 20rpx 28rpx;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  border: 1rpx solid #e9ecef;
+}
+.daily-item.filled {
+  border-color: #2f9e44;
+}
+.di-info {
+  flex: 1;
+  min-width: 0;
+}
+.di-n {
+  font-size: 24rpx;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.di-s {
+  font-size: 20rpx;
+  color: #868e96;
+}
+.di-ex {
+  font-size: 20rpx;
+  color: #e8590c;
+  margin-top: 4rpx;
+}
+.di-ia {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+.di-in {
+  width: 140rpx;
+  border: 1rpx solid #e9ecef;
+  border-radius: 12rpx;
+  padding: 12rpx 16rpx;
+  font-size: 26rpx;
+  text-align: center;
+}
+.di-sv {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 12rpx;
+  background: #2f9e44;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+}
+.di-sv.off {
+  background: #f1f3f5;
+  color: #868e96;
+}
+.empty {
+  text-align: center;
+  color: #868e96;
+  padding: 80rpx;
+}
+.btm {
+  position: fixed;
+  left: 16rpx;
+  right: 16rpx;
+  bottom: 0;
+  background: #fff;
+  border-radius: 28rpx 28rpx 0 0;
+  padding: 24rpx 32rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+.prog {
+  font-size: 26rpx;
+  font-weight: 500;
+  margin-bottom: 16rpx;
+}
+.btn-go {
+  background: #2f9e44;
+  color: #fff;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  border: none;
+}
+.btn-go::after {
+  border: none;
+}

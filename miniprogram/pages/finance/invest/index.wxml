@@ -1,3 +1,44 @@
-<view class="page">
-  <empty-state text="这里先空着" />
+<view class="page invest">
+  <asset-toolbar
+    filter-count="{{model.filterCount}}"
+    summary="{{model.summary}}"
+    sort-label="{{model.sortLabel}}"
+    bind:filter="onOpenFilter"
+    bind:toggleSummary="onTogglePlatform"
+    bind:sort="onCycleSort"
+  />
+  <platform-summary wx:if="{{platformOpen}}" items="{{model.platforms}}" />
+
+  <block wx:if="{{model.cards.length}}">
+    <holding-card
+      wx:for="{{model.cards}}"
+      wx:key="id"
+      card="{{item}}"
+      bind:open="onOpenHolding"
+    />
+  </block>
+  <empty-state wx:else text="暂无符合条件的产品" hint="点右下角新增第一只" />
+
+  <insight-dock
+    wx:for="{{model.docks}}"
+    wx:key="id"
+    dock="{{item}}"
+    bind:open="onOpenDock"
+  />
+
+  <view class="fab" bindtap="onAdd">+</view>
+
+  <view class="quick-links">
+    <text class="ql" bindtap="onDaily">日收益</text>
+    <text class="ql" bindtap="onTags">标签库</text>
+    <text class="ql" bindtap="onLibs">配置库</text>
+  </view>
+
+  <filter-sheet
+    open="{{filterOpen}}"
+    groups="{{model.filterGroups}}"
+    bind:change="onFilterChange"
+    bind:reset="onFilterReset"
+    bind:close="onCloseFilter"
+  />
 </view>

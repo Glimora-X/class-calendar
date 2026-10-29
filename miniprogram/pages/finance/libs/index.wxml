@@ -1,0 +1,22 @@
+<view class="page page--no-tab libs">
+  <view class="card">
+    <view class="head">
+      <text>平台库</text>
+      <text class="add" data-field="platforms" bindtap="onAdd">+ 新增</text>
+    </view>
+    <view wx:for="{{platforms}}" wx:key="*this" class="row">
+      <input class="fi" value="{{item}}" data-field="platforms" data-i="{{index}}" bindblur="onUpdate" />
+      <text class="del" data-field="platforms" data-i="{{index}}" bindtap="onRemove">×</text>
+    </view>
+  </view>
+  <view class="card">
+    <view class="head">
+      <text>类型库</text>
+      <text class="add" data-field="types" bindtap="onAdd">+ 新增</text>
+    </view>
+    <view wx:for="{{types}}" wx:key="*this" class="row">
+      <input class="fi" value="{{item}}" data-field="types" data-i="{{index}}" bindblur="onUpdate" />
+      <text class="del" data-field="types" data-i="{{index}}" bindtap="onRemove">×</text>
+    </view>
+  </view>
+</view>

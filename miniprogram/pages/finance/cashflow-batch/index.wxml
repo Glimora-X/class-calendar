@@ -1,0 +1,31 @@
+<view class="page page--no-tab cf">
+  <view class="card" wx:if="{{!lockedId}}">
+    <view class="lab">选择产品</view>
+    <picker mode="selector" range="{{productNames}}" value="{{productIndex}}" bindchange="onProduct">
+      <view class="fi">{{productNames[productIndex] || '请选择'}}</view>
+    </picker>
+  </view>
+
+  <view class="card">
+    <view class="head">
+      <text>现金流明细</text>
+      <text class="add" bindtap="onAddRow">+ 添加行</text>
+    </view>
+    <view wx:for="{{rows}}" wx:key="index" class="bcf-row">
+      <picker mode="date" value="{{item.date}}" data-i="{{index}}" bindchange="onRowDate">
+        <view class="cell">{{item.date || '日期'}}</view>
+      </picker>
+      <picker mode="selector" range="{{types}}" value="{{item.typeIndex}}" data-i="{{index}}" bindchange="onRowType">
+        <view class="cell">{{types[item.typeIndex]}}</view>
+      </picker>
+      <input class="cell amt" type="digit" placeholder="金额" value="{{item.amount}}" data-i="{{index}}" bindinput="onRowAmount" />
+      <input class="cell rem" placeholder="备注" value="{{item.remark}}" data-i="{{index}}" bindinput="onRowRemark" />
+      <text class="del" data-i="{{index}}" bindtap="onDelRow">×</text>
+    </view>
+  </view>
+
+  <view class="fa">
+    <button class="btn btn-s" bindtap="onCancel">取消</button>
+    <button class="btn btn-p" bindtap="onSave">保存</button>
+  </view>
+</view>

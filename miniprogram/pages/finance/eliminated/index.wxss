@@ -1,0 +1,53 @@
+.elim {
+  background: #f0f0f3;
+  padding: 16rpx;
+}
+.eli-item {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 28rpx 32rpx;
+  margin-bottom: 16rpx;
+}
+.eh {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+.en {
+  font-size: 26rpx;
+  font-weight: 500;
+}
+.er {
+  font-size: 22rpx;
+  color: #e8590c;
+  background: #fff4e6;
+  padding: 8rpx 16rpx;
+  border-radius: 12rpx;
+  margin-top: 12rpx;
+}
+.ed {
+  font-size: 22rpx;
+  color: #868e96;
+}
+.ea {
+  display: flex;
+  gap: 12rpx;
+}
+.btn {
+  flex: 1;
+  font-size: 24rpx;
+  border-radius: 12rpx;
+  padding: 16rpx;
+  border: none;
+}
+.btn::after {
+  border: none;
+}
+.btn-s {
+  background: #f1f3f5;
+  color: #495057;
+}
+.btn-d {
+  background: #c92a2a;
+  color: #fff;
+}

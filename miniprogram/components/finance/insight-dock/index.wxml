@@ -1,0 +1,22 @@
+<view
+  class="sidebar-card {{dock.openable || dock.variant === 'eliminated' ? 'is-link' : ''}}"
+  bindtap="onOpen"
+>
+  <view class="sc-t">
+    <text>{{dock.title}}</text>
+    <text class="sc-c">{{dock.countText}}</text>
+  </view>
+  <block wx:if="{{dock.variant === 'advice'}}">
+    <view wx:for="{{dock.rows}}" wx:key="id" class="asi">
+      <advice-badge code="{{item.badge}}" />
+      <text class="asi-n">{{item.text}}</text>
+    </view>
+  </block>
+  <block wx:elif="{{dock.variant === 'expiry'}}">
+    <view wx:for="{{dock.rows}}" wx:key="id" class="ei">
+      <text class="ei-n">{{item.text}}</text>
+      <text class="ei-d">{{item.right}}</text>
+    </view>
+  </block>
+  <view wx:if="{{dock.hint}}" class="hint">{{dock.hint}}</view>
+</view>

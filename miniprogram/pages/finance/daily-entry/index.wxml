@@ -1,0 +1,44 @@
+<view class="page page--no-tab daily">
+  <view class="card">
+    <view class="row">
+      <text class="lab">收益日期</text>
+      <view class="chips">
+        <text class="chip {{dateOffset===-1?'active':''}}" data-o="-1" bindtap="onDatePreset">昨天</text>
+        <text class="chip {{dateOffset===0?'active':''}}" data-o="0" bindtap="onDatePreset">今天</text>
+      </view>
+    </view>
+    <picker mode="date" value="{{date}}" bindchange="onDate">
+      <view class="fi">{{date}}</view>
+    </picker>
+  </view>
+
+  <view wx:for="{{rows}}" wx:key="id" class="daily-item {{item.cls}}">
+    <view class="di-info">
+      <view class="di-n">{{item.name}}</view>
+      <view class="di-s">{{item.code}} · 余额 ¥{{item.eodText}}</view>
+      <view wx:if="{{item.hint}}" class="di-ex">{{item.hint}}</view>
+    </view>
+    <view class="di-ia">
+      <input
+        class="di-in"
+        type="digit"
+        placeholder="日收益"
+        value="{{item.value}}"
+        data-id="{{item.id}}"
+        bindinput="onInput"
+      />
+      <view
+        class="di-sv {{item.value===''?'off':''}}"
+        data-id="{{item.id}}"
+        bindtap="onSaveOne"
+      >✓</view>
+    </view>
+  </view>
+
+  <view wx:if="{{!rows.length}}" class="empty">暂无持仓产品</view>
+
+  <view class="btm">
+    <view class="prog">已填 {{filled}} / {{rows.length}}</view>
+    <button class="btn btn-go" bindtap="onSubmit">保存已填的 {{filled}} 条</button>
+  </view>
+</view>

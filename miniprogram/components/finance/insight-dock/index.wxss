@@ -1,0 +1,60 @@
+.sidebar-card {
+  background: #fff;
+  margin: 16rpx;
+  border-radius: 24rpx;
+  padding: 28rpx 32rpx;
+}
+.is-link {
+  /* tap target */
+}
+.sc-t {
+  font-size: 26rpx;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sc-c {
+  font-size: 22rpx;
+  color: #868e96;
+  font-weight: 400;
+}
+.asi {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #f8f9fa;
+}
+.asi:last-child {
+  border-bottom: none;
+}
+.asi-n {
+  font-size: 24rpx;
+  color: #495057;
+  line-height: 1.5;
+}
+.ei {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #f8f9fa;
+}
+.ei:last-child {
+  border-bottom: none;
+}
+.ei-n {
+  font-size: 24rpx;
+  font-weight: 500;
+}
+.ei-d {
+  font-size: 22rpx;
+  color: #e8590c;
+  font-weight: 600;
+}
+.hint {
+  font-size: 22rpx;
+  color: #868e96;
+}

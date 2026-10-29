@@ -1,0 +1,110 @@
+.form {
+  background: #f0f0f3;
+  padding: 16rpx;
+}
+.late-card {
+  background: #e7f5ff;
+  margin-bottom: 16rpx;
+  border-radius: 24rpx;
+  padding: 28rpx 32rpx;
+  border: 1rpx solid #d0ebff;
+}
+.lt {
+  font-size: 24rpx;
+  color: #1c7ed6;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+.ld {
+  font-size: 22rpx;
+  color: #74c0fc;
+  margin-bottom: 16rpx;
+}
+.form-sec {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 16rpx;
+}
+.st {
+  font-size: 26rpx;
+  font-weight: 600;
+  margin-bottom: 28rpx;
+}
+.fg {
+  margin-bottom: 28rpx;
+}
+.fr {
+  display: flex;
+  gap: 16rpx;
+}
+.fr .fg {
+  flex: 1;
+}
+.fl {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+.lab {
+  font-size: 26rpx;
+  color: #495057;
+}
+.req {
+  font-size: 22rpx;
+  color: #c92a2a;
+}
+.fi {
+  width: 100%;
+  border: 1rpx solid #e9ecef;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  background: #fff;
+  min-height: 80rpx;
+  box-sizing: border-box;
+}
+.ta {
+  min-height: 120rpx;
+}
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+.fp {
+  padding: 10rpx 24rpx;
+  border-radius: 32rpx;
+  font-size: 22rpx;
+  background: #f1f3f5;
+  color: #495057;
+}
+.fp.active {
+  background: #1a1a1a;
+  color: #fff;
+}
+.fa {
+  display: flex;
+  gap: 16rpx;
+  padding: 24rpx 0 48rpx;
+}
+.btn {
+  border-radius: 16rpx;
+  padding: 24rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  border: none;
+}
+.btn::after {
+  border: none;
+}
+.btn-s {
+  background: #f1f3f5;
+  color: #495057;
+  flex: 1;
+}
+.btn-p {
+  background: #1a1a1a;
+  color: #fff;
+  flex: 2;
+}

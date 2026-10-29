@@ -1,0 +1,8 @@
+<view class="ps">
+  <view class="pst">平台本金汇总（按币种拆分，不受平台筛选影响）</view>
+  <view class="psr">
+    <view wx:for="{{items}}" wx:key="id" class="psi">
+      {{item.label}} <text class="amt">{{item.amountText}}</text>
+    </view>
+  </view>
+</view>

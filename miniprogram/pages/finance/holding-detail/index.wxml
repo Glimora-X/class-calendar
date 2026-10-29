@@ -1,0 +1,99 @@
+<view class="page page--no-tab detail" wx:if="{{holding}}">
+  <view class="card">
+    <view class="name">{{holding.name}}</view>
+    <view class="meta">编号 {{holding.code}} · {{holding.platform}} · 本金 ¥{{principalText}}</view>
+    <view class="meta" wx:if="{{holding.startDate}}">起息 {{holding.startDate}}<text wx:if="{{holding.endDate}}"> · 到期 {{holding.endDate}}</text></view>
+  </view>
+
+  <view class="dtabs">
+    <view class="dtab {{tab==='metrics'?'active':''}}" data-t="metrics" bindtap="onTab">指标</view>
+    <view class="dtab {{tab==='daily'?'active':''}}" data-t="daily" bindtap="onTab">日流水</view>
+    <view class="dtab {{tab==='cashflow'?'active':''}}" data-t="cashflow" bindtap="onTab">现金流</view>
+  </view>
+
+  <block wx:if="{{tab==='metrics'}}">
+    <view class="mg">
+      <view class="mgt">持仓结果</view>
+      <view wx:for="{{resultRows}}" wx:key="label" class="mr">
+        <text class="mrl">{{item.label}}</text>
+        <view class="mrr">
+          <text class="mrv">{{item.value}}</text>
+          <text wx:if="{{item.hint}}" class="mrf">{{item.hint}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="mg">
+      <view class="mgt">全周期</view>
+      <view wx:if="{{!fullRows.length}}" class="empty-hint">持有不足7天，暂不展示</view>
+      <view wx:for="{{fullRows}}" wx:key="label" class="mr">
+        <text class="mrl">{{item.label}}</text>
+        <text class="mrv">{{item.value}}</text>
+      </view>
+    </view>
+    <view class="mg">
+      <view class="mgt">稳仓后</view>
+      <view wx:for="{{stableRows}}" wx:key="label" class="mr">
+        <text class="mrl">{{item.label}}</text>
+        <text class="mrv">{{item.value}}</text>
+      </view>
+    </view>
+    <view class="mg">
+      <view class="mgt">决策建议</view>
+      <view class="advice-row">
+        <advice-badge code="{{advice.code}}" />
+        <text class="score">决策分 {{advice.score}}</text>
+      </view>
+      <view wx:for="{{advice.reasons}}" wx:key="*this" class="reason">• {{item}}</view>
+      <view class="disclaimer">不构成投资建议</view>
+    </view>
+    <view class="fa">
+      <button class="btn btn-s" bindtap="onEdit">编辑</button>
+      <button class="btn btn-p" bindtap="onDaily">日收益录入</button>
+    </view>
+    <view class="fa">
+      <button class="btn btn-s" bindtap="onCashflow">现金流</button>
+      <button class="btn btn-s" bindtap="onMature">标记到期</button>
+    </view>
+    <view class="fa">
+      <button class="btn btn-d" bindtap="onEliminate">淘汰</button>
+      <button class="btn btn-s" bindtap="onDelete">删除</button>
+    </view>
+  </block>
+
+  <block wx:elif="{{tab==='daily'}}">
+    <view class="card">
+      <view class="mgt">日流水 · {{dailyCount}} 条</view>
+      <view wx:for="{{dailyList}}" wx:key="date" class="dei">
+        <text class="dei-d">{{item.date}}</text>
+        <view class="dei-v">
+          <text class="dei-b">¥{{item.eodText}}</text>
+          <text class="dei-r {{item.retTone}}">{{item.retText}}</text>
+        </view>
+        <text class="dei-del" data-date="{{item.date}}" bindtap="onDelDaily">×</text>
+      </view>
+      <view wx:if="{{!dailyList.length}}" class="empty-hint">暂无日流水</view>
+    </view>
+    <view class="fa">
+      <button class="btn btn-p" bindtap="onDaily">录入日收益</button>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="card">
+      <view class="mgt">现金流 · {{cashflowCount}} 条</view>
+      <view wx:for="{{cashflowList}}" wx:key="index" class="cfi">
+        <view class="cfi-t {{item.type==='buy'?'buy':'re'}}">{{item.type==='buy'?'买':'赎'}}</view>
+        <view class="cfi-i">
+          <view class="cfi-d">{{item.date}}</view>
+          <view wx:if="{{item.remark}}" class="cfi-rem">{{item.remark}}</view>
+        </view>
+        <text class="cfi-a {{item.tone}}">{{item.amountText}}</text>
+        <text class="cfi-del" data-index="{{index}}" bindtap="onDelCf">×</text>
+      </view>
+      <view wx:if="{{!cashflowList.length}}" class="empty-hint">暂无现金流</view>
+    </view>
+    <view class="fa">
+      <button class="btn btn-p" bindtap="onCashflow">批量现金流</button>
+    </view>
+  </block>
+</view>

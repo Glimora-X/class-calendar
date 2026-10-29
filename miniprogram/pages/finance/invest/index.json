@@ -1,6 +1,11 @@
 {
   "navigationBarTitleText": "理财",
   "usingComponents": {
-    "empty-state": "/components/empty-state/index"
+    "empty-state": "/components/empty-state/index",
+    "asset-toolbar": "/components/finance/asset-toolbar/index",
+    "platform-summary": "/components/finance/platform-summary/index",
+    "holding-card": "/components/finance/holding-card/index",
+    "insight-dock": "/components/finance/insight-dock/index",
+    "filter-sheet": "/components/finance/filter-sheet/index"
   }
 }

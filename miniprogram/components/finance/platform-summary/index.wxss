@@ -1,0 +1,26 @@
+.ps {
+  background: #fff;
+  padding: 28rpx 32rpx;
+  border-bottom: 1rpx solid #e9ecef;
+}
+.pst {
+  font-size: 24rpx;
+  color: #868e96;
+  margin-bottom: 16rpx;
+}
+.psr {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+.psi {
+  font-size: 22rpx;
+  padding: 6rpx 20rpx;
+  background: #f1f3f5;
+  border-radius: 24rpx;
+  color: #495057;
+}
+.amt {
+  font-weight: 600;
+  color: #1a1a1a;
+}

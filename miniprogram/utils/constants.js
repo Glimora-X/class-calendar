@@ -42,7 +42,13 @@ const CLOUD_FUNCTIONS = {
   subjectList: 'subjectList',
   subjectUpsert: 'subjectUpsert',
   reminderTick: 'reminderTick',
-  dayHold: 'dayHold'
+  dayHold: 'dayHold',
+  holdingList: 'holdingList',
+  holdingUpsert: 'holdingUpsert',
+  holdingDelete: 'holdingDelete',
+  holdingStatus: 'holdingStatus',
+  holdingFlow: 'holdingFlow',
+  financeCatalog: 'financeCatalog'
 }
 
 /** 课前提醒提前分钟数（与云函数一致） */

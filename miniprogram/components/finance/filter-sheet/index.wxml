@@ -1,0 +1,30 @@
+<view class="filter-backdrop {{open ? 'show' : ''}}" bindtap="onClose"></view>
+<view class="filter-panel {{open ? 'open' : ''}}" catchtap="noop">
+  <view class="filter-panel-header">
+    <text class="fph-title">筛选</text>
+    <text class="fph-close" bindtap="onClose">×</text>
+  </view>
+  <scroll-view class="filter-panel-body" scroll-y>
+    <view wx:for="{{groups}}" wx:key="key" class="fg">
+      <view class="fs-lab">{{item.label}}</view>
+      <scroll-view class="filter-row" scroll-x enhanced show-scrollbar="{{false}}">
+        <view
+          wx:for="{{item.options}}"
+          wx:for-item="opt"
+          wx:key="value"
+          class="fp {{opt.active ? 'active' : ''}}"
+          data-key="{{item.key}}"
+          data-value="{{opt.value}}"
+          bindtap="onPick"
+        >
+          {{opt.label}}
+          <text wx:if="{{opt.count != null}}" class="fp-cnt">{{opt.count}}</text>
+        </view>
+      </scroll-view>
+    </view>
+  </scroll-view>
+  <view class="filter-panel-footer">
+    <button class="btn btn-s" bindtap="onReset">重置</button>
+    <button class="btn btn-p" bindtap="onClose">确定</button>
+  </view>
+</view>

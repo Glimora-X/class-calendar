@@ -1,0 +1,19 @@
+<view class="page page--no-tab elim">
+  <block wx:if="{{list.length}}">
+    <view wx:for="{{list}}" wx:key="_id" class="eli-item">
+      <view class="eh">
+        <view>
+          <view class="en">{{item.name}}</view>
+          <view wx:if="{{item.eliminatedReason}}" class="er">原因：{{item.eliminatedReason}}</view>
+        </view>
+        <view class="ed">{{item.eliminatedDate || '—'}}</view>
+      </view>
+      <view class="ea">
+        <button class="btn btn-s" data-id="{{item._id}}" bindtap="onEdit">编辑</button>
+        <button class="btn btn-s" data-id="{{item._id}}" bindtap="onRestore">还原</button>
+        <button class="btn btn-d" data-id="{{item._id}}" bindtap="onDelete">永久删除</button>
+      </view>
+    </view>
+  </block>
+  <empty-state wx:else text="暂无已淘汰产品" />
+</view>

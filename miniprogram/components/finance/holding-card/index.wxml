@@ -1,0 +1,31 @@
+<view class="product-card" bindtap="onOpen">
+  <view class="pc-h">
+    <view class="pc-left">
+      <view class="pc-n">{{card.name}}</view>
+      <view class="pc-tg">
+        <text
+          wx:for="{{card.tags}}"
+          wx:key="text"
+          class="tag tag-{{item.tone}}"
+        >{{item.text}}</text>
+      </view>
+    </view>
+    <advice-badge code="{{card.advice.code}}" />
+  </view>
+  <view class="pc-m">
+    <view wx:for="{{card.metrics}}" wx:key="label" class="pc-mi">
+      <view class="pl">{{item.label}}</view>
+      <view class="pv {{item.tone}}">
+        {{item.value}}
+        <text wx:if="{{item.shortCycle}}" class="sc-badge">短周期</text>
+      </view>
+    </view>
+  </view>
+  <view class="pc-f">
+    <text
+      wx:for="{{card.foot}}"
+      wx:key="text"
+      class="pc-fi {{item.tone}}"
+    >{{item.text}}</text>
+  </view>
+</view>

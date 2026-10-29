@@ -1,0 +1,9 @@
+{
+  "name": "holdingUpsert",
+  "version": "1.0.0",
+  "description": "理财持仓建档/编辑",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

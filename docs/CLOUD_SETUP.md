@@ -43,6 +43,12 @@ module.exports = {
 - `subjectUpsert`
 - `reminderTick`（课前提醒；需配置模板 ID + 定时触发器）
 - `dayHold`（某日「其他安排」：list / upsert / remove）
+- `holdingList`（理财持仓列表/详情）
+- `holdingUpsert`（理财建档/编辑）
+- `holdingDelete`（理财永久删除）
+- `holdingStatus`（到期 / 淘汰 / 还原）
+- `holdingFlow`（日收益 / 现金流写入与账本重算）
+- `financeCatalog`（平台 / 类型 / 标签库；首次访问播种默认值）
 
 ## 4. 建集合与权限
 
@@ -54,6 +60,8 @@ module.exports = {
 | `subjects` | 仅创建者可读写 |
 | `name_lists` | 仅创建者可读写 |
 | `day_holds` | 仅创建者可读写 |
+| `finance_holdings` | 仅创建者可读写 |
+| `finance_catalog` | 仅创建者可读写 |
 
 ## 5. 索引
 
@@ -65,6 +73,15 @@ module.exports = {
 `day_holds` 集合 → 索引管理：
 
 1. 组合索引：`_openid` 升序、`date` 升序（按月拉占用）
+
+`finance_holdings` 集合 → 索引管理：
+
+1. 组合索引：`_openid` 升序、`status` 升序  
+2. 组合索引：`_openid` 升序、`code` 升序（编号查重）
+
+`finance_catalog` 集合 → 索引管理：
+
+1. 单字段：`_openid` 升序
 
 ## 6. 课前提醒（订阅消息）
 
@@ -106,6 +123,16 @@ module.exports = {
 
 
 ## 7. 自检
+
+### 理财（上传上表 6 个云函数并建 `finance_*` 集合后）
+
+- 理财 Tab → 空态 → FAB 新增 → 填名称/编号/平台/本金/起息日 → 保存后列表出现  
+- 点卡片进详情 → 指标 / 日流水 / 现金流可切换  
+- 日收益录入 → 填一条保存 → 详情累计收益变化  
+- 淘汰（原因必填）→ 列表消失 → 已淘汰页可还原/永久删除  
+- 标签库 / 配置库首次打开有默认值  
+
+### 约课
 
 - 日历页翻月无报错，空月显示空态（非示意 demo）  
 - FAB → 新增约课 → 科目默认「英语」可见 → 保存成功 → 月历出现  
