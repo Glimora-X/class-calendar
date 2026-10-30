@@ -12,33 +12,46 @@
     </picker>
   </view>
 
-  <view wx:for="{{rows}}" wx:key="id" class="daily-item {{item.cls}}">
-    <view class="di-info">
-      <view class="di-n">{{item.name}}</view>
-      <view class="di-s">{{item.code}} · 余额 ¥{{item.eodText}}</view>
-      <view wx:if="{{item.hint}}" class="di-ex">{{item.hint}}</view>
-    </view>
-    <view class="di-ia">
-      <input
-        class="di-in"
-        type="digit"
-        placeholder="日收益"
-        value="{{item.value}}"
-        data-id="{{item.id}}"
-        bindinput="onInput"
-      />
+  <block wx:for="{{groups}}" wx:key="platform">
+    <view class="plat">
+      <view class="plat__head">
+        <text class="plat__name">{{item.platform}}</text>
+        <text class="plat__count">{{item.count}} 只</text>
+      </view>
       <view
-        class="di-sv {{item.value===''?'off':''}}"
-        data-id="{{item.id}}"
-        bindtap="onSaveOne"
-      >✓</view>
+        wx:for="{{item.rows}}"
+        wx:for-item="row"
+        wx:key="id"
+        class="daily-item {{row.cls}}"
+      >
+        <view class="di-info">
+          <view class="di-n">{{row.name}}</view>
+          <view class="di-s">{{row.code}} · 余额 ¥{{row.eodText}}</view>
+          <view wx:if="{{row.hint}}" class="di-ex">{{row.hint}}</view>
+        </view>
+        <view class="di-ia">
+          <input
+            class="di-in"
+            type="digit"
+            placeholder="日收益"
+            value="{{row.value}}"
+            data-id="{{row.id}}"
+            bindinput="onInput"
+          />
+          <view
+            class="di-sv {{row.value===''?'off':''}}"
+            data-id="{{row.id}}"
+            bindtap="onSaveOne"
+          >✓</view>
+        </view>
+      </view>
     </view>
-  </view>
+  </block>
 
-  <view wx:if="{{!rows.length}}" class="empty">暂无持仓产品</view>
+  <view wx:if="{{!rowCount}}" class="empty">暂无持仓产品</view>
 
   <view class="btm">
-    <view class="prog">已填 {{filled}} / {{rows.length}}</view>
+    <view class="prog">已填 {{filled}} / {{rowCount}}</view>
     <button class="btn btn-go" bindtap="onSubmit">保存已填的 {{filled}} 条</button>
   </view>
 </view>

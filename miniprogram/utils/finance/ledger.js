@@ -49,11 +49,15 @@ function rebuildLedger(holding) {
 
   ;(holding.dailyEntries || []).forEach((e) => {
     if (!e || !e.date) return
-    byDate[e.date] = {
+    const row = {
       date: e.date,
       dailyReturn: round2(Number(e.dailyReturn) || 0),
       eodBalance: 0
     }
+    // 保留迟录入等来源标记，供收益月历角标使用
+    if (e.source) row.source = e.source
+    if (e.kind) row.kind = e.kind
+    byDate[e.date] = row
   })
 
   Object.keys(cfMap).forEach((date) => {
@@ -109,7 +113,8 @@ function seedOpeningLedger(input) {
       {
         date: lateDate,
         dailyReturn: round2(lateReturn),
-        eodBalance: round2(principal + lateReturn)
+        eodBalance: round2(principal + lateReturn),
+        source: 'late'
       }
     ]
   } else if (!dailyEntries.length && startDate) {

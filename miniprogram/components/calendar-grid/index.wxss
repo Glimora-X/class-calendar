@@ -73,6 +73,23 @@
   z-index: 1;
 }
 
+.cal__cum-mark {
+  position: absolute;
+  top: -4rpx;
+  right: -12rpx;
+  min-width: 24rpx;
+  height: 24rpx;
+  padding: 0 4rpx;
+  border-radius: 8rpx;
+  background: #1c7ed6;
+  color: #fff;
+  font-size: 16rpx;
+  font-weight: 600;
+  line-height: 24rpx;
+  text-align: center;
+  z-index: 1;
+}
+
 .cal__cell.is-hold:not(.is-selected):not(.has-mark) .cal__day {
   background: rgba(100, 116, 139, 0.12);
   color: #475569;
@@ -113,6 +130,23 @@
   overflow: hidden;
   white-space: nowrap;
   text-align: center;
+}
+
+.cal__summary.tone-pos {
+  color: #e03131;
+}
+
+.cal__summary.tone-neg {
+  color: #2f9e44;
+}
+
+.cal__summary.tone-neutral {
+  color: #868e96;
+}
+
+.cal__cell.is-cum .cal__day {
+  background: rgba(28, 126, 214, 0.12);
+  color: #1c7ed6;
 }
 
 .cal__dots {

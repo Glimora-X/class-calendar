@@ -4,10 +4,10 @@
   </view>
   <view class="month-nav__center">
     <text class="month-nav__title">{{year}}年{{month}}月</text>
-    <view class="month-nav__sub-row">
-      <text class="month-nav__sub" bindtap="onToggleMode">{{mode === 'calendar' ? '月历模式' : '时间线模式'}} ▾</text>
+    <view wx:if="{{showModeToggle || showStudentCycle}}" class="month-nav__sub-row">
+      <text wx:if="{{showModeToggle}}" class="month-nav__sub" bindtap="onToggleMode">{{mode === 'calendar' ? '月历模式' : '时间线模式'}} ▾</text>
       <block wx:if="{{showStudentCycle}}">
-        <text class="month-nav__sub month-nav__sep">·</text>
+        <text wx:if="{{showModeToggle}}" class="month-nav__sub month-nav__sep">·</text>
         <text class="month-nav__sub" bindtap="onCycleStudent">{{studentLabel}} ▾</text>
       </block>
     </view>

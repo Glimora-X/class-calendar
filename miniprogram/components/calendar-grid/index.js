@@ -7,8 +7,8 @@ Component({
     /** YYYY-MM-DD */
     selectedDate: { type: String, value: '' },
     /**
-     * 有课日期标记
-     * [{ date, tone, count?, summary?, tones?: string[] }]
+     * 有课/收益日期标记
+     * [{ date, tone, count?, summary?, tones?: string[], badge?, isCumulative? }]
      */
     marks: { type: Array, value: [] },
     /** { 'YYYY-MM-DD': '国庆' } */
@@ -67,6 +67,9 @@ Component({
           tone: '',
           count: 0,
           summary: '',
+          summaryTone: '',
+          badge: '',
+          isCumulative: false,
           dots: [],
           holiday: '',
           isHold: false,
@@ -81,6 +84,10 @@ Component({
         const isHold = Object.prototype.hasOwnProperty.call(holdMap, date)
         const count = mark ? Number(mark.count) || 0 : 0
         const summary = (mark && mark.summary) || ''
+        const badge = (mark && (mark.badge || (mark.isCumulative ? '累计' : ''))) || ''
+        const isCumulative = !!(mark && (mark.isCumulative || badge === '累计'))
+        const summaryTone =
+          (mark && (mark.summaryTone || mark.tone)) || ''
         let dots = []
         if (!summary && mark) {
           if (Array.isArray(mark.tones) && mark.tones.length) {
@@ -100,6 +107,9 @@ Component({
           tone: (mark && mark.tone) || '',
           count,
           summary,
+          summaryTone,
+          badge,
+          isCumulative,
           dots,
           holiday,
           isHold,
@@ -119,6 +129,9 @@ Component({
           tone: '',
           count: 0,
           summary: '',
+          summaryTone: '',
+          badge: '',
+          isCumulative: false,
           dots: [],
           holiday: '',
           isHold: false,

@@ -60,7 +60,7 @@ assert.strictEqual(
   assert.strictEqual(s.effectivePrincipal, 50000)
 }
 
-// 迟录入两锚点
+// 迟录入两锚点，截至日带 source:late
 {
   const s = seedOpeningLedger({
     principal: 100000,
@@ -70,6 +70,7 @@ assert.strictEqual(
   })
   assert.strictEqual(s.dailyEntries.length, 2)
   assert.strictEqual(s.dailyEntries[1].eodBalance, 100526.3)
+  assert.strictEqual(s.dailyEntries[1].source, 'late')
 }
 
 console.log('ledger.test.js OK')

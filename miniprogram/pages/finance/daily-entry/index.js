@@ -10,7 +10,8 @@ Page({
     focusId: '',
     holdings: [],
     drafts: {},
-    rows: [],
+    groups: [],
+    rowCount: 0,
     filled: 0
   },
 
@@ -44,14 +45,18 @@ Page({
       const focused = list.filter((p) => p._id === focusId)
       if (focused.length) list = focused
     }
-    const rows = list.map((p) => {
+
+    const byPlatform = {}
+    list.forEach((p) => {
+      const platform = String(p.platform || '').trim() || '未设置平台'
+      if (!byPlatform[platform]) byPlatform[platform] = []
       const existing = (p.dailyEntries || []).find((e) => e.date === date)
       const hasReal = existing && existing.dailyReturn !== 0
       const value =
         drafts[p._id] !== undefined && drafts[p._id] !== null
           ? String(drafts[p._id])
           : ''
-      return {
+      byPlatform[platform].push({
         id: p._id,
         name: p.name,
         code: p.code,
@@ -63,10 +68,28 @@ Page({
             : '',
         value,
         cls: value !== '' ? 'filled' : ''
-      }
+      })
     })
-    const filled = rows.filter((r) => r.value !== '' && r.value != null).length
-    this.setData({ rows, filled })
+
+    const platforms = Object.keys(byPlatform).sort((a, b) => {
+      if (a === '未设置平台') return 1
+      if (b === '未设置平台') return -1
+      return a.localeCompare(b, 'zh-CN')
+    })
+    const groups = platforms.map((platform) => ({
+      platform,
+      rows: byPlatform[platform],
+      count: byPlatform[platform].length
+    }))
+    let filled = 0
+    let rowCount = 0
+    groups.forEach((g) => {
+      rowCount += g.rows.length
+      g.rows.forEach((r) => {
+        if (r.value !== '' && r.value != null) filled += 1
+      })
+    })
+    this.setData({ groups, rowCount, filled })
   },
 
   onDatePreset(e) {

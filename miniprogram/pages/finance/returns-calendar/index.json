@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "收益月历",
+  "usingComponents": {
+    "month-nav": "/components/month-nav/index",
+    "filter-chips": "/components/filter-chips/index",
+    "calendar-grid": "/components/calendar-grid/index"
+  }
+}

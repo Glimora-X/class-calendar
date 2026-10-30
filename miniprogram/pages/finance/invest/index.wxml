@@ -30,6 +30,7 @@
 
   <view class="quick-links">
     <text class="ql" bindtap="onDaily">日收益</text>
+    <text class="ql" bindtap="onReturnsCal">收益月历</text>
     <text class="ql" bindtap="onTags">标签库</text>
     <text class="ql" bindtap="onLibs">配置库</text>
   </view>

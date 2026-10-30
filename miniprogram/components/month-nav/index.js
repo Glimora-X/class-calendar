@@ -4,6 +4,8 @@ Component({
     month: { type: Number, value: 1 },
     summaryText: { type: String, value: '' },
     mode: { type: String, value: 'calendar' }, // calendar | timeline
+    /** 是否显示月历/时间线切换（理财收益月历可关） */
+    showModeToggle: { type: Boolean, value: true },
     /** 是否显示学员轮换（名单 ≥2） */
     showStudentCycle: { type: Boolean, value: false },
     /** 当前学员文案：全部 / 姓名 */

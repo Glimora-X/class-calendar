@@ -129,6 +129,10 @@ Page({
     wx.navigateTo({ url: '/pages/finance/daily-entry/index' })
   },
 
+  onReturnsCal() {
+    wx.navigateTo({ url: '/pages/finance/returns-calendar/index' })
+  },
+
   onTags() {
     wx.navigateTo({ url: '/pages/finance/tags/index' })
   },

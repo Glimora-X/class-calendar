@@ -1,0 +1,37 @@
+<view class="page page--no-tab rc">
+  <filter-chips items="{{chips}}" bind:change="onFilterChange" />
+
+  <month-nav
+    year="{{year}}"
+    month="{{month}}"
+    showModeToggle="{{false}}"
+    bind:change="onMonthChange"
+  />
+
+  <calendar-grid
+    year="{{year}}"
+    month="{{month}}"
+    selectedDate="{{selectedDate}}"
+    marks="{{marks}}"
+    bind:select="onSelectDate"
+  />
+
+  <view class="rc-sum">
+    <view class="rc-sum__row">
+      <text class="rc-sum__lab">本月收益</text>
+      <text class="rc-sum__val {{monthTone}}">{{monthTotalText}}</text>
+    </view>
+    <view class="rc-sum__meta">
+      <text>{{filterLabel}}</text>
+      <text wx:if="{{dayCount}}"> · {{dayCount}} 天有记录</text>
+      <text wx:else> · 暂无日收益记录</text>
+    </view>
+    <view wx:if="{{hasCumulative}}" class="rc-sum__hint">带「累」角标的日期为迟录入累计收益，不平摊到中间日期</view>
+  </view>
+
+  <view wx:if="{{selectedDate && selectedDayText}}" class="rc-day">
+    <text class="rc-day__lab">{{selectedDate}}</text>
+    <text class="rc-day__val {{selectedDayTone}}">{{selectedDayText}}</text>
+    <text wx:if="{{selectedCumulative}}" class="rc-day__badge">累计</text>
+  </view>
+</view>

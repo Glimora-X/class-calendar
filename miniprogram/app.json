@@ -7,6 +7,7 @@
     "pages/finance/holding-form/index",
     "pages/finance/holding-detail/index",
     "pages/finance/daily-entry/index",
+    "pages/finance/returns-calendar/index",
     "pages/finance/cashflow-batch/index",
     "pages/finance/eliminated/index",
     "pages/finance/tags/index",
