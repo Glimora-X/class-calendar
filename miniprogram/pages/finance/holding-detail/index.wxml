@@ -31,6 +31,25 @@
       </view>
     </view>
     <view class="mg">
+      <view class="mgt">产品收益能力</view>
+      <block wx:if="{{productYieldEmpty}}">
+        <view class="empty-hint">暂无足够日收益数据</view>
+      </block>
+      <block wx:else>
+        <view class="py-hero">
+          <text class="py-hero-num">{{productYieldHero}}</text>
+          <text class="py-hero-unit">元</text>
+        </view>
+        <view class="mrf py-sub">平均每万元每日收益（收益日均 · 估算）</view>
+        <view class="mrf py-sub">根据每日收益及前序持仓余额估算，不代表产品官方万份收益。</view>
+        <view wx:if="{{productYieldHasAnomalies}}" class="mrf py-sub">存在微小收益调整日，已计入统计，可核对原始收益。</view>
+        <view wx:for="{{productYieldRows}}" wx:key="label" class="mr">
+          <text class="mrl">{{item.label}}</text>
+          <text class="mrv">{{item.value}}</text>
+        </view>
+      </block>
+    </view>
+    <view class="mg">
       <view class="mgt">稳仓后</view>
       <view wx:for="{{stableRows}}" wx:key="label" class="mr">
         <text class="mrl">{{item.label}}</text>

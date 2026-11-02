@@ -2,6 +2,7 @@ const portfolio = require('../../../services/portfolio')
 const { showApiError, showWriteError } = require('../../../utils/errors')
 const { todayStr, fmtMoney, fmtPct } = require('../../../utils/finance/money')
 const { calcAllMetrics } = require('../../../utils/finance/metrics')
+const { calcProductYieldMetrics } = require('../../../utils/finance/product-yield')
 const { calcAdvice } = require('../../../utils/finance/advice')
 
 Page({
@@ -12,6 +13,10 @@ Page({
     principalText: '',
     resultRows: [],
     fullRows: [],
+    productYieldHero: '—',
+    productYieldRows: [],
+    productYieldHasAnomalies: false,
+    productYieldEmpty: true,
     stableRows: [],
     advice: { code: 'HOLD', score: 0, reasons: [] },
     dailyList: [],
@@ -88,6 +93,33 @@ Page({
       fullRows.push({ label: '近7日涨跌', value: fmtPct(m.recent7Day) })
     }
 
+    const py = calcProductYieldMetrics(holding)
+    const productYieldEmpty = py.period.recordedDayCount === 0
+    const productYieldHero =
+      py.averagePer10k == null ? '—' : fmtMoney(py.averagePer10k)
+    const productYieldRows = []
+    if (!productYieldEmpty) {
+      if (py.annualizedYield != null) {
+        productYieldRows.push({
+          label: '估算年化收益率',
+          value: fmtPct(py.annualizedYield)
+        })
+      }
+      productYieldRows.push({
+        label: '有效收益日',
+        value: py.yieldDayCount + '天'
+      })
+      productYieldRows.push({
+        label: '正 / 负 / 零收益日',
+        value:
+          py.positiveDayCount +
+          ' / ' +
+          py.negativeDayCount +
+          ' / ' +
+          py.zeroYieldDayCount
+      })
+    }
+
     const s = m.stable || {}
     const stableRows = [
       { label: '稳仓锚点日', value: s.anchorDate || '—' },
@@ -127,6 +159,10 @@ Page({
       principalText: fmtMoney(holding.principal),
       resultRows,
       fullRows,
+      productYieldHero,
+      productYieldRows,
+      productYieldHasAnomalies: !!py.hasAnomalies,
+      productYieldEmpty,
       stableRows,
       advice: {
         code: advice.advice,

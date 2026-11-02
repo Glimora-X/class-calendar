@@ -44,6 +44,24 @@
   font-weight: 600;
   margin-bottom: 16rpx;
 }
+.py-hero {
+  display: flex;
+  align-items: baseline;
+  padding: 8rpx 0 4rpx;
+}
+.py-hero-num {
+  font-size: 48rpx;
+  font-weight: 600;
+}
+.py-hero-unit {
+  margin-left: 8rpx;
+  font-size: 24rpx;
+  color: #868e96;
+}
+.py-sub {
+  display: block;
+  margin-bottom: 6rpx;
+}
 .mr {
   display: flex;
   justify-content: space-between;
