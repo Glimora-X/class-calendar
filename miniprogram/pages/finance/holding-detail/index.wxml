@@ -38,11 +38,11 @@
       <block wx:else>
         <view class="py-hero">
           <text class="py-hero-num">{{productYieldHero}}</text>
-          <text class="py-hero-unit">元</text>
+          <text wx:if="{{!productYieldSampleInsufficient}}" class="py-hero-unit">元</text>
         </view>
-        <view class="mrf py-sub">平均每万元每日收益（收益日均 · 估算）</view>
-        <view class="mrf py-sub">根据每日收益及前序持仓余额估算，不代表产品官方万份收益。</view>
-        <view wx:if="{{productYieldHasAnomalies}}" class="mrf py-sub">存在微小收益调整日，已计入统计，可核对原始收益。</view>
+        <view class="mrf py-sub">{{productYieldHint}}</view>
+        <view class="mrf py-sub">根据每日收益及前序持仓余额估算，不代表产品官方万份收益。迟录入不计入收益日均。</view>
+        <view wx:if="{{productYieldHasAnomalies}}" class="mrf py-sub">存在待核查日期（微小收益或迟录入），可核对原始收益。</view>
         <view wx:for="{{productYieldRows}}" wx:key="label" class="mr">
           <text class="mrl">{{item.label}}</text>
           <text class="mrv">{{item.value}}</text>

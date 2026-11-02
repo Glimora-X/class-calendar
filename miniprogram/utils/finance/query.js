@@ -4,6 +4,7 @@
 
 const { fmtMoney, fmtPct, todayStr } = require('./money')
 const { calcAllMetrics, getCumProfit, getLatestEOD, getStable } = require('./metrics')
+const { calcProductYieldMetrics } = require('./product-yield')
 const { calcAdvice } = require('./advice')
 const { getEffectivePrincipal } = require('./ledger')
 
@@ -132,8 +133,10 @@ function sortHoldings(list, sortKey, sortDir, asOf) {
 function buildCard(holding, asOf) {
   const m = calcAllMetrics(holding, asOf)
   const ad = calcAdvice(holding, asOf)
+  const py = calcProductYieldMetrics(holding)
   const wanshou =
     m.stable && m.stable.per10kPerDay != null ? m.stable.per10kPerDay : null
+  const productPer10k = py && !py.sampleInsufficient ? py.averagePer10k : null
 
   const tags = []
   if (holding.risk) tags.push({ text: holding.risk, tone: 'risk' })
@@ -152,6 +155,15 @@ function buildCard(holding, asOf) {
     })
   } else {
     metrics.push({ label: '持仓年化', value: '不足7天', tone: 'neutral' })
+  }
+  if (productPer10k != null) {
+    metrics.push({
+      label: '万收(估算)',
+      value: (productPer10k >= 0 ? '+' : '') + productPer10k.toFixed(2),
+      tone: productPer10k >= 0 ? 'pos' : 'neg'
+    })
+  } else {
+    metrics.push({ label: '万收(估算)', value: '—', tone: 'neutral' })
   }
   if (wanshou != null) {
     metrics.push({

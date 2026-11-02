@@ -14,9 +14,11 @@ Page({
     resultRows: [],
     fullRows: [],
     productYieldHero: '—',
+    productYieldHint: '',
     productYieldRows: [],
     productYieldHasAnomalies: false,
     productYieldEmpty: true,
+    productYieldSampleInsufficient: false,
     stableRows: [],
     advice: { code: 'HOLD', score: 0, reasons: [] },
     dailyList: [],
@@ -94,9 +96,19 @@ Page({
     }
 
     const py = calcProductYieldMetrics(holding)
-    const productYieldEmpty = py.period.recordedDayCount === 0
+    const productYieldEmpty =
+      py.period.recordedDayCount === 0 && py.lateExcludedDayCount === 0
     const productYieldHero =
       py.averagePer10k == null ? '—' : fmtMoney(py.averagePer10k)
+    const productYieldHint = productYieldEmpty
+      ? ''
+      : py.sampleInsufficient
+        ? '有效收益日不足' +
+          py.minYieldDaysRequired +
+          '天（当前' +
+          py.yieldDayCount +
+          '天），暂不估算'
+        : '平均每万元每日收益（收益日均 · 估算）'
     const productYieldRows = []
     if (!productYieldEmpty) {
       if (py.annualizedYield != null) {
@@ -118,6 +130,12 @@ Page({
           ' / ' +
           py.zeroYieldDayCount
       })
+      if (py.lateExcludedDayCount > 0) {
+        productYieldRows.push({
+          label: '已排除迟录入',
+          value: py.lateExcludedDayCount + '天'
+        })
+      }
     }
 
     const s = m.stable || {}
@@ -160,9 +178,11 @@ Page({
       resultRows,
       fullRows,
       productYieldHero,
+      productYieldHint,
       productYieldRows,
       productYieldHasAnomalies: !!py.hasAnomalies,
       productYieldEmpty,
+      productYieldSampleInsufficient: !!py.sampleInsufficient,
       stableRows,
       advice: {
         code: advice.advice,

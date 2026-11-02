@@ -6,6 +6,9 @@
 
 const { round2 } = require('./money')
 
+/** 收益日均 / 年化展示所需最少有效收益日（不含迟录入） */
+const MIN_YIELD_DAYS_FOR_AVERAGE = 5
+
 /**
  * @param {number|null|undefined} dailyReturn
  * @returns {'MISSING'|'INVALID'|'POSITIVE'|'NEGATIVE'|'ZERO'}
@@ -28,9 +31,17 @@ function isValidBase(x) {
 }
 
 /**
+ * @param {object} entry
+ * @returns {boolean}
+ */
+function isLateEntry(entry) {
+  return !!(entry && entry.source === 'late')
+}
+
+/**
  * 不修改原数组；按 date 升序；同日后写覆盖。
  * @param {Array|undefined|null} dailyEntries
- * @returns {Array<{date:string,dailyReturn:*,eodBalance:*}>}
+ * @returns {Array}
  */
 function normalizeEntries(dailyEntries) {
   const copy = Array.isArray(dailyEntries) ? dailyEntries.slice() : []
@@ -61,8 +72,11 @@ function emptyMetrics() {
     negativeDayCount: 0,
     zeroYieldDayCount: 0,
     invalidDayCount: 0,
+    lateExcludedDayCount: 0,
     totalReturnOnYieldDays: 0,
     calculationQuality: 'ESTIMATED',
+    sampleInsufficient: true,
+    minYieldDaysRequired: MIN_YIELD_DAYS_FOR_AVERAGE,
     period: { startDate: null, endDate: null, recordedDayCount: 0 },
     days: [],
     hasAnomalies: false
@@ -83,6 +97,7 @@ function calcProductYieldMetrics(holding) {
   let negativeDayCount = 0
   let zeroYieldDayCount = 0
   let invalidDayCount = 0
+  let lateExcludedDayCount = 0
   let sumCalPer = 0
   let recordedDayCount = 0
   let totalReturnOnYieldDays = 0
@@ -93,11 +108,10 @@ function calcProductYieldMetrics(holding) {
   for (let i = 0; i < entries.length; i++) {
     const e = entries[i]
     const date = String(e.date)
+    const late = isLateEntry(e)
     const rawReturn = e.dailyReturn
     const dailyReturn =
-      rawReturn == null || rawReturn === ''
-        ? null
-        : Number(rawReturn)
+      rawReturn == null || rawReturn === '' ? null : Number(rawReturn)
 
     let yieldDayType = classifyByReturn(dailyReturn)
     const prev = i > 0 ? entries[i - 1] : null
@@ -127,8 +141,24 @@ function calcProductYieldMetrics(holding) {
       anomalyFlags.push('TINY_RETURN')
       hasAnomalies = true
     }
+    if (late) {
+      anomalyFlags.push('LATE_ENTRY')
+      hasAnomalies = true
+    }
 
-    if (yieldDayType === 'POSITIVE') {
+    // 迟录入：可分类/可算单日估算，但不进入收益日均 / 自然日日均 / 计数闸门
+    const excludeFromAverage =
+      late &&
+      (yieldDayType === 'POSITIVE' ||
+        yieldDayType === 'NEGATIVE' ||
+        yieldDayType === 'ZERO')
+
+    if (excludeFromAverage) {
+      lateExcludedDayCount++
+      // 仍记入 period 可视范围（有记录），但不进 recordedDayCount 的日均分母
+      if (!periodStart) periodStart = date
+      periodEnd = date
+    } else if (yieldDayType === 'POSITIVE') {
       positiveDayCount++
       yieldDayCount++
       sumYieldPer += rawPer10k
@@ -165,25 +195,40 @@ function calcProductYieldMetrics(holding) {
           : previousEodBalance,
       estimatedPer10k: rawPer10k == null ? null : round2(rawPer10k),
       yieldDayType,
-      anomalyFlags
+      anomalyFlags,
+      excludedFromAverage: !!excludeFromAverage
     })
   }
 
-  const rawAvg = yieldDayCount > 0 ? sumYieldPer / yieldDayCount : null
+  const sampleInsufficient = yieldDayCount < MIN_YIELD_DAYS_FOR_AVERAGE
+  const rawAvg =
+    !sampleInsufficient && yieldDayCount > 0
+      ? sumYieldPer / yieldDayCount
+      : null
   const rawAnn = rawAvg == null ? null : (rawAvg * 365) / 100
-  const rawCal = recordedDayCount > 0 ? sumCalPer / recordedDayCount : null
+
+  // 有效收益日达标才展示自然日日均；仅有 ZERO 日时为 0；有收益但样本不足 → null
+  let averagePer10kOnCalendarDays = null
+  if (!sampleInsufficient && recordedDayCount > 0) {
+    averagePer10kOnCalendarDays = round2(sumCalPer / recordedDayCount)
+  } else if (yieldDayCount === 0 && recordedDayCount > 0) {
+    averagePer10kOnCalendarDays = 0
+  }
 
   return {
     averagePer10k: rawAvg == null ? null : round2(rawAvg),
-    averagePer10kOnCalendarDays: rawCal == null ? null : round2(rawCal),
+    averagePer10kOnCalendarDays,
     annualizedYield: rawAnn == null ? null : round2(rawAnn),
     yieldDayCount,
     positiveDayCount,
     negativeDayCount,
     zeroYieldDayCount,
     invalidDayCount,
+    lateExcludedDayCount,
     totalReturnOnYieldDays: round2(totalReturnOnYieldDays),
     calculationQuality: 'ESTIMATED',
+    sampleInsufficient,
+    minYieldDaysRequired: MIN_YIELD_DAYS_FOR_AVERAGE,
     period: {
       startDate: periodStart,
       endDate: periodEnd,
@@ -197,6 +242,8 @@ function calcProductYieldMetrics(holding) {
 module.exports = {
   classifyByReturn,
   isValidBase,
+  isLateEntry,
   normalizeEntries,
-  calcProductYieldMetrics
+  calcProductYieldMetrics,
+  MIN_YIELD_DAYS_FOR_AVERAGE
 }

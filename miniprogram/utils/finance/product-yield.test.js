@@ -7,7 +7,11 @@ const assert = require('assert')
 const { round2 } = require('./money')
 const { rebuildLedger } = require('./ledger')
 const { getStable } = require('./metrics')
-const { classifyByReturn, calcProductYieldMetrics } = require('./product-yield')
+const {
+  classifyByReturn,
+  calcProductYieldMetrics,
+  MIN_YIELD_DAYS_FOR_AVERAGE
+} = require('./product-yield')
 
 // —— 分类 ——
 assert.strictEqual(classifyByReturn(null), 'MISSING')
@@ -144,6 +148,50 @@ assert.strictEqual(classifyByReturn(Infinity), 'INVALID')
   assert.strictEqual(m.days[1].yieldDayType, 'INVALID')
   assert.strictEqual(m.yieldDayCount, 0)
   assert.strictEqual(m.averagePer10k, null)
+}
+
+// 样本不足（有效收益日 < 5）：不展示 average / 年化
+{
+  const m = calcProductYieldMetrics({
+    dailyEntries: [
+      { date: '2026-10-14', dailyReturn: 0, eodBalance: 100000 },
+      { date: '2026-10-15', dailyReturn: 10, eodBalance: 100010 }
+    ]
+  })
+  assert.strictEqual(m.yieldDayCount, 1)
+  assert.strictEqual(m.sampleInsufficient, true)
+  assert.ok(m.yieldDayCount < MIN_YIELD_DAYS_FOR_AVERAGE)
+  assert.strictEqual(m.averagePer10k, null)
+  assert.strictEqual(m.annualizedYield, null)
+}
+
+// 迟录入排除出收益日均
+{
+  const m = calcProductYieldMetrics({
+    dailyEntries: [
+      { date: '2026-10-14', dailyReturn: 0, eodBalance: 100000 },
+      {
+        date: '2026-10-20',
+        dailyReturn: 800,
+        eodBalance: 100800,
+        source: 'late'
+      },
+      { date: '2026-10-21', dailyReturn: 10, eodBalance: 100810 },
+      { date: '2026-10-22', dailyReturn: 10, eodBalance: 100820 },
+      { date: '2026-10-23', dailyReturn: 10, eodBalance: 100830 },
+      { date: '2026-10-24', dailyReturn: 10, eodBalance: 100840 },
+      { date: '2026-10-25', dailyReturn: 10, eodBalance: 100850 }
+    ]
+  })
+  const late = m.days.find((d) => d.date === '2026-10-20')
+  assert.ok(late.anomalyFlags.indexOf('LATE_ENTRY') >= 0)
+  assert.strictEqual(late.excludedFromAverage, true)
+  assert.strictEqual(m.lateExcludedDayCount, 1)
+  assert.strictEqual(m.yieldDayCount, 5)
+  assert.strictEqual(m.sampleInsufficient, false)
+  assert.ok(m.averagePer10k != null)
+  // 若把 800 算进去会远大于 1
+  assert.ok(m.averagePer10k < 5)
 }
 
 function buildWenxiangHolding() {
