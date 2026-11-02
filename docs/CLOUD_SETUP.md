@@ -49,6 +49,7 @@ module.exports = {
 - `holdingStatus`（到期 / 淘汰 / 还原）
 - `holdingFlow`（日收益 / 现金流写入与账本重算）
 - `financeCatalog`（平台 / 类型 / 标签库；首次访问播种默认值）
+- `accountVault`（秘密基地：账户与资产快照）
 
 ## 4. 建集合与权限
 
@@ -62,6 +63,8 @@ module.exports = {
 | `day_holds` | 仅创建者可读写 |
 | `finance_holdings` | 仅创建者可读写 |
 | `finance_catalog` | 仅创建者可读写 |
+| `finance_accounts` | 仅创建者可读写 |
+| `finance_snapshots` | 仅创建者可读写 |
 
 ## 5. 索引
 
@@ -82,6 +85,14 @@ module.exports = {
 `finance_catalog` 集合 → 索引管理：
 
 1. 单字段：`_openid` 升序
+
+`finance_accounts` 集合 → 索引管理：
+
+1. 单字段：`_openid` 升序
+
+`finance_snapshots` 集合 → 索引管理：
+
+1. 组合索引：`_openid` 升序、`date` 升序
 
 ## 6. 课前提醒（订阅消息）
 
@@ -131,6 +142,14 @@ module.exports = {
 - 日收益录入 → 填一条保存 → 详情累计收益变化  
 - 淘汰（原因必填）→ 列表消失 → 已淘汰页可还原/永久删除  
 - 标签库 / 配置库首次打开有默认值  
+
+### 秘密基地（上传 `accountVault`，建 `finance_accounts` / `finance_snapshots` 后）
+
+- 资产 Tab 打开为「秘密基地」；无账户时可见「添加第一个账户」
+- 添加账户后进入录入，默认「仅看变动」仍能看到首次账户
+- 保存快照；同一天再次保存会先对比净值再覆盖
+- 管理里可停用、删除（3 秒撤销）、排序、合并；合并后账户历史出现「合并自」
+- 历史快照里「以此为模板」会带回录入页，切到管理再回来仍保留模板
 
 ### 约课
 

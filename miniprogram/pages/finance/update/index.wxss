@@ -1,0 +1,5 @@
+.hint {
+  color: var(--color-muted);
+  padding-top: 80rpx;
+  text-align: center;
+}

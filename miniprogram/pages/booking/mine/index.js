@@ -66,6 +66,10 @@ Page({
     wx.showToast({ title: '已保存', icon: 'success' })
   },
 
+  onVault() {
+    wx.switchTab({ url: '/pages/finance/assets/index' })
+  },
+
   onBatch() {
     wx.navigateTo({ url: '/pages/booking/batch/index' })
   },

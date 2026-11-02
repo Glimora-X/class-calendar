@@ -32,8 +32,8 @@
         <view class="di-ia">
           <input
             class="di-in"
-            type="digit"
-            placeholder="日收益"
+            type="text"
+            placeholder="日收益（可负）"
             value="{{row.value}}"
             data-id="{{row.id}}"
             bindinput="onInput"

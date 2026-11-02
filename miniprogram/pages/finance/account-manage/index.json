@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "管理账户",
+  "usingComponents": {
+    "empty-state": "/components/empty-state/index"
+  }
+}

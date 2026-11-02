@@ -1,3 +1,172 @@
 <view class="page">
-  <empty-state text="这里先空着" />
+  <view wx:if="{{showRestore}}" class="banner banner--pro">
+    <text>模板：{{restoreText}}</text>
+    <text class="banner__x" bindtap="onAskAbandon">✕</text>
+  </view>
+
+  <view wx:if="{{loading && !loaded}}" class="hint">正在读取账户…</view>
+  <view wx:elif="{{loadError && !loaded}}" class="fail">
+    <text>账户加载失败</text>
+    <button class="btn-ghost fail__btn" bindtap="onRetry">重试</button>
+  </view>
+
+  <block wx:elif="{{loaded}}">
+    <view wx:if="{{bootEmpty}}" class="boot">
+      <empty-state text="还没有账户" hint="先添加一个资金账户，再记第一笔快照" />
+      <button class="btn-primary boot__btn" bindtap="onAdd">添加第一个账户</button>
+    </view>
+
+    <block wx:else>
+      <view class="date-card" bindtap="onOpenCalendar">
+        <view class="date-card__main">
+          <view class="date-card__label">快照日期</view>
+          <view class="date-card__value">{{dateText}}</view>
+          <view wx:if="{{warning}}" class="date-card__warn">
+            <view class="date-card__warn-icon" aria-hidden="true">
+              <view class="date-card__warn-tri"></view>
+              <text class="date-card__warn-bang">!</text>
+            </view>
+            <text>该日已有快照，保存将覆盖</text>
+          </view>
+        </view>
+        <view class="date-card__history" catchtap="onOpenHistory">历史</view>
+      </view>
+
+      <view class="net-card" bindtap="onToggleNet">
+        <view class="net-card__main">
+          <view class="net-card__label">净资产</view>
+          <view class="net-card__value">{{netText}}</view>
+          <view class="net-card__hint">{{netHint}}</view>
+          <view wx:if="{{netExpanded}}" class="net-card__split">
+            <view><text>总资产</text><text>{{assetsText}}</text></view>
+            <view><text>总负债</text><text>{{liabilitiesText}}</text></view>
+            <view><text>净资产</text><text>{{netText}}</text></view>
+          </view>
+        </view>
+        <view class="net-card__manage" catchtap="onOpenManage">管理账户</view>
+      </view>
+
+      <view wx:if="{{archivedOnly}}" class="hint">没有可录入的账户。到管理账户里恢复停用账户，或再添加一个。</view>
+
+      <block wx:else>
+        <view class="filters">
+          <view class="filter {{filter !== 'all' ? 'on' : ''}}" data-filter="changes" bindtap="onFilter">仅看变动</view>
+          <view class="filter {{filter === 'all' ? 'on' : ''}}" data-filter="all" bindtap="onFilter">显示全部</view>
+        </view>
+
+        <view wx:if="{{changesEmpty}}" class="empty-inline">
+          <view>当前无变动账户，全部继承上次记录</view>
+          <view class="link" data-filter="all" bindtap="onFilter">显示全部</view>
+        </view>
+
+        <view wx:for="{{groups}}" wx:key="type" class="accounts-card">
+          <view class="accounts-card__head" data-type="{{item.type}}" data-collapsed="{{item.collapsed ? '1' : '0'}}" bindtap="onToggleGroup">
+            <view class="accounts-card__title">
+              <view class="accounts-card__dot"></view>
+              <text>{{item.name}}</text>
+            </view>
+            <text class="accounts-card__meta">{{item.count}} · {{item.collapsed ? '展开' : '收起'}}</text>
+          </view>
+          <view wx:if="{{!item.collapsed}}" class="accounts-card__list">
+            <view wx:for="{{item.rows}}" wx:for-item="row" wx:key="id" id="row-{{row.id}}" class="entry tone-{{row.tone}} {{row.invalid ? 'is-invalid' : ''}}">
+              <view class="entry__meta">
+                <view class="entry__name-line">
+                  <text class="entry__name">{{row.name}}</text>
+                  <text wx:if="{{row.badge}}" class="tag tag--first">{{row.badge}}</text>
+                  <text wx:if="{{row.inheritBadge}}" class="tag">{{row.inheritBadge}}</text>
+                </view>
+                <view class="entry__sub">{{row.lastText}}</view>
+                <view wx:if="{{row.error}}" class="entry__error">{{row.error}}</view>
+              </view>
+              <view class="entry__amount">
+                <text class="entry__yen">¥</text>
+                <input
+                  class="entry__input"
+                  type="text"
+                  value="{{row.input}}"
+                  placeholder="{{row.placeholder}}"
+                  placeholder-class="entry__ph"
+                  data-id="{{row.id}}"
+                  bindinput="onAmountInput"
+                  bindblur="onAmountBlur"
+                />
+                <text wx:if="{{row.deltaText}}" class="delta delta--{{row.tone}}">{{row.deltaText}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{showDock}}" class="note-card">
+          <view class="note-card__label">备注</view>
+          <textarea
+            class="note-card__input"
+            value="{{note}}"
+            placeholder="给这份快照写点备注…"
+            maxlength="500"
+            auto-height
+            bindinput="onNote"
+          />
+          <view class="note-card__footer">
+            <text class="note-card__count">{{noteCount}}/500</text>
+            <button
+              class="note-card__save {{savePro ? 'is-pro' : ''}}"
+              loading="{{saving}}"
+              disabled="{{saving}}"
+              bindtap="onSave"
+            >{{saveLabel}}</button>
+          </view>
+        </view>
+      </block>
+    </block>
+  </block>
+</view>
+
+<view wx:if="{{sheet}}" class="mask" catchtouchmove="noop" bindtap="onCloseSheet">
+  <view class="sheet" catchtap="noop">
+    <block wx:if="{{sheet === 'calendar'}}">
+      <view class="sheet__head">
+        <text bindtap="onShiftMonth" data-dir="-1">‹</text>
+        <text>{{calendar.title}}</text>
+        <text bindtap="onShiftMonth" data-dir="1">›</text>
+      </view>
+      <view class="cal__week">
+        <text wx:for="{{weekdays}}" wx:key="*this">{{item}}</text>
+      </view>
+      <view wx:for="{{calendar.weeks}}" wx:for-item="week" wx:key="index" class="cal__week">
+        <view
+          wx:for="{{week}}"
+          wx:for-item="cell"
+          wx:key="key"
+          class="cal__day {{cell.selected ? 'is-on' : ''}} {{cell.disabled ? 'is-off' : ''}}"
+          data-date="{{cell.date}}"
+          data-disabled="{{cell.disabled ? '1' : '0'}}"
+          data-empty="{{cell.empty ? '1' : '0'}}"
+          bindtap="onPickDate"
+        >
+          <text wx:if="{{!cell.empty}}">{{cell.day}}</text>
+          <view wx:if="{{cell.marked}}" class="cal__dot"></view>
+        </view>
+      </view>
+    </block>
+
+    <block wx:elif="{{sheet === 'overwrite'}}">
+      <view class="sheet__title">覆盖该日快照</view>
+      <view class="compare"><text>原净值</text><text>{{overwrite.beforeText}}</text></view>
+      <view class="compare"><text>草稿净值</text><text>{{overwrite.afterText}}</text></view>
+      <view class="hint">确认后替换该日记录，不可撤销</view>
+      <view class="sheet__row">
+        <button class="btn-ghost" bindtap="onCancelOverwrite">取消</button>
+        <button class="btn-primary" bindtap="onConfirmOverwrite">确认覆盖</button>
+      </view>
+    </block>
+
+    <block wx:elif="{{sheet === 'abandon'}}">
+      <view class="sheet__title">放弃当前编辑？</view>
+      <view class="hint">恢复模板和未保存的金额会被清掉</view>
+      <view class="sheet__row">
+        <button class="btn-ghost" bindtap="onKeepRestore">继续</button>
+        <button class="btn-primary" bindtap="onAbandonRestore">放弃</button>
+      </view>
+    </block>
+  </view>
 </view>

@@ -1,0 +1,132 @@
+<view class="page page--no-tab page--manage">
+  <view wx:if="{{loading && !loaded}}" class="hint">正在读取…</view>
+  <view wx:elif="{{loadError}}" class="fail">
+    <text>{{loadError}}</text>
+    <button class="btn-ghost" bindtap="onRetry">重试</button>
+  </view>
+
+  <block wx:elif="{{loaded}}">
+    <view wx:if="{{bootEmpty}}" class="boot">
+      <empty-state text="还没有账户" hint="添加后就可以记快照" />
+    </view>
+
+    <view wx:for="{{manageGroups}}" wx:key="type" class="section">
+      <view class="section__head">
+        <view class="section__title">
+          <view class="section__dot {{item.dotClass}}"></view>
+          <text>{{item.name}}</text>
+        </view>
+        <text class="section__count">{{item.count}}</text>
+      </view>
+
+      <view
+        wx:for="{{item.rows}}"
+        wx:for-item="row"
+        wx:key="id"
+        class="card {{row.archived ? 'is-archived' : ''}}"
+      >
+        <view class="card__top">
+          <view class="card__identity">
+            <text class="card__name">{{row.name}}</text>
+            <text wx:if="{{row.status}}" class="card__status">{{row.status}}</text>
+          </view>
+          <text class="card__balance">{{row.balanceText}}</text>
+          <view class="card__sort">
+            <view
+              class="sort-btn {{row.canUp ? '' : 'is-off'}}"
+              data-id="{{row.id}}"
+              data-dir="-1"
+              bindtap="onMove"
+            >↑</view>
+            <view
+              class="sort-btn {{row.canDown ? '' : 'is-off'}}"
+              data-id="{{row.id}}"
+              data-dir="1"
+              bindtap="onMove"
+            >↓</view>
+          </view>
+        </view>
+        <view class="card__actions">
+          <text class="act act--blue" data-id="{{row.id}}" data-act="edit" bindtap="onFlatAct">编辑</text>
+          <text class="act" data-id="{{row.id}}" data-act="timeline" bindtap="onFlatAct">历史</text>
+          <text wx:if="{{row.active}}" class="act" data-id="{{row.id}}" data-act="archive" bindtap="onFlatAct">停用</text>
+          <text wx:else class="act act--green" data-id="{{row.id}}" data-act="restore" bindtap="onFlatAct">恢复</text>
+          <text wx:if="{{row.active}}" class="act" data-id="{{row.id}}" data-act="merge" bindtap="onFlatAct">合并</text>
+          <text class="act act--danger" data-id="{{row.id}}" data-act="delete" bindtap="onFlatAct">删除</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section__head">
+        <view class="section__title">
+          <view class="section__dot gray"></view>
+          <text>已删除账户</text>
+        </view>
+      </view>
+      <view class="deleted-card" bindtap="onToggleDeleted">
+        <text class="deleted-card__title">已删除账户</text>
+        <text class="deleted-card__count">{{deletedCount}}</text>
+      </view>
+      <block wx:if="{{deletedOpen}}">
+        <view wx:if="{{!deletedRows.length}}" class="hint deleted-empty">没有可查看的已删除账户</view>
+        <view wx:for="{{deletedRows}}" wx:key="id" class="card card--deleted">
+          <view class="card__top">
+            <text class="card__name">{{item.name}}</text>
+          </view>
+          <view class="card__actions">
+            <text class="act" data-id="{{item.id}}" data-act="timeline" bindtap="onFlatAct">历史</text>
+            <text class="act" data-id="{{item.id}}" bindtap="onHideDeleted">彻底隐藏</text>
+          </view>
+        </view>
+        <view wx:if="{{hiddenCount}}" class="link" bindtap="onShowHidden">显示已隐藏 ({{hiddenCount}})</view>
+      </block>
+    </view>
+  </block>
+</view>
+
+<button class="fab-add" bindtap="onAdd">+ 添加账户</button>
+
+<view wx:if="{{undo}}" class="undo">
+  <text>已删除 {{undo.name}}</text>
+  <text class="undo__btn" bindtap="onUndo">撤销</text>
+</view>
+
+<view wx:if="{{sheet}}" class="mask" catchtouchmove="noop" bindtap="onCloseSheet">
+  <view class="sheet" catchtap="noop">
+    <block wx:if="{{sheet === 'merge'}}">
+      <view class="sheet__title">合并/迁移</view>
+      <block wx:if="{{merge.empty || merge.step === 0}}">
+        <view class="hint">{{merge.emptyText}}</view>
+        <button class="btn-primary sheet__btn" bindtap="onCloseSheet">知道了</button>
+      </block>
+      <block wx:elif="{{merge.step === 1}}">
+        <view class="hint">选择与「{{merge.sourceName}}」同类型的目标账户</view>
+        <view wx:for="{{merge.targets}}" wx:key="id" class="pick {{item.on ? 'on' : ''}}" data-id="{{item.id}}" bindtap="onPickMerge">{{item.name}}</view>
+        <view class="sheet__row">
+          <button class="btn-ghost" bindtap="onCloseSheet">取消</button>
+          <button class="btn-primary" disabled="{{!merge.canNext}}" bindtap="onMergeNext">下一步</button>
+        </view>
+      </block>
+      <block wx:else>
+        <view class="merge-copy">源账户「{{merge.sourceName}}」将停用</view>
+        <view class="merge-copy">目标「{{merge.targetName}}」备注会追加合并记录</view>
+        <view class="merge-copy">目标账户历史会并入源账户记录</view>
+        <view class="merge-copy">此操作不可撤销</view>
+        <view class="sheet__row">
+          <button class="btn-ghost" bindtap="onMergeBack">上一步</button>
+          <button class="btn-primary" disabled="{{writing}}" bindtap="onMergeConfirm">确认合并</button>
+        </view>
+      </block>
+    </block>
+
+    <block wx:elif="{{sheet === 'deleteConfirm'}}">
+      <view class="sheet__title">删除这个账户？</view>
+      <view class="hint">删除后不再参与记账，历史保留可回溯</view>
+      <view class="sheet__row">
+        <button class="btn-ghost" bindtap="onCancelDelete">取消</button>
+        <button class="btn-primary btn-danger" disabled="{{writing}}" bindtap="onConfirmDelete">删除</button>
+      </view>
+    </block>
+  </view>
+</view>

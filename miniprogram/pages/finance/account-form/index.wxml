@@ -1,0 +1,59 @@
+<view class="page page--no-tab form">
+  <view class="form-body">
+    <view class="fg">
+      <view class="fl">
+        <text class="lab">账户名称</text>
+        <text class="hint hint--req">必填 · {{nameCount}}/40</text>
+      </view>
+      <input
+        class="fi"
+        placeholder="如：招行工资卡、支付宝"
+        placeholder-class="fi-ph"
+        value="{{name}}"
+        maxlength="40"
+        bindinput="onName"
+      />
+    </view>
+
+    <view class="fg">
+      <view class="fl">
+        <text class="lab">账户类型</text>
+        <text class="hint hint--req">必选</text>
+      </view>
+      <view class="chip-grid">
+        <view
+          wx:for="{{types}}"
+          wx:key="code"
+          class="chip {{item.on ? 'is-on' : ''}}"
+          data-type="{{item.code}}"
+          bindtap="onType"
+        >{{item.name}}</view>
+      </view>
+    </view>
+
+    <view class="fg">
+      <view class="fl">
+        <text class="lab">备注</text>
+        <text class="hint">可不填 · {{noteCount}}/200</text>
+      </view>
+      <textarea
+        class="fi ta"
+        placeholder="开户用途、归属说明等"
+        placeholder-class="fi-ph"
+        value="{{description}}"
+        maxlength="200"
+        auto-height
+        bindinput="onNote"
+      />
+    </view>
+
+    <view wx:if="{{error}}" class="err">{{error}}</view>
+  </view>
+
+  <view class="fa">
+    <button class="btn btn-s" bindtap="onCancel">取消</button>
+    <button class="btn btn-p" loading="{{saving}}" disabled="{{!canSubmit || saving}}" bindtap="onSave">
+      {{editingId ? '保存修改' : '添加账户'}}
+    </button>
+  </view>
+</view>

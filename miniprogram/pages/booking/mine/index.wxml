@@ -30,6 +30,7 @@
 
   <view class="section-label">功能</view>
   <view class="menu surface-card">
+    <view class="menu__item" bindtap="onVault">秘密基地</view>
     <view class="menu__item" bindtap="onTeachers">老师列表</view>
     <view class="menu__item" bindtap="onStudents">学生列表</view>
     <view class="menu__item" bindtap="onCopyMonth">复制上月</view>

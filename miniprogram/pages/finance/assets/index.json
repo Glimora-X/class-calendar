@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "资产",
+  "navigationBarTitleText": "秘密基地",
   "usingComponents": {
     "empty-state": "/components/empty-state/index"
   }

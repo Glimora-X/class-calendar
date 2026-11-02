@@ -104,10 +104,24 @@ Page({
     this.buildRows()
   },
 
+  sanitizeReturn(raw) {
+    const text = String(raw == null ? '' : raw)
+    const neg = /^\s*-/.test(text)
+    const cleaned = text.replace(/[^\d.]/g, '')
+    const parts = cleaned.split('.')
+    const intPart = parts[0] || ''
+    let decPart = parts.length > 1 ? parts.slice(1).join('') : ''
+    if (decPart.length > 2) decPart = decPart.slice(0, 2)
+    const body = intPart + (parts.length > 1 ? '.' + decPart : '')
+    if (!body && neg) return '-'
+    if (!body) return ''
+    return (neg ? '-' : '') + body
+  },
+
   onInput(e) {
     const id = e.currentTarget.dataset.id
     const drafts = Object.assign({}, this.data.drafts)
-    drafts[id] = e.detail.value
+    drafts[id] = this.sanitizeReturn(e.detail.value)
     this.setData({ drafts })
     this.buildRows()
   },

@@ -55,6 +55,12 @@ textarea {
 }
 
 .btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 28rpx;
+  min-height: 80rpx;
+  line-height: 1;
   background: var(--color-primary);
   color: #fff;
   border-radius: var(--radius-chip);
@@ -68,6 +74,12 @@ textarea {
 }
 
 .btn-ghost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 28rpx;
+  min-height: 80rpx;
+  line-height: 1;
   background: var(--color-surface);
   color: var(--color-ink);
   border: 1rpx solid var(--color-line);

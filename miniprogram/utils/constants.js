@@ -48,7 +48,8 @@ const CLOUD_FUNCTIONS = {
   holdingDelete: 'holdingDelete',
   holdingStatus: 'holdingStatus',
   holdingFlow: 'holdingFlow',
-  financeCatalog: 'financeCatalog'
+  financeCatalog: 'financeCatalog',
+  accountVault: 'accountVault'
 }
 
 /** 课前提醒提前分钟数（与云函数一致） */

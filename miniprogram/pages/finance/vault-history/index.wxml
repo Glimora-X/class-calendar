@@ -1,0 +1,62 @@
+<view class="page page--no-tab">
+  <view class="page-title">历史快照</view>
+  <view wx:if="{{loading}}" class="hint">正在读取…</view>
+  <view wx:elif="{{error}}" class="fail">
+    <text>{{error}}</text>
+    <button class="btn-ghost" bindtap="onRetry">重试</button>
+  </view>
+  <view wx:elif="{{!rows.length}}" class="hint">还没有快照。先在秘密基地记一笔。</view>
+  <block wx:else>
+    <view wx:for="{{rows}}" wx:key="id" class="card surface-card">
+      <view class="card__head">
+        <view class="card__head-main">
+          <view class="card__date">{{item.dateText}}</view>
+          <view class="card__net">{{item.netText}}</view>
+        </view>
+        <view
+          class="card__tpl"
+          data-id="{{item.id}}"
+          catchtap="onAskRestore"
+        >以此为模板</view>
+      </view>
+
+      <view wx:if="{{item.note}}" class="card__note">{{item.note}}</view>
+      <view wx:if="{{item.restored}}" class="tag">来自模板</view>
+
+      <view class="detail">
+        <view class="detail__title">账户明细 · {{item.detailCount}}</view>
+        <view class="detail__cols">
+          <text class="detail__col detail__col--name">账户</text>
+          <text class="detail__col">原始</text>
+          <text class="detail__col">结果</text>
+          <text class="detail__col">变动</text>
+        </view>
+        <view wx:if="{{!item.details.length}}" class="hint">该日没有账户条目</view>
+        <view wx:for="{{item.details}}" wx:for-item="row" wx:key="accountId" class="detail__row">
+          <text class="detail__col detail__col--name">{{row.name}}</text>
+          <text class="detail__col">{{row.originalText}}</text>
+          <text class="detail__col detail__col--strong">{{row.currentText}}</text>
+          <text class="detail__col delta delta--{{row.deltaTone}}">{{row.deltaText}}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>
+
+<view wx:if="{{confirmOpen}}" class="mask" catchtouchmove="noop" bindtap="onCancelRestore">
+  <view class="sheet" catchtap="noop">
+    <view class="sheet__title">确认使用该模板？</view>
+    <view class="sheet__lead">将把 {{confirm.dateText}} 的快照（净资产 {{confirm.netText}}，{{confirm.detailCount}} 个账户）预填到「录入快照」。</view>
+    <view class="impact">
+      <view class="impact__item">会进入恢复模式，金额和备注可再改</view>
+      <view class="impact__item">默认日期是今天，也可改成别的日期再保存</view>
+      <view class="impact__item">保存后会新建一条快照，不会改写 {{confirm.dateText}} 当天记录</view>
+      <view class="impact__item">若目标日已有快照，保存前仍会弹出覆盖确认</view>
+      <view class="impact__item">未保存前可点 ✕ 放弃，不会产生任何写入</view>
+    </view>
+    <view class="sheet__row">
+      <button class="btn-ghost" bindtap="onCancelRestore">取消</button>
+      <button class="btn-primary" bindtap="onConfirmRestore">确认使用</button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,9 @@
+{
+  "name": "accountVault",
+  "version": "1.0.0",
+  "description": "秘密基地账户与资产快照",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -1,0 +1,24 @@
+<view class="page page--no-tab">
+  <view wx:if="{{loading}}" class="hint">正在读取…</view>
+  <view wx:elif="{{error}}" class="fail">
+    <text>{{error}}</text>
+    <button class="btn-ghost" bindtap="onRetry">重试</button>
+  </view>
+  <block wx:else>
+    <view wx:if="{{status}}" class="status">{{status}}</view>
+    <view class="page-title">{{name}}</view>
+    <view wx:if="{{empty}}" class="hint">暂无历史记录</view>
+    <block wx:else>
+      <canvas wx:if="{{spark.length}}" class="spark" canvas-id="spark" id="spark" bindtouchstart="onSpark"></canvas>
+      <view wx:if="{{picked}}" class="picked">{{picked}}</view>
+      <view wx:for="{{rows}}" wx:key="key" class="line {{item.kind === 'merge' ? 'is-merge' : ''}} {{item.tone === 'source' ? 'is-source' : ''}}">
+        <block wx:if="{{item.kind === 'merge'}}">{{item.text}}</block>
+        <block wx:else>
+          <text>{{item.date}}</text>
+          <text>{{item.amountText}}</text>
+          <text class="mark">{{item.marker}}</text>
+        </block>
+      </view>
+    </block>
+  </block>
+</view>

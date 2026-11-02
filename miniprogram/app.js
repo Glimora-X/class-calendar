@@ -17,6 +17,10 @@ App({
     viewingYear: null,
     viewingMonth: null,
     /** 约课有写入后置 true，日历 onShow 强制拉云 */
-    bookingsDirty: false
+    bookingsDirty: false,
+    /** 历史页确认恢复后交给资产 Tab：{ type:'restore', snapshot } */
+    vaultIntent: null,
+    /** 账户表单保存后置 true，资产 Tab onShow 强制刷新 */
+    vaultDirty: false
   }
 })
