@@ -4,7 +4,12 @@ miniprogram_npm/
 *.log
 project.private.config.json
 cloudfunctions/**/node_modules/
+backup-tools/node_modules/
 miniprogram/config/env.js
+keys.json
+**/keys.json
+analysis-workspace/**
+!analysis-workspace/.gitkeep
 .idea/
 .vscode/
 .worktrees/

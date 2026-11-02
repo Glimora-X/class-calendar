@@ -1,0 +1,16 @@
+{
+  "name": "class-calendar-backup-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "独立灾备 CLI：下载 / 解密 / 校验 / 分析导出 / 恢复",
+  "bin": {
+    "cc-backup": "./cli.js"
+  },
+  "scripts": {
+    "test": "node ../backup-shared/crypto.test.js && node ./restorer.test.js",
+    "keygen": "node ./cli.js keygen"
+  },
+  "dependencies": {
+    "@cloudbase/node-sdk": "^2.10.0"
+  }
+}

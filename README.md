@@ -5,7 +5,8 @@
 个人主体微信小程序：微信登录 + 云开发同步，记录「谁、跟谁、哪天、几点、什么科目上课」。
 
 技术栈锁定见 [`STACK.md`](STACK.md)（**原生小程序 + 云开发**，不迁 uni-app/Taro）。  
-云环境步骤见 [`docs/CLOUD_SETUP.md`](docs/CLOUD_SETUP.md)。
+云环境步骤见 [`docs/CLOUD_SETUP.md`](docs/CLOUD_SETUP.md)。  
+灾备备份（GitHub Releases + AES）见 [`docs/BACKUP.md`](docs/BACKUP.md)。
 
 配套文档（Obsidian）：PRD v3.5 / 技术方案 v2 / API 契约 v1.5；视觉见 `PRODUCT.md` / `DESIGN.md`。
 
@@ -29,7 +30,9 @@
 ## 目录
 
 ```
-miniprogram/   pages · components · services · utils · custom-tab-bar
-cloudfunctions/  7 个云函数（契约实现）
-docs/          CLOUD_SETUP.md
+miniprogram/      pages · components · services · utils · custom-tab-bar
+cloudfunctions/   业务云函数 + backup（灾备）
+backup-shared/    加密/清单等纯逻辑（CLI 与云函数共用源）
+backup-tools/     独立恢复/分析 CLI
+docs/             CLOUD_SETUP.md · BACKUP.md
 ```

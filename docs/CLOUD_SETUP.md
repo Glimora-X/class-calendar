@@ -50,6 +50,7 @@ module.exports = {
 - `holdingFlow`（日收益 / 现金流写入与账本重算）
 - `financeCatalog`（平台 / 类型 / 标签库；首次访问播种默认值）
 - `accountVault`（秘密基地：账户与资产快照）
+- `backup`（灾备全量加密备份 → GitHub Releases；详见 [`BACKUP.md`](./BACKUP.md)）
 
 ## 4. 建集合与权限
 
@@ -65,6 +66,7 @@ module.exports = {
 | `finance_catalog` | 仅创建者可读写 |
 | `finance_accounts` | 仅创建者可读写 |
 | `finance_snapshots` | 仅创建者可读写 |
+| `backup_runs` | 仅管理端 / 云函数可写（备份运行记录） |
 
 ## 5. 索引
 

@@ -1,0 +1,12 @@
+{
+  "permissions": {},
+  "timeout": 60,
+  "memorySize": 256,
+  "triggers": [
+    {
+      "name": "backupDaily3am",
+      "type": "timer",
+      "config": "0 0 3 * * * *"
+    }
+  ]
+}
