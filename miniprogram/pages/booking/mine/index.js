@@ -8,19 +8,23 @@ const {
   remindOptionIndex
 } = require('../../../utils/prefs')
 const { clearAllBookings } = require('../../../services/booking')
-const { showWriteError } = require('../../../utils/errors')
+const { fetchNameList } = require('../../../services/name-list')
+const { showWriteError, showApiError } = require('../../../utils/errors')
 
 Page({
   data: {
     version: '0.1.0',
-    durationOptions: DURATION_OPTIONS,
-    remindOptions: REMIND_OPTIONS,
+    profileInitial: 'U',
+    profileName: '用户名',
+    profileSub: '本地账号 · 云端已同步',
     durationLabels: DURATION_OPTIONS.map((m) => `${m} 分钟`),
     remindLabels: REMIND_OPTIONS.map((m) => `${m} 分钟`),
     durationIndex: 0,
     remindIndex: 0,
     durationLabel: '25 分钟',
-    remindLabel: '10 分钟'
+    remindLabel: '10 分钟',
+    teacherCountText: '—',
+    studentCountText: '—'
   },
 
   onShow() {
@@ -28,6 +32,7 @@ Page({
       this.getTabBar().setData({ selected: 3 })
     }
     this.syncPrefsUi()
+    this.loadCounts()
   },
 
   syncPrefsUi() {
@@ -40,6 +45,21 @@ Page({
       durationLabel: `${DURATION_OPTIONS[durationIndex]} 分钟`,
       remindLabel: `${REMIND_OPTIONS[remindIndex]} 分钟`
     })
+  },
+
+  loadCounts() {
+    fetchNameList({ silent: true })
+      .then((res) => {
+        const teachers = (res && res.teachers) || []
+        const students = (res && res.students) || []
+        this.setData({
+          teacherCountText: teachers.length + ' 位',
+          studentCountText: students.length + ' 位'
+        })
+      })
+      .catch((err) => {
+        showApiError(err)
+      })
   },
 
   onDurationChange(e) {
@@ -66,16 +86,21 @@ Page({
     wx.showToast({ title: '已保存', icon: 'success' })
   },
 
-  onVault() {
-    wx.switchTab({ url: '/pages/finance/assets/index' })
+  onProfile() {
+    wx.showActionSheet({
+      itemList: ['退出登录'],
+      success: (res) => {
+        if (res.tapIndex === 0) this.onLogout()
+      }
+    })
   },
 
-  onBatch() {
-    wx.navigateTo({ url: '/pages/booking/batch/index' })
+  onTags() {
+    wx.navigateTo({ url: '/pages/finance/tags/index' })
   },
 
-  onBatchDelete() {
-    wx.navigateTo({ url: '/pages/booking/batch-delete/index' })
+  onLibs() {
+    wx.navigateTo({ url: '/pages/finance/libs/index' })
   },
 
   onTeachers() {
@@ -84,10 +109,6 @@ Page({
 
   onStudents() {
     wx.navigateTo({ url: '/pages/booking/student-list/index' })
-  },
-
-  onCopyMonth() {
-    wx.navigateTo({ url: '/pages/booking/copy-month/index' })
   },
 
   onClearBookings() {
@@ -138,14 +159,6 @@ Page({
           wx.reLaunch({ url: '/pages/booking/calendar/index' })
         }, 400)
       }
-    })
-  },
-
-  onAbout() {
-    wx.showModal({
-      title: '关于小课记录本',
-      content: '一本轻巧的家庭课表：记课、批量加课、课前提醒，打开就能看本月安排。',
-      showCancel: false
     })
   }
 })

@@ -1,0 +1,27 @@
+<view class="page page--no-tab closed">
+  <block wx:if="{{list.length}}">
+    <view
+      wx:for="{{list}}"
+      wx:key="_id"
+      class="cli-item"
+      data-id="{{item._id}}"
+      bindtap="onOpen"
+    >
+      <view class="ch">
+        <view>
+          <view class="cn">{{item.name}}</view>
+          <view class="cm">
+            <text wx:if="{{item.platform}}">{{item.platform}}</text>
+            <text wx:if="{{item.closedDate}}"> · 清仓 {{item.closedDate}}</text>
+          </view>
+          <view class="cp {{item.profitTone}}">已实现 {{item.profitText}}</view>
+        </view>
+      </view>
+      <view class="ca">
+        <button class="btn btn-s" data-id="{{item._id}}" catchtap="onRestore">还原</button>
+        <button class="btn btn-d" data-id="{{item._id}}" catchtap="onDelete">永久删除</button>
+      </view>
+    </view>
+  </block>
+  <empty-state wx:else text="暂无已清仓产品" />
+</view>

@@ -1,60 +1,134 @@
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
+.head {
   background: #fff;
-  padding: 16rpx 24rpx;
   border-bottom: 1rpx solid #e9ecef;
   position: sticky;
   top: 0;
   z-index: 10;
+  padding: 12rpx 0 14rpx;
 }
-.tb-filter {
+
+.platform-row {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 8rpx;
+  padding-right: 72rpx;
+}
+
+.platform-scroll {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  padding-left: 24rpx;
+  box-sizing: border-box;
+}
+
+.platform-chips {
+  display: inline-flex;
+  align-items: center;
+  gap: 12rpx;
+  padding-right: 16rpx;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 10rpx 22rpx;
+  border-radius: 32rpx;
+  font-size: 22rpx;
+  background: #f1f3f5;
+  color: #495057;
   flex-shrink: 0;
 }
-.tb-fi-icon {
-  font-size: 28rpx;
-}
-.tb-fi-text {
-  font-size: 26rpx;
+
+.chip.active {
+  background: #1a1a1a;
+  color: #fff;
   font-weight: 500;
 }
-.tb-fi-badge {
-  background: #c92a2a;
-  color: #fff;
-  font-size: 20rpx;
-  min-width: 32rpx;
-  height: 32rpx;
-  border-radius: 16rpx;
+
+.chip-cnt {
+  font-size: 18rpx;
+  opacity: 0.7;
+}
+
+.tb-filter {
+  position: absolute;
+  right: 16rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 8rpx;
+  gap: 4rpx;
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 28rpx;
+  background: #fff;
+  box-shadow: 0 4rpx 16rpx rgba(26, 26, 26, 0.1);
+  border: 1rpx solid #e9ecef;
 }
+
+.tb-fi-icon {
+  font-size: 28rpx;
+  line-height: 1;
+  color: #1a1a1a;
+}
+
+.tb-fi-badge {
+  position: absolute;
+  top: -6rpx;
+  right: -6rpx;
+  background: #c92a2a;
+  color: #fff;
+  font-size: 18rpx;
+  min-width: 26rpx;
+  height: 26rpx;
+  border-radius: 13rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6rpx;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 12rpx 24rpx 0;
+  min-width: 0;
+}
+
+.tb-sort {
+  flex-shrink: 0;
+  font-size: 24rpx;
+  color: #1c7ed6;
+  font-weight: 500;
+}
+
+.ql {
+  flex-shrink: 0;
+  font-size: 24rpx;
+  color: #1c7ed6;
+  line-height: 1.2;
+}
+
 .tb-summary {
   flex: 1;
+  min-width: 0;
   font-size: 22rpx;
   color: #868e96;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  text-align: right;
 }
-.ts-total {
-  font-weight: 600;
-  color: #1a1a1a;
-}
-.tb-sort {
-  font-size: 24rpx;
-  color: #1c7ed6;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
+
 .pos {
   color: #c92a2a;
 }
+
 .neg {
   color: #2f9e44;
 }

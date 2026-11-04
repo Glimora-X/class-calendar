@@ -14,6 +14,7 @@
     "pages/finance/daily-entry/index",
     "pages/finance/returns-calendar/index",
     "pages/finance/cashflow-batch/index",
+    "pages/finance/closed/index",
     "pages/finance/eliminated/index",
     "pages/finance/tags/index",
     "pages/finance/libs/index",

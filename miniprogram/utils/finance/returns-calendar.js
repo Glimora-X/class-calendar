@@ -58,6 +58,7 @@ function aggregateMonthReturns(holdings, opts) {
 
   const list = (holdings || []).filter((h) => {
     if (!h) return false
+    // 已清仓仍计入历史日收益；仅淘汰排除
     if (h.status === 'eliminated') return false
     if (holdingId && h._id !== holdingId) return false
     return true

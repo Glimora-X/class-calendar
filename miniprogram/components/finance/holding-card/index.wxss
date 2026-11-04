@@ -65,21 +65,24 @@
   white-space: nowrap;
 }
 .pv {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 6rpx;
   font-size: 22rpx;
   font-weight: 600;
   margin-top: 2rpx;
   white-space: nowrap;
 }
 .sc-badge {
-  display: block;
-  width: fit-content;
+  flex-shrink: 0;
   font-size: 16rpx;
   color: #e8590c;
   background: #fff4e6;
   padding: 2rpx 6rpx;
   border-radius: 6rpx;
-  margin-top: 4rpx;
   font-weight: 500;
+  line-height: 1.2;
 }
 .pc-f {
   display: flex;

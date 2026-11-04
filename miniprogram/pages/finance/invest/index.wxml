@@ -3,9 +3,13 @@
     filter-count="{{model.filterCount}}"
     summary="{{model.summary}}"
     sort-label="{{model.sortLabel}}"
+    platform-chips="{{model.platformChips}}"
     bind:filter="onOpenFilter"
     bind:toggleSummary="onTogglePlatform"
-    bind:sort="onCycleSort"
+    bind:sort="onOpenSort"
+    bind:platform="onPlatformChip"
+    bind:daily="onDaily"
+    bind:returns="onReturnsCal"
   />
   <platform-summary wx:if="{{platformOpen}}" items="{{model.platforms}}" />
 
@@ -28,18 +32,18 @@
 
   <view class="fab" bindtap="onAdd">+</view>
 
-  <view class="quick-links">
-    <text class="ql" bindtap="onDaily">日收益</text>
-    <text class="ql" bindtap="onReturnsCal">收益月历</text>
-    <text class="ql" bindtap="onTags">标签库</text>
-    <text class="ql" bindtap="onLibs">配置库</text>
-  </view>
-
   <filter-sheet
     open="{{filterOpen}}"
     groups="{{model.filterGroups}}"
     bind:change="onFilterChange"
     bind:reset="onFilterReset"
     bind:close="onCloseFilter"
+  />
+
+  <sort-sheet
+    open="{{sortOpen}}"
+    options="{{model.sortOptions}}"
+    bind:change="onSortChange"
+    bind:close="onCloseSort"
   />
 </view>

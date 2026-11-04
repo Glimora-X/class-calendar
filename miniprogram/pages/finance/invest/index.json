@@ -6,6 +6,7 @@
     "platform-summary": "/components/finance/platform-summary/index",
     "holding-card": "/components/finance/holding-card/index",
     "insight-dock": "/components/finance/insight-dock/index",
-    "filter-sheet": "/components/finance/filter-sheet/index"
+    "filter-sheet": "/components/finance/filter-sheet/index",
+    "sort-sheet": "/components/finance/sort-sheet/index"
   }
 }

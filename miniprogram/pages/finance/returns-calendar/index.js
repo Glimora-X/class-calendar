@@ -47,6 +47,7 @@ Page({
         const holdings = ((res && res.list) || []).filter(
           (p) => p.status !== 'eliminated'
         )
+        // 已清仓保留：历史日收益仍进月历合计
         this.setData({ holdings })
         this.rebuild()
       })

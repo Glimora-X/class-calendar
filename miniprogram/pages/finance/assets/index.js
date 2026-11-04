@@ -119,8 +119,9 @@ Page({
 
   onPickDate(e) {
     const date = e.currentTarget.dataset.date
-    if (!rules.canSelectDate(date, this.model.today)) return
-    this.model.session.date = date
+    const next = rules.selectSessionDate(this.model.session, date, this.model.today)
+    if (next === this.model.session) return
+    this.model.session = next
     this.model.sheet = ''
     this.render()
   },

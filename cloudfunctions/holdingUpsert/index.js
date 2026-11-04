@@ -65,27 +65,34 @@ exports.main = async (event) => {
     const conflicts = (conflictRes.data || []).filter(
       (x) => x._id !== payload._id
     )
-    const activeConflict = conflicts.find((x) => x.status !== 'eliminated')
+    const activeConflict = conflicts.find(
+      (x) => x.status !== 'eliminated' && x.status !== 'closed'
+    )
     if (activeConflict) {
       return {
         code: 'INVALID_PARAM',
         message: '编号 ' + fields.code + ' 已存在（' + activeConflict.name + '）'
       }
     }
-    const elimConflict = conflicts.find((x) => x.status === 'eliminated')
-    if (elimConflict) {
-      if (payload.replaceEliminatedId !== elimConflict._id) {
+    const inactiveConflict = conflicts.find(
+      (x) => x.status === 'eliminated' || x.status === 'closed'
+    )
+    if (inactiveConflict) {
+      if (payload.replaceEliminatedId !== inactiveConflict._id) {
         return {
           code: 'CODE_CONFLICT',
-          message: '编号与已淘汰产品冲突',
+          message:
+            inactiveConflict.status === 'closed'
+              ? '编号与已清仓产品冲突'
+              : '编号与已淘汰产品冲突',
           conflict: {
-            _id: elimConflict._id,
-            name: elimConflict.name,
-            code: elimConflict.code
+            _id: inactiveConflict._id,
+            name: inactiveConflict.name,
+            code: inactiveConflict.code
           }
         }
       }
-      await col.doc(elimConflict._id).remove()
+      await col.doc(inactiveConflict._id).remove()
     }
 
     if (payload._id) {
@@ -119,6 +126,8 @@ exports.main = async (event) => {
         restoredNote: '',
         restoredDate: '',
         eliminationHistory: [],
+        realizedProfit: null,
+        closedDate: '',
         cashflows: seeded.cashflows,
         dailyEntries: seeded.dailyEntries,
         createdAt: now,

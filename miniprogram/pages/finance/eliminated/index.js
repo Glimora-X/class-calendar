@@ -17,6 +17,14 @@ Page({
       .catch(showApiError)
   },
 
+  onOpen(e) {
+    const id = e.currentTarget.dataset.id
+    if (!id) return
+    wx.navigateTo({
+      url: '/pages/finance/holding-detail/index?id=' + id
+    })
+  },
+
   onEdit(e) {
     wx.navigateTo({
       url: '/pages/finance/holding-form/index?id=' + e.currentTarget.dataset.id

@@ -20,14 +20,3 @@
   box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
   z-index: 50;
 }
-
-.quick-links {
-  margin: 16rpx 32rpx 32rpx;
-  display: flex;
-  gap: 24rpx;
-  justify-content: center;
-}
-.ql {
-  font-size: 24rpx;
-  color: #1c7ed6;
-}

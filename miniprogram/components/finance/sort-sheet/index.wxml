@@ -1,0 +1,20 @@
+<view class="sort-backdrop {{open ? 'show' : ''}}" bindtap="onClose"></view>
+<view class="sort-panel {{open ? 'open' : ''}}" catchtap="noop">
+  <view class="sort-panel-header">
+    <text class="sph-title">排序</text>
+    <text class="sph-hint">点同一项可切换升降序</text>
+    <text class="sph-close" bindtap="onClose">×</text>
+  </view>
+  <scroll-view class="sort-panel-body" scroll-y>
+    <view
+      wx:for="{{options}}"
+      wx:key="key"
+      class="sort-item {{item.active ? 'active' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="onPick"
+    >
+      <text class="si-label">{{item.label}}</text>
+      <text wx:if="{{item.active}}" class="si-dir">{{item.dirLabel}}</text>
+    </view>
+  </scroll-view>
+</view>

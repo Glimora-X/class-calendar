@@ -11,6 +11,18 @@ function getLatestEOD(holding) {
   return round2(Number(e[e.length - 1].eodBalance) || 0)
 }
 
+/** 最近一条日收益日期 YYYY-MM-DD；无流水则 null */
+function getLatestReturnDate(holding) {
+  const e = holding.dailyEntries || []
+  let latest = null
+  for (let i = 0; i < e.length; i++) {
+    const d = e[i] && e[i].date
+    if (!d) continue
+    if (!latest || String(d) > latest) latest = String(d)
+  }
+  return latest
+}
+
 function getHoldingDays(holding, asOf) {
   return daysBetween(holding.startDate, asOf)
 }
@@ -259,6 +271,7 @@ function calcAllMetrics(holding, asOf) {
 
 module.exports = {
   getLatestEOD,
+  getLatestReturnDate,
   getHoldingDays,
   getCumProfit,
   getCumReturnRate,

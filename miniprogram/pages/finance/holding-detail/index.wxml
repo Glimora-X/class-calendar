@@ -1,8 +1,23 @@
 <view class="page page--no-tab detail" wx:if="{{holding}}">
-  <view class="card">
+  <view class="card header-card">
     <view class="name">{{holding.name}}</view>
-    <view class="meta">编号 {{holding.code}} · {{holding.platform}} · 本金 ¥{{principalText}}</view>
-    <view class="meta" wx:if="{{holding.startDate}}">起息 {{holding.startDate}}<text wx:if="{{holding.endDate}}"> · 到期 {{holding.endDate}}</text></view>
+    <view class="meta">
+      <text wx:if="{{holding.code}}">编号 {{holding.code}}</text>
+      <text wx:if="{{holding.code && holding.platform}}"> · </text>
+      <text wx:if="{{holding.platform}}">{{holding.platform}}</text>
+      <text wx:if="{{holding.endDate}}"> · 到期 {{holding.endDate}}</text>
+    </view>
+    <view class="header-actions">
+      <view class="hbtn" bindtap="onEdit">编辑</view>
+      <view wx:if="{{holding.status !== 'closed' && holding.status !== 'eliminated'}}" class="hbtn hbtn-p" bindtap="onDaily">日收益</view>
+      <view wx:if="{{holding.status !== 'closed' && holding.status !== 'eliminated'}}" class="hbtn" bindtap="onCashflow">现金流</view>
+      <view wx:if="{{holding.status !== 'closed' && holding.status !== 'eliminated'}}" class="hbtn" bindtap="onMature">标记到期</view>
+      <view wx:if="{{holding.status !== 'closed' && holding.status !== 'eliminated'}}" class="hbtn hbtn-p" bindtap="onClose">清仓</view>
+      <view wx:if="{{holding.status === 'closed'}}" class="hbtn" bindtap="onReopen">还原清仓</view>
+      <view wx:if="{{holding.status === 'eliminated'}}" class="hbtn" bindtap="onRestoreEliminated">还原</view>
+      <view wx:if="{{holding.status !== 'eliminated'}}" class="hbtn hbtn-d" bindtap="onEliminate">淘汰</view>
+      <view class="hbtn" bindtap="onDelete">删除</view>
+    </view>
   </view>
 
   <view class="dtabs">
@@ -20,14 +35,6 @@
           <text class="mrv">{{item.value}}</text>
           <text wx:if="{{item.hint}}" class="mrf">{{item.hint}}</text>
         </view>
-      </view>
-    </view>
-    <view class="mg">
-      <view class="mgt">全周期</view>
-      <view wx:if="{{!fullRows.length}}" class="empty-hint">持有不足7天，暂不展示</view>
-      <view wx:for="{{fullRows}}" wx:key="label" class="mr">
-        <text class="mrl">{{item.label}}</text>
-        <text class="mrv">{{item.value}}</text>
       </view>
     </view>
     <view class="mg">
@@ -50,6 +57,14 @@
       </block>
     </view>
     <view class="mg">
+      <view class="mgt">全周期</view>
+      <view wx:if="{{!fullRows.length}}" class="empty-hint">持有不足7天，暂不展示</view>
+      <view wx:for="{{fullRows}}" wx:key="label" class="mr">
+        <text class="mrl">{{item.label}}</text>
+        <text class="mrv">{{item.value}}</text>
+      </view>
+    </view>
+    <view class="mg">
       <view class="mgt">稳仓后</view>
       <view wx:for="{{stableRows}}" wx:key="label" class="mr">
         <text class="mrl">{{item.label}}</text>
@@ -64,18 +79,6 @@
       </view>
       <view wx:for="{{advice.reasons}}" wx:key="*this" class="reason">• {{item}}</view>
       <view class="disclaimer">不构成投资建议</view>
-    </view>
-    <view class="fa">
-      <button class="btn btn-s" bindtap="onEdit">编辑</button>
-      <button class="btn btn-p" bindtap="onDaily">日收益录入</button>
-    </view>
-    <view class="fa">
-      <button class="btn btn-s" bindtap="onCashflow">现金流</button>
-      <button class="btn btn-s" bindtap="onMature">标记到期</button>
-    </view>
-    <view class="fa">
-      <button class="btn btn-d" bindtap="onEliminate">淘汰</button>
-      <button class="btn btn-s" bindtap="onDelete">删除</button>
     </view>
   </block>
 

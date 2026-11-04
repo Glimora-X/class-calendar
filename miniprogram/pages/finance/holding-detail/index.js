@@ -1,16 +1,16 @@
 const portfolio = require('../../../services/portfolio')
 const { showApiError, showWriteError } = require('../../../utils/errors')
 const { todayStr, fmtMoney, fmtPct } = require('../../../utils/finance/money')
-const { calcAllMetrics } = require('../../../utils/finance/metrics')
+const { calcAllMetrics, getCumProfit } = require('../../../utils/finance/metrics')
 const { calcProductYieldMetrics } = require('../../../utils/finance/product-yield')
 const { calcAdvice } = require('../../../utils/finance/advice')
+const { getReportedProfit } = require('../../../utils/finance/close-holding')
 
 Page({
   data: {
     id: '',
     holding: null,
     tab: 'metrics',
-    principalText: '',
     resultRows: [],
     fullRows: [],
     productYieldHero: '—',
@@ -54,6 +54,7 @@ Page({
     const m = calcAllMetrics(holding, asOf)
     const advice = calcAdvice(holding, asOf)
 
+    const reported = getReportedProfit(holding)
     const resultRows = [
       { label: '最新余额', value: '¥' + fmtMoney(m.latestEOD) },
       {
@@ -63,12 +64,16 @@ Page({
       },
       { label: '净现金流', value: '¥' + fmtMoney(m.netCashflow) },
       {
-        label: '累计收益',
-        value: (m.cumulativeProfit >= 0 ? '+' : '') + '¥' + fmtMoney(m.cumulativeProfit)
+        label: holding.status === 'closed' ? '已实现损益' : '累计收益',
+        value: (reported >= 0 ? '+' : '') + '¥' + fmtMoney(reported),
+        hint: holding.status === 'closed' ? '清仓时冻结，计入总收益' : ''
       },
       { label: '持有收益率', value: fmtPct(m.cumulativeReturnRate) },
       { label: '持有天数', value: m.holdingDays + '天' }
     ]
+    if (holding.status === 'closed' && holding.closedDate) {
+      resultRows.push({ label: '清仓日', value: holding.closedDate })
+    }
     if (m.distToMaturity != null) {
       resultRows.push({
         label: '距到期',
@@ -174,7 +179,6 @@ Page({
 
     this.setData({
       holding,
-      principalText: fmtMoney(holding.principal),
       resultRows,
       fullRows,
       productYieldHero,
@@ -228,6 +232,50 @@ Page({
       .catch(showWriteError)
   },
 
+  onClose() {
+    const holding = this.data.holding
+    const profit =
+      holding && holding.status === 'closed'
+        ? getReportedProfit(holding)
+        : getCumProfit(holding || {})
+    const profitText =
+      (profit >= 0 ? '+' : '') + '¥' + fmtMoney(Math.abs(profit))
+    wx.showModal({
+      title: '确认清仓',
+      content:
+        '将移出当前持仓，并冻结已实现损益 ' +
+        profitText +
+        '（计入总收益）。同时自动记一笔全额赎回。',
+      success: (r) => {
+        if (!r.confirm) return
+        portfolio
+          .setHoldingStatus({ action: 'close', _id: this.data.id })
+          .then(() => {
+            wx.showToast({ title: '已清仓', icon: 'success' })
+            setTimeout(() => wx.navigateBack(), 400)
+          })
+          .catch(showWriteError)
+      }
+    })
+  },
+
+  onReopen() {
+    wx.showModal({
+      title: '还原清仓',
+      content: '将撤销清仓赎回，产品回到持有中；冻结损益会清除并恢复现算。',
+      success: (r) => {
+        if (!r.confirm) return
+        portfolio
+          .setHoldingStatus({ action: 'restore', _id: this.data.id })
+          .then(() => {
+            wx.showToast({ title: '已还原', icon: 'success' })
+            this.reload()
+          })
+          .catch(showWriteError)
+      }
+    })
+  },
+
   onEliminate() {
     wx.showModal({
       title: '淘汰产品',
@@ -249,6 +297,33 @@ Page({
           .then(() => {
             wx.showToast({ title: '已淘汰', icon: 'success' })
             setTimeout(() => wx.navigateBack(), 400)
+          })
+          .catch(showWriteError)
+      }
+    })
+  },
+
+  onRestoreEliminated() {
+    wx.showModal({
+      title: '还原产品',
+      editable: true,
+      placeholderText: '还原原因（必填）',
+      success: (r) => {
+        if (!r.confirm) return
+        const note = (r.content || '').trim()
+        if (!note) {
+          wx.showToast({ title: '请填写还原备注', icon: 'none' })
+          return
+        }
+        portfolio
+          .setHoldingStatus({
+            action: 'restore',
+            _id: this.data.id,
+            note
+          })
+          .then(() => {
+            wx.showToast({ title: '已还原', icon: 'success' })
+            this.reload()
           })
           .catch(showWriteError)
       }

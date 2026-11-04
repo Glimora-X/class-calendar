@@ -2,11 +2,21 @@
  * 筛选 / 排序 / 列表视图模型
  */
 
-const { fmtMoney, fmtPct, todayStr } = require('./money')
-const { calcAllMetrics, getCumProfit, getLatestEOD, getStable } = require('./metrics')
+const { fmtMoney, fmtPct, fmtDateShort, todayStr, round2 } = require('./money')
+const {
+  calcAllMetrics,
+  getCumProfit,
+  getLatestEOD,
+  getLatestReturnDate,
+  getStable
+} = require('./metrics')
 const { calcProductYieldMetrics } = require('./product-yield')
 const { calcAdvice } = require('./advice')
 const { getEffectivePrincipal } = require('./ledger')
+const {
+  isPositionStatus,
+  getReportedProfit
+} = require('./close-holding')
 
 const SORT_KEYS = [
   { k: 'score', l: '决策分' },
@@ -36,10 +46,14 @@ function createDefaultFilters() {
   return Object.assign({}, DEFAULT_FILTERS)
 }
 
+/** 抽屉内筛选计数（购买平台已平铺到顶栏，不计入角标） */
+const SHEET_FILTER_KEYS = ['type', 'status', 'advice', 'profit', 'tag']
+
 function filterCount(filters) {
   let c = 0
-  Object.keys(DEFAULT_FILTERS).forEach((k) => {
-    if (filters[k] !== 'all') c++
+  const f = filters || DEFAULT_FILTERS
+  SHEET_FILTER_KEYS.forEach((k) => {
+    if (f[k] !== 'all') c++
   })
   return c
 }
@@ -48,7 +62,7 @@ function getFiltered(holdings, filters, asOf) {
   const f = filters || DEFAULT_FILTERS
   return (holdings || []).filter((p) => {
     if (f.status !== 'all' && p.status !== f.status) return false
-    if (f.status === 'all' && p.status === 'eliminated') return false
+    if (f.status === 'all' && !isPositionStatus(p.status)) return false
     if (f.platform !== 'all') {
       if (f.platform === 'none' && p.platform) return false
       if (f.platform !== 'none' && p.platform !== f.platform) return false
@@ -145,6 +159,7 @@ function buildCard(holding, asOf) {
   if (holding.minDays) tags.push({ text: '≥' + holding.minDays + '天', tone: 'rt' })
   ;(holding.tags || []).forEach((t) => tags.push({ text: t, tone: 'cu' }))
   if (holding.wasEliminated) tags.push({ text: '曾被淘汰', tone: 'we' })
+  if (holding.status === 'closed') tags.push({ text: '已清仓', tone: 'we' })
 
   const metrics = []
   if (m.showAnnualized && m.simpleAnnualized != null) {
@@ -183,8 +198,13 @@ function buildCard(holding, asOf) {
 
   const foot = []
   foot.push({ text: '余额¥' + fmtMoney(m.latestEOD), tone: 'muted' })
+  const lastReturnDate = getLatestReturnDate(holding)
+  const profitText =
+    (m.cumulativeProfit >= 0 ? '+' : '') + fmtMoney(m.cumulativeProfit)
   foot.push({
-    text: (m.cumulativeProfit >= 0 ? '+' : '') + fmtMoney(m.cumulativeProfit),
+    text:
+      profitText +
+      (lastReturnDate ? ' (' + fmtDateShort(lastReturnDate) + ')' : ''),
     tone: m.cumulativeProfit >= 0 ? 'pos' : 'neg'
   })
   if (m.expected) {
@@ -211,21 +231,33 @@ function buildCard(holding, asOf) {
   }
 }
 
-function buildSummary(holdings, asOf) {
-  const active = (holdings || []).filter((p) => p.status !== 'eliminated')
+/**
+ * @param {Array} holdings 持仓余额来源（通常已筛选）
+ * @param {string} [asOf]
+ * @param {Array} [profitHoldings] 总收益来源；传入完整列表以便计入已清仓冻结损益
+ */
+function buildSummary(holdings, asOf, profitHoldings) {
+  const position = (holdings || []).filter((p) => isPositionStatus(p.status))
   const byCur = {}
-  active.forEach((p) => {
+  position.forEach((p) => {
     const c = p.currency || 'CNY'
     if (!byCur[c]) byCur[c] = { principal: 0, eod: 0, profit: 0 }
     byCur[c].principal += Number(p.principal) || 0
     byCur[c].eod += getLatestEOD(p)
-    byCur[c].profit += getCumProfit(p)
+    byCur[c].profit += getReportedProfit(p)
+  })
+  const profitSource = profitHoldings != null ? profitHoldings : holdings
+  ;(profitSource || []).forEach((p) => {
+    if (!p || p.status !== 'closed') return
+    const c = p.currency || 'CNY'
+    if (!byCur[c]) byCur[c] = { principal: 0, eod: 0, profit: 0 }
+    byCur[c].profit = round2(byCur[c].profit + getReportedProfit(p))
   })
   const keys = Object.keys(byCur)
   const c = keys[0] || 'CNY'
   const d = byCur[c] || { principal: 0, eod: 0, profit: 0 }
   return {
-    count: active.length,
+    count: position.length,
     multiCurrency: keys.length > 1,
     currencies: keys,
     principalText: fmtMoney(d.principal),
@@ -239,7 +271,7 @@ function buildSummary(holdings, asOf) {
 function buildPlatformSummary(holdings) {
   const pm = {}
   ;(holdings || []).forEach((p) => {
-    if (p.status === 'eliminated') return
+    if (!isPositionStatus(p.status)) return
     const pl = p.platform || '未填写'
     const c = p.currency || 'CNY'
     if (!pm[pl]) pm[pl] = {}
@@ -258,48 +290,74 @@ function buildPlatformSummary(holdings) {
   return items
 }
 
-function buildFilterGroups(holdings, catalog, filters, asOf) {
-  const active = (holdings || []).filter((p) => p.status !== 'eliminated')
+function buildFilterOptionList(key, filters, allCount, extra) {
+  const f = filters || DEFAULT_FILTERS
+  const list = [{ value: 'all', label: '全部', count: allCount, active: f[key] === 'all' }]
+  ;(extra || []).forEach((o) => {
+    if (o.count > 0 || o.value === 'all') {
+      list.push({
+        value: o.value,
+        label: o.label,
+        count: o.count,
+        active: f[key] === o.value
+      })
+    }
+  })
+  return list
+}
+
+/**
+ * 顶栏平铺：购买平台 chips（仅展示有持仓的平台 + 未填写）
+ * @returns {Array<{ id: string, label: string, count: number, active: boolean }>}
+ */
+function buildPlatformChips(holdings, catalog, filters) {
+  const active = (holdings || []).filter((p) => isPositionStatus(p.status))
   const cnt = (fn) => active.filter(fn).length
   const f = filters || DEFAULT_FILTERS
   const platforms = (catalog && catalog.platforms) || []
+  const options = buildFilterOptionList(
+    'platform',
+    f,
+    active.length,
+    platforms
+      .map((p) => ({ value: p, label: p, count: cnt((x) => x.platform === p) }))
+      .concat([{ value: 'none', label: '未填写', count: cnt((x) => !x.platform) }])
+  )
+  return options.map((o) => ({
+    id: o.value,
+    label: o.label,
+    count: o.count,
+    active: o.active
+  }))
+}
+
+function buildSortOptions(sortKey, sortDir) {
+  const dir = sortDir === 'asc' ? 'asc' : 'desc'
+  const sk = sortKey || 'score'
+  return SORT_KEYS.map((x) => ({
+    key: x.k,
+    label: x.l,
+    active: x.k === sk,
+    dirLabel: x.k === sk ? (dir === 'desc' ? '↓' : '↑') : ''
+  }))
+}
+
+function buildFilterGroups(holdings, catalog, filters, asOf) {
+  const active = (holdings || []).filter((p) => isPositionStatus(p.status))
+  const closed = (holdings || []).filter((p) => p.status === 'closed')
+  const cnt = (fn) => active.filter(fn).length
+  const f = filters || DEFAULT_FILTERS
   const types = (catalog && catalog.types) || []
   const tags = (catalog && catalog.tags) || []
+  const statusAllCount = active.length + closed.length
 
-  function opts(key, allCount, extra) {
-    const list = [{ value: 'all', label: '全部', count: allCount, active: f[key] === 'all' }]
-    ;(extra || []).forEach((o) => {
-      if (o.count > 0 || o.value === 'all') {
-        list.push({
-          value: o.value,
-          label: o.label,
-          count: o.count,
-          active: f[key] === o.value
-        })
-      }
-    })
-    return list
-  }
-
-  const groups = [
-    {
-      key: 'platform',
-      label: '购买平台',
-      options: opts(
-        'platform',
-        active.length,
-        platforms
-          .map((p) => ({ value: p, label: p, count: cnt((x) => x.platform === p) }))
-          .concat([
-            { value: 'none', label: '未填写', count: cnt((x) => !x.platform) }
-          ])
-      )
-    },
+  return [
     {
       key: 'type',
       label: '所属类型',
-      options: opts(
+      options: buildFilterOptionList(
         'type',
+        f,
         active.length,
         types
           .map((t) => ({ value: t, label: t, count: cnt((x) => x.type === t) }))
@@ -309,16 +367,18 @@ function buildFilterGroups(holdings, catalog, filters, asOf) {
     {
       key: 'status',
       label: '状态',
-      options: opts('status', active.length, [
+      options: buildFilterOptionList('status', f, statusAllCount, [
         { value: 'active', label: '持有中', count: cnt((x) => x.status === 'active') },
-        { value: 'matured', label: '已到期', count: cnt((x) => x.status === 'matured') }
+        { value: 'matured', label: '已到期', count: cnt((x) => x.status === 'matured') },
+        { value: 'closed', label: '已清仓', count: closed.length }
       ])
     },
     {
       key: 'advice',
       label: '建议',
-      options: opts(
+      options: buildFilterOptionList(
         'advice',
+        f,
         active.length,
         ['ADD', 'HOLD', 'REDUCE', 'EXIT', 'WATCH'].map((a) => ({
           value: a,
@@ -330,7 +390,7 @@ function buildFilterGroups(holdings, catalog, filters, asOf) {
     {
       key: 'profit',
       label: '收益',
-      options: opts('profit', active.length, [
+      options: buildFilterOptionList('profit', f, active.length, [
         { value: 'profit', label: '盈利', count: cnt((x) => getCumProfit(x) > 0) },
         { value: 'loss', label: '亏损', count: cnt((x) => getCumProfit(x) <= 0) }
       ])
@@ -338,8 +398,9 @@ function buildFilterGroups(holdings, catalog, filters, asOf) {
     {
       key: 'tag',
       label: '标签',
-      options: opts(
+      options: buildFilterOptionList(
         'tag',
+        f,
         active.length,
         tags
           .map((t) => ({
@@ -357,14 +418,13 @@ function buildFilterGroups(holdings, catalog, filters, asOf) {
       )
     }
   ]
-  return groups
 }
 
 function buildDocks(holdings, asOf) {
   const docks = []
   const g = { EXIT: [], REDUCE: [], ADD: [], WATCH: [], HOLD: [] }
   ;(holdings || []).forEach((p) => {
-    if (p.status === 'eliminated') return
+    if (!isPositionStatus(p.status)) return
     const a = calcAdvice(p, asOf).advice
     if (g[a]) g[a].push(p.name.substring(0, 8))
   })
@@ -415,6 +475,17 @@ function buildDocks(holdings, asOf) {
     })
   }
 
+  const closedCount = (holdings || []).filter((p) => p.status === 'closed').length
+  docks.push({
+    id: 'closed',
+    variant: 'closed',
+    title: '已清仓产品',
+    countText: closedCount + ' 只',
+    rows: [],
+    hint: '查看已清仓产品，已实现损益计入总收益 ›',
+    openable: true
+  })
+
   const elimCount = (holdings || []).filter((p) => p.status === 'eliminated').length
   docks.push({
     id: 'eliminated',
@@ -445,9 +516,11 @@ function buildAssetPageModel(input) {
   return {
     asOf,
     filterCount: filterCount(filters),
-    summary: buildSummary(holdings, asOf),
+    summary: buildSummary(filtered, asOf, holdings),
     platforms: buildPlatformSummary(holdings),
+    platformChips: buildPlatformChips(holdings, input.catalog, filters),
     sortLabel: sk.l + (sortDir === 'desc' ? ' ↓' : ' ↑'),
+    sortOptions: buildSortOptions(sortKey, sortDir),
     cards: sorted.map((h) => buildCard(h, asOf)),
     filterGroups: buildFilterGroups(holdings, input.catalog, filters, asOf),
     docks: buildDocks(holdings, asOf)
@@ -457,6 +530,7 @@ function buildAssetPageModel(input) {
 module.exports = {
   SORT_KEYS,
   DEFAULT_FILTERS,
+  SHEET_FILTER_KEYS,
   createDefaultFilters,
   filterCount,
   getFiltered,
@@ -464,6 +538,8 @@ module.exports = {
   buildCard,
   buildSummary,
   buildPlatformSummary,
+  buildPlatformChips,
+  buildSortOptions,
   buildFilterGroups,
   buildDocks,
   buildAssetPageModel,

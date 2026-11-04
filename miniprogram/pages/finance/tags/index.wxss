@@ -27,10 +27,13 @@
 }
 .fi {
   flex: 1;
+  min-width: 0;
+  height: 72rpx;
+  padding: 0 20rpx;
   border: 1rpx solid #e9ecef;
   border-radius: 12rpx;
-  padding: 16rpx 20rpx;
   font-size: 28rpx;
+  line-height: 72rpx;
 }
 .del {
   color: #c92a2a;

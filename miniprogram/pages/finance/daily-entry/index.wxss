@@ -35,10 +35,12 @@
   color: #fff;
 }
 .fi {
+  height: 72rpx;
+  padding: 0 24rpx;
   border: 1rpx solid #e9ecef;
   border-radius: 16rpx;
-  padding: 20rpx 24rpx;
   font-size: 26rpx;
+  line-height: 72rpx;
 }
 .plat {
   margin-bottom: 20rpx;
@@ -99,10 +101,12 @@
 }
 .di-in {
   width: 140rpx;
+  height: 64rpx;
+  padding: 0 12rpx;
   border: 1rpx solid #e9ecef;
   border-radius: 12rpx;
-  padding: 12rpx 16rpx;
   font-size: 26rpx;
+  line-height: 64rpx;
   text-align: center;
 }
 .di-sv {

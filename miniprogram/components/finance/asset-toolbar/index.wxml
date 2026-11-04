@@ -1,17 +1,35 @@
-<view class="toolbar">
-  <view class="tb-filter" bindtap="onFilter">
-    <text class="tb-fi-icon">≡</text>
-    <text class="tb-fi-text">筛选</text>
-    <view wx:if="{{filterCount > 0}}" class="tb-fi-badge">{{filterCount}}</view>
+<view class="head">
+  <view class="platform-row">
+    <scroll-view class="platform-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="platform-chips">
+        <view
+          wx:for="{{platformChips}}"
+          wx:key="id"
+          class="chip {{item.active ? 'active' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="onPlatform"
+        >
+          <text>{{item.label}}</text>
+          <text wx:if="{{item.count != null}}" class="chip-cnt">{{item.count}}</text>
+        </view>
+      </view>
+    </scroll-view>
+    <view class="tb-filter" catchtap="onFilter">
+      <text class="tb-fi-icon">≡</text>
+      <view wx:if="{{filterCount > 0}}" class="tb-fi-badge">{{filterCount}}</view>
+    </view>
   </view>
-  <view class="tb-summary" bindtap="onToggleSummary">
-    <text class="ts-total">{{summary.count}}只</text>
-    <text wx:if="{{summary.multiCurrency}}"> · 多币种</text>
-    <block wx:else>
-      <text> · 本金¥{{summary.principalText}}</text>
-      <text> · 余额¥{{summary.eodText}}</text>
-      <text class="{{summary.profitTone}}"> · {{summary.profitSign}}{{summary.profitText}}</text>
-    </block>
+
+  <view class="toolbar">
+    <view class="tb-sort" bindtap="onSort">{{sortLabel}}</view>
+    <view class="ql" catchtap="onDaily">日收益</view>
+    <view class="ql" catchtap="onReturns">收益月历</view>
+    <view class="tb-summary" bindtap="onToggleSummary">
+      <text wx:if="{{summary.multiCurrency}}">多币种</text>
+      <block wx:else>
+        <text>持仓¥{{summary.eodText}}</text>
+        <text class="{{summary.profitTone}}"> · 总收益{{summary.profitSign}}{{summary.profitText}}</text>
+      </block>
+    </view>
   </view>
-  <view class="tb-sort" bindtap="onSort">{{sortLabel}}</view>
 </view>

@@ -1,7 +1,14 @@
-<view class="page">
-  <view class="page-title">我的</view>
+<view class="page mine">
+  <view class="profile surface-card" bindtap="onProfile">
+    <view class="profile__avatar">{{profileInitial}}</view>
+    <view class="profile__meta">
+      <text class="profile__name">{{profileName}}</text>
+      <text class="profile__sub">{{profileSub}}</text>
+    </view>
+    <text class="profile__chev">›</text>
+  </view>
 
-  <view class="section-label">设置</view>
+  <view class="section-label">约课设置</view>
   <view class="menu surface-card">
     <picker
       mode="selector"
@@ -10,35 +17,78 @@
       bindchange="onDurationChange"
     >
       <view class="menu__item menu__item--row">
-        <text>默认课程时长</text>
-        <text class="menu__value">{{durationLabel}} ›</text>
+        <view class="menu__main">
+          <text class="menu__title">默认课程时长</text>
+          <text class="menu__desc">改时间时自动计算结束时间</text>
+        </view>
+        <view class="menu__aside">
+          <text class="menu__value">{{durationLabel}}</text>
+          <text class="menu__chev">›</text>
+        </view>
       </view>
     </picker>
+
     <picker
       mode="selector"
       range="{{remindLabels}}"
       value="{{remindIndex}}"
       bindchange="onRemindChange"
     >
-      <view class="menu__item menu__item--row menu__item--last">
-        <text>课前提醒</text>
-        <text class="menu__value">提前 {{remindLabel}} ›</text>
+      <view class="menu__item menu__item--row">
+        <view class="menu__main">
+          <text class="menu__title">课前提醒</text>
+          <text class="menu__desc">微信通知 + 打开小程序时提醒</text>
+        </view>
+        <view class="menu__aside">
+          <text class="menu__value">提前 {{remindLabel}}</text>
+          <text class="menu__chev">›</text>
+        </view>
       </view>
     </picker>
-  </view>
-  <view class="hint">改开始时间时会按这里的时长自动带出结束时间；提醒会推微信通知，打开小程序时也会轻轻提一句。</view>
 
-  <view class="section-label">功能</view>
-  <view class="menu surface-card">
-    <view class="menu__item" bindtap="onVault">秘密基地</view>
-    <view class="menu__item" bindtap="onTeachers">老师列表</view>
-    <view class="menu__item" bindtap="onStudents">学生列表</view>
-    <view class="menu__item" bindtap="onCopyMonth">复制上月</view>
-    <view class="menu__item" bindtap="onBatch">批量新增</view>
-    <view class="menu__item" bindtap="onBatchDelete">批量删除</view>
-    <view class="menu__item" bindtap="onAbout">关于小课记录本</view>
-    <view class="menu__item menu__item--danger" bindtap="onClearBookings">清空全部课程</view>
-    <view class="menu__item menu__item--danger menu__item--last" bindtap="onLogout">退出登录</view>
+    <view class="menu__item menu__item--row" bindtap="onTeachers">
+      <text class="menu__title">老师列表</text>
+      <view class="menu__aside">
+        <text class="menu__value">{{teacherCountText}}</text>
+        <text class="menu__chev">›</text>
+      </view>
+    </view>
+
+    <view class="menu__item menu__item--row" bindtap="onStudents">
+      <text class="menu__title">学生列表</text>
+      <view class="menu__aside">
+        <text class="menu__value">{{studentCountText}}</text>
+        <text class="menu__chev">›</text>
+      </view>
+    </view>
+
+    <view class="menu__item menu__item--row menu__item--last menu__item--danger" bindtap="onClearBookings">
+      <text class="menu__title">清空全部课程</text>
+      <view class="menu__aside">
+        <text class="menu__value menu__value--danger">谨慎操作</text>
+        <text class="menu__chev menu__chev--danger">›</text>
+      </view>
+    </view>
   </view>
+
+  <view class="section-label">理财工具</view>
+  <view class="menu surface-card">
+    <view class="menu__item menu__item--row" bindtap="onTags">
+      <text class="menu__title">标签库</text>
+      <text class="menu__chev">›</text>
+    </view>
+    <view class="menu__item menu__item--row menu__item--last" bindtap="onLibs">
+      <text class="menu__title">配置库</text>
+      <text class="menu__chev">›</text>
+    </view>
+  </view>
+
+  <view class="menu surface-card menu--solo">
+    <view class="menu__item menu__item--row menu__item--last menu__item--danger" bindtap="onLogout">
+      <text class="menu__title">退出登录</text>
+      <text class="menu__chev menu__chev--danger">›</text>
+    </view>
+  </view>
+
   <view class="version">版本 {{version}}</view>
 </view>

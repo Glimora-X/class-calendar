@@ -28,7 +28,7 @@ Page({
       .listHoldings({}, { silent: true })
       .then((res) => {
         const holdings = ((res && res.list) || []).filter(
-          (p) => p.status !== 'eliminated'
+          (p) => p.status !== 'eliminated' && p.status !== 'closed'
         )
         this.setData({ holdings })
         this.buildRows()

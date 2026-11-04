@@ -1,6 +1,12 @@
 <view class="page page--no-tab elim">
   <block wx:if="{{list.length}}">
-    <view wx:for="{{list}}" wx:key="_id" class="eli-item">
+    <view
+      wx:for="{{list}}"
+      wx:key="_id"
+      class="eli-item"
+      data-id="{{item._id}}"
+      bindtap="onOpen"
+    >
       <view class="eh">
         <view>
           <view class="en">{{item.name}}</view>
@@ -9,9 +15,9 @@
         <view class="ed">{{item.eliminatedDate || '—'}}</view>
       </view>
       <view class="ea">
-        <button class="btn btn-s" data-id="{{item._id}}" bindtap="onEdit">编辑</button>
-        <button class="btn btn-s" data-id="{{item._id}}" bindtap="onRestore">还原</button>
-        <button class="btn btn-d" data-id="{{item._id}}" bindtap="onDelete">永久删除</button>
+        <button class="btn btn-s" data-id="{{item._id}}" catchtap="onEdit">编辑</button>
+        <button class="btn btn-s" data-id="{{item._id}}" catchtap="onRestore">还原</button>
+        <button class="btn btn-d" data-id="{{item._id}}" catchtap="onDelete">永久删除</button>
       </view>
     </view>
   </block>

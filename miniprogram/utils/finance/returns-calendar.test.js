@@ -61,11 +61,17 @@ const {
       _id: 'c',
       status: 'eliminated',
       dailyEntries: [{ date: '2026-07-15', dailyReturn: 100 }]
+    },
+    {
+      _id: 'd',
+      status: 'closed',
+      dailyEntries: [{ date: '2026-07-15', dailyReturn: 4.5 }]
     }
   ]
   const r = aggregateMonthReturns(holdings, { year: 2026, month: 7 })
-  assert.strictEqual(r.monthTotal, 15.5)
-  assert.strictEqual(r.dayMap['2026-07-15'], 15.5)
+  // 已清仓计入历史；已淘汰排除
+  assert.strictEqual(r.monthTotal, 20)
+  assert.strictEqual(r.dayMap['2026-07-15'], 20)
 }
 
 // 迟录入：截至日保留金额 + 累计角标，不平摊

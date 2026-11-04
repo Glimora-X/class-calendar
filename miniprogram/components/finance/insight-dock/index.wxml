@@ -1,5 +1,5 @@
 <view
-  class="sidebar-card {{dock.openable || dock.variant === 'eliminated' ? 'is-link' : ''}}"
+  class="sidebar-card {{dock.openable || dock.variant === 'eliminated' || dock.variant === 'closed' ? 'is-link' : ''}}"
   bindtap="onOpen"
 >
   <view class="sc-t">

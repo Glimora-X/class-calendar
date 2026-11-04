@@ -277,6 +277,21 @@ function account(partial) {
 }
 
 {
+  const today = '2026-10-31'
+  assert.strictEqual(rules.defaultFilterForDate(today, today), 'all')
+  assert.strictEqual(rules.defaultFilterForDate('2026-10-01', today), 'changes')
+  assert.strictEqual(rules.initialSession(today).filter, 'all')
+  const session = rules.initialSession(today)
+  const past = rules.selectSessionDate(session, '2026-10-01', today)
+  assert.strictEqual(past.date, '2026-10-01')
+  assert.strictEqual(past.filter, 'changes')
+  const back = rules.selectSessionDate(past, today, today)
+  assert.strictEqual(back.date, today)
+  assert.strictEqual(back.filter, 'all')
+  assert.strictEqual(rules.selectSessionDate(session, '2026-11-01', today), session)
+}
+
+{
   const session = rules.initialSession('2026-10-31')
   session.tab = 'manage'
   session.sortMode = true
@@ -311,7 +326,7 @@ function account(partial) {
   }]
   const first = present(model)
   assert.strictEqual(first.bootEmpty, false)
-  assert.strictEqual(first.filter, 'changes')
+  assert.strictEqual(first.filter, 'all')
   assert.strictEqual(first.changesEmpty, false)
   assert.strictEqual(first.groups[0].rows[0].badge, '首次')
   assert.strictEqual(first.groups[0].rows[0].input, '')
@@ -320,6 +335,7 @@ function account(partial) {
     totalNetWorth: 5,
     items: [{ accountId: 'a', amount: 5 }]
   }]
+  model.session.filter = 'changes'
   const quiet = present(model)
   assert.strictEqual(quiet.changesEmpty, true)
   assert.strictEqual(quiet.warning, false)

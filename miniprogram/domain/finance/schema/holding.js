@@ -5,6 +5,7 @@
 const HOLDING_STATUS = {
   active: 'active',
   matured: 'matured',
+  closed: 'closed',
   eliminated: 'eliminated'
 }
 
@@ -39,6 +40,8 @@ function createEmptyHolding() {
     restoredNote: '',
     restoredDate: '',
     eliminationHistory: [],
+    realizedProfit: null,
+    closedDate: '',
     cashflows: [],
     dailyEntries: []
   }
@@ -75,6 +78,11 @@ function normalizeHolding(raw) {
     eliminationHistory: Array.isArray(raw.eliminationHistory)
       ? raw.eliminationHistory
       : [],
+    realizedProfit:
+      raw.realizedProfit == null || raw.realizedProfit === ''
+        ? null
+        : Number(raw.realizedProfit),
+    closedDate: String(raw.closedDate || '').trim(),
     cashflows: Array.isArray(raw.cashflows) ? raw.cashflows : [],
     dailyEntries: Array.isArray(raw.dailyEntries) ? raw.dailyEntries : []
   })

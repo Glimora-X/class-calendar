@@ -3,6 +3,7 @@ const { showApiError } = require('../../../utils/errors')
 const {
   buildAssetPageModel,
   createDefaultFilters,
+  SHEET_FILTER_KEYS,
   SORT_KEYS
 } = require('../../../utils/finance/query')
 const { createDefaultCatalog } = require('../../../domain/finance/schema/catalog')
@@ -15,12 +16,15 @@ Page({
     sortKey: 'score',
     sortDir: 'desc',
     filterOpen: false,
+    sortOpen: false,
     platformOpen: false,
     model: {
       filterCount: 0,
       summary: { count: 0 },
       platforms: [],
+      platformChips: [],
       sortLabel: '决策分 ↓',
+      sortOptions: [],
       cards: [],
       filterGroups: [],
       docks: []
@@ -80,27 +84,45 @@ Page({
   },
 
   onFilterReset() {
-    this.setData({ filters: createDefaultFilters() })
+    const filters = Object.assign({}, this.data.filters)
+    SHEET_FILTER_KEYS.forEach((k) => {
+      filters[k] = 'all'
+    })
+    this.setData({ filters })
     this.rebuildModel()
     wx.showToast({ title: '筛选已重置', icon: 'none' })
+  },
+
+  onPlatformChip(e) {
+    const id = e.detail && e.detail.id
+    if (id == null || id === '') return
+    const filters = Object.assign({}, this.data.filters, { platform: id })
+    this.setData({ filters })
+    this.rebuildModel()
   },
 
   onTogglePlatform() {
     this.setData({ platformOpen: !this.data.platformOpen })
   },
 
-  onCycleSort() {
-    const keys = SORT_KEYS
-    let idx = keys.findIndex((x) => x.k === this.data.sortKey)
-    if (idx < 0) idx = 0
+  onOpenSort() {
+    this.setData({ sortOpen: true })
+  },
+
+  onCloseSort() {
+    this.setData({ sortOpen: false })
+  },
+
+  onSortChange(e) {
+    const key = e.detail && e.detail.key
+    if (!key || !SORT_KEYS.some((x) => x.k === key)) return
     let sortKey = this.data.sortKey
     let sortDir = this.data.sortDir
-    if (sortDir === 'desc') {
-      sortDir = 'asc'
+    if (key === sortKey) {
+      sortDir = sortDir === 'desc' ? 'asc' : 'desc'
     } else {
+      sortKey = key
       sortDir = 'desc'
-      idx = (idx + 1) % keys.length
-      sortKey = keys[idx].k
     }
     this.setData({ sortKey, sortDir })
     this.rebuildModel()
@@ -116,6 +138,9 @@ Page({
 
   onOpenDock(e) {
     const variant = e.detail && e.detail.variant
+    if (variant === 'closed') {
+      wx.navigateTo({ url: '/pages/finance/closed/index' })
+    }
     if (variant === 'eliminated') {
       wx.navigateTo({ url: '/pages/finance/eliminated/index' })
     }
@@ -131,13 +156,5 @@ Page({
 
   onReturnsCal() {
     wx.navigateTo({ url: '/pages/finance/returns-calendar/index' })
-  },
-
-  onTags() {
-    wx.navigateTo({ url: '/pages/finance/tags/index' })
-  },
-
-  onLibs() {
-    wx.navigateTo({ url: '/pages/finance/libs/index' })
   }
 })

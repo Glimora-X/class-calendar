@@ -1,6 +1,7 @@
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
+const { buildClosePatch, buildReopenPatch } = require('./close-holding')
 
 function todayChina() {
   const parts = new Intl.DateTimeFormat('en-CA', {
@@ -18,8 +19,9 @@ function todayChina() {
 /**
  * 入参:
  *   { action: 'mature', _id }
+ *   { action: 'close', _id }
  *   { action: 'eliminate', _id, reason }
- *   { action: 'restore', _id, note }
+ *   { action: 'restore', _id, note }  // 淘汰还原；已清仓还原可不填 note
  */
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext()
@@ -45,10 +47,46 @@ exports.main = async (event) => {
       : []
 
     if (action === 'mature') {
+      if (p.status === 'closed' || p.status === 'eliminated') {
+        return { code: 'INVALID_PARAM', message: '当前状态不可标记到期' }
+      }
       await col.doc(_id).update({
         data: { status: 'matured', updatedAt: now }
       })
       return { code: 'OK', _id, status: 'matured' }
+    }
+
+    if (action === 'close') {
+      if (p.status === 'closed') {
+        return { code: 'OK', _id, status: 'closed', realizedProfit: p.realizedProfit }
+      }
+      if (p.status === 'eliminated') {
+        return { code: 'INVALID_PARAM', message: '已淘汰产品请先还原再清仓' }
+      }
+      const patch = buildClosePatch(p, today)
+      history.push({
+        type: 'close',
+        date: today,
+        reason: '清仓',
+        realizedProfit: patch.realizedProfit
+      })
+      await col.doc(_id).update({
+        data: {
+          status: patch.status,
+          realizedProfit: patch.realizedProfit,
+          closedDate: patch.closedDate,
+          cashflows: patch.cashflows,
+          dailyEntries: patch.dailyEntries,
+          eliminationHistory: history,
+          updatedAt: now
+        }
+      })
+      return {
+        code: 'OK',
+        _id,
+        status: 'closed',
+        realizedProfit: patch.realizedProfit
+      }
     }
 
     if (action === 'eliminate') {
@@ -68,6 +106,27 @@ exports.main = async (event) => {
     }
 
     if (action === 'restore') {
+      if (p.status === 'closed') {
+        const patch = buildReopenPatch(p)
+        history.push({
+          type: 'reopen',
+          date: today,
+          reason: String(payload.note || '还原清仓').trim() || '还原清仓'
+        })
+        await col.doc(_id).update({
+          data: {
+            status: patch.status,
+            realizedProfit: patch.realizedProfit,
+            closedDate: patch.closedDate,
+            cashflows: patch.cashflows,
+            dailyEntries: patch.dailyEntries,
+            eliminationHistory: history,
+            updatedAt: now
+          }
+        })
+        return { code: 'OK', _id, status: 'active' }
+      }
+
       const note = String(payload.note || '').trim()
       if (!note) return { code: 'INVALID_PARAM', message: '请填写还原备注' }
       history.push({ type: 'restore', date: today, reason: note })

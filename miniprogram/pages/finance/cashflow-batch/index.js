@@ -19,7 +19,7 @@ Page({
       .listHoldings({}, { silent: true })
       .then((res) => {
         const holdings = ((res && res.list) || []).filter(
-          (p) => p.status !== 'eliminated'
+          (p) => p.status !== 'eliminated' && p.status !== 'closed'
         )
         const productNames = holdings.map((p) => p.name.substring(0, 18))
         let productIndex = 0

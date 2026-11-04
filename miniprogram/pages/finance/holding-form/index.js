@@ -201,14 +201,20 @@ Page({
       .catch((err) => {
         if (err && err.code === 'CODE_CONFLICT' && err.result && err.result.conflict) {
           const c = err.result.conflict
+          const msg = String(
+            (err.result && err.result.message) || err.message || ''
+          )
+          const kind = msg.indexOf('清仓') !== -1 ? '已清仓' : '已淘汰'
           wx.showModal({
             title: '编号冲突确认',
             content:
               '编号 ' +
               c.code +
-              ' 已被已淘汰产品「' +
+              ' 已被' +
+              kind +
+              '产品「' +
               c.name +
-              '」使用。确认放行后，原已淘汰产品将被永久删除。',
+              '」使用。确认放行后，原产品将被永久删除。',
             success: (r) => {
               if (r.confirm) {
                 this.doSave(this.buildPayload(c._id))

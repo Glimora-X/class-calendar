@@ -52,6 +52,11 @@ function canSelectDate(date, today) {
   return cmpDate(date, today) <= 0
 }
 
+/** 当天默认看全部；历史日默认仅看变动 */
+function defaultFilterForDate(date, today) {
+  return date === today ? 'all' : 'changes'
+}
+
 function shiftDate(date, delta) {
   const matched = String(date || '').match(/^(\d{4})-(\d{2})-(\d{2})$/)
   if (!matched) return ''
@@ -657,7 +662,7 @@ function initialSession(today) {
   return {
     tab: 'entry',
     date: today,
-    filter: 'changes',
+    filter: defaultFilterForDate(today, today),
     note: '',
     drafts: {},
     collapsed: {},
@@ -668,6 +673,14 @@ function initialSession(today) {
     orderOverride: {},
     deletedOpen: false
   }
+}
+
+function selectSessionDate(session, date, today) {
+  if (!canSelectDate(date, today)) return session
+  return Object.assign({}, session, {
+    date,
+    filter: defaultFilterForDate(date, today)
+  })
 }
 
 function switchTab(session, tab) {
@@ -693,7 +706,7 @@ function applyRestoreTemplate(session, snapshot, accounts, today) {
   return Object.assign({}, session, {
     tab: 'entry',
     date: today,
-    filter: 'changes',
+    filter: defaultFilterForDate(today, today),
     note: raw.slice(0, SNAPSHOT_NOTE_MAX),
     drafts,
     restore: { sourceDate: snapshot.date, sourceId: snapshot.id || snapshot._id || '' },
@@ -758,6 +771,7 @@ module.exports = {
   isDateStr,
   cmpDate,
   canSelectDate,
+  defaultFilterForDate,
   shiftDate,
   acceptableClientToday,
   formatDateCn,
@@ -789,6 +803,7 @@ module.exports = {
   buildHistoryRows,
   buildMonthGrid,
   initialSession,
+  selectSessionDate,
   switchTab,
   applyRestoreTemplate,
   abandonRestore,
