@@ -1,14 +1,21 @@
 const rules = require('../../../domain/finance/accounts/rules')
 const { createModel, present } = require('../../../domain/finance/accounts/present')
 const vault = require('../../../services/vault')
+const portfolio = require('../../../services/portfolio')
+const { buildNetWorthGrowthSeries } = require('../../../utils/finance/net-worth-growth')
 
 Page({
-  data: present(createModel(rules.todayStr())),
+  data: Object.assign({}, present(createModel(rules.todayStr())), {
+    chartPoints: [],
+    chartInvestUnavailable: false
+  }),
 
   onLoad() {
     this.model = createModel(rules.todayStr())
     this.model.loading = true
     this._pendingRestore = null
+    this._holdings = []
+    this._investUnavailable = false
     this.render()
   },
 
@@ -31,7 +38,17 @@ Page({
   noop() {},
 
   render() {
-    this.setData(present(this.model))
+    const view = present(this.model)
+    const chartPoints = buildNetWorthGrowthSeries(
+      this.model.snapshots || [],
+      this._investUnavailable ? [] : this._holdings || []
+    )
+    this.setData(
+      Object.assign({}, view, {
+        chartPoints,
+        chartInvestUnavailable: !!this._investUnavailable
+      })
+    )
   },
 
   toast(title) {
@@ -44,11 +61,21 @@ Page({
     this.model.loading = !this.model.loaded
     this.render()
     try {
-      const result = await vault.loadVault()
+      const [result, holdingsRes] = await Promise.all([
+        vault.loadVault(),
+        portfolio.listHoldings({}, { silent: true }).catch(() => null)
+      ])
       this.model.accounts = result.accounts || []
       this.model.snapshots = result.snapshots || []
       this.model.loaded = true
       this.model.loadError = ''
+      if (holdingsRes == null) {
+        this._holdings = []
+        this._investUnavailable = true
+      } else {
+        this._holdings = (holdingsRes && holdingsRes.list) || []
+        this._investUnavailable = false
+      }
       if (result.migrated) this.toast('信用卡账户已迁移')
       if (this._pendingRestore) {
         this.model.session = rules.applyRestoreTemplate(

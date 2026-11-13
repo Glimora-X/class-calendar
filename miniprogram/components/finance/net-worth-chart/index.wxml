@@ -1,0 +1,45 @@
+<view class="nw">
+  <view class="nw__head">
+    <text class="nw__title">净资产走势</text>
+    <text class="nw__sub">按快照节点</text>
+  </view>
+
+  <view wx:if="{{empty}}" class="nw__empty">保存至少 2 份快照后，这里会显示走势</view>
+
+  <block wx:else>
+    <view wx:if="{{!canChart}}" class="nw__empty">再记一份快照即可连成走势</view>
+    <canvas
+      wx:else
+      class="nw__canvas"
+      canvas-id="nw-canvas"
+      id="nw-canvas"
+      bindtouchstart="onTouch"
+    ></canvas>
+
+    <view wx:if="{{selectedIndex >= 0}}" class="nw__panel">
+      <view class="nw__row nw__row--main">
+        <text class="nw__date">{{selected.dateText}}</text>
+        <text class="nw__net">{{selected.netText}}</text>
+      </view>
+
+      <block wx:if="{{selected.hasDelta}}">
+        <view class="nw__row">
+          <text class="nw__lab">较上次</text>
+          <text class="nw__val tone-{{selected.deltaTone}}">{{selected.deltaText}}</text>
+        </view>
+        <view class="nw__split">
+          <view class="nw__chip">
+            <text class="nw__lab">理财</text>
+            <text class="nw__val tone-{{selected.investTone}}">{{selected.investText}}</text>
+          </view>
+          <view class="nw__chip">
+            <text class="nw__lab">其他</text>
+            <text class="nw__val tone-{{selected.otherTone}}">{{selected.otherText}}</text>
+          </view>
+        </view>
+        <view wx:if="{{investUnavailable}}" class="nw__hint">理财收益暂不可用，已按 0 计入</view>
+      </block>
+      <view wx:else class="nw__hint">起点快照，无较上次拆分</view>
+    </view>
+  </block>
+</view>

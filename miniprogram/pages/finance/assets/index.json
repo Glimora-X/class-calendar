@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "秘密基地",
   "usingComponents": {
-    "empty-state": "/components/empty-state/index"
+    "empty-state": "/components/empty-state/index",
+    "net-worth-chart": "/components/finance/net-worth-chart/index"
   }
 }

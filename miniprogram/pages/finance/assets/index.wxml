@@ -46,6 +46,11 @@
         <view class="net-card__manage" catchtap="onOpenManage">管理账户</view>
       </view>
 
+      <net-worth-chart
+        points="{{chartPoints}}"
+        investUnavailable="{{chartInvestUnavailable}}"
+      />
+
       <view wx:if="{{archivedOnly}}" class="hint">没有可录入的账户。到管理账户里恢复停用账户，或再添加一个。</view>
 
       <block wx:else>
